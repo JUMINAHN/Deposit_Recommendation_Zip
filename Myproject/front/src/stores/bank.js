@@ -7,7 +7,8 @@ export const useBankStore = defineStore('bank', () => {
   //일단은 메인 data만 다뤄보자 => 3개만 만들어보자
   //순위, 6개월, 12개월, 세전이자, 세후이자, 24개월, 36개월, 금융기관, 상품, update
 
-  //더미 데이터 그자체를 ..
+  //더미 데이터 그자체를 .. => 해당 데이터 11/20(수) : 수정하기
+  //ref로 반응형 데ㅣㅇ터 담고 보관해서 작업 진행해야 함
   const dummyData = reactive([
     axios({
       method: 'get',
@@ -52,27 +53,60 @@ export const useBankStore = defineStore('bank', () => {
 
   //user가 입력한 예치금 데이터
   const userDepositData = ref(null)
-  //v-model로 추가 유저 데이터 입력값 받아오기
+  //v-model로 추가 유저 데이터 입력값 받아오기 (아직 미진행)
   const getUserData = function(data){
-    userDepositData.value = data //data 자체를 받아오기
+    userDepositData.value = data 
   }
 
-  //정기 예금 검색 조건들 => 더미 데이터, 추가적으로 입력하게 될 데이터들
-  //title, content부분 받아와서 진행할 필요 있음
   let id = 1
   const findCondition = reactive([
-    //option에 사용될 데이터들..
     {id: id++, title: '세율', content: ['일반과세', '세금우대', '비과세']},
     {id: id++, title: '이자지급방식', content: ['전체', '만기지급', '월지급']},
     {id: id++, title: '가입방식', content: ['전체', '온라인', '방문']},
     //예치금액은 input받는 값 => v-model로 input받고 또 던져줘야 함
-    //편의를 위해 이것도 동일하게 생성
     {id: id++, title: '예치금액', content: userDepositData},
     {id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월']},
-    //추후 데이터 넣을 것 현재는 더미데이터
     {id: id++, title: '지역', content: ['서울', '부산', '경기', '인천', '포항']},
   ])
 
 
-  return {  dummyData, findCondition, getUserData  }
+  
+  //로그인 데이터 : 더미 데이터 테스팅
+  const findUser = async function(userLoginData) {
+    const {email, password} = userLoginData
+    const dummyUser = ({
+      'email' : 'zamwa@naver.com',
+      'password' : 'sleep123'
+    })
+    if (dummyUser.email === email && dummyUser.password === password) {
+      console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
+      console.log('응답 확인')
+      return true
+    }
+    return false
+  }
+
+  //로그인 관련 데이터 확보 : 로그인 데이터 확보
+  // const findUser = async function(userLoginData){
+  //   const {email, password} = userLoginData
+  //   try {
+  //     const response = axios({
+  //       method : 'post',
+  //       url : '', //login url
+  //       params : {
+  //         email,
+  //         password
+  //       }
+  //     })
+  //     console.log(response, ': 응답 데이터 확인')
+  //     console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
+  //       return true
+  //   } catch{
+  //     console.log('에러 발생')
+  //     return false
+  //   }
+  // }
+
+
+  return {  dummyData, findCondition, getUserData, findUser }
 })

@@ -1,4 +1,5 @@
 import HomeView from '@/views/HomeView.vue'
+import LoginRetryView from '@/views/LoginRetryView.vue'
 import LoginView from '@/views/LoginView.vue'
 import MainView from '@/views/MainView.vue'
 import RecommendView from '@/views/RecommendView.vue'
@@ -33,6 +34,11 @@ const router = createRouter({
       name : 'signup',
       component : SignUpView
     },
+    {
+      path : '/main/login/retry',
+      name : 'retry',
+      component : LoginRetryView
+    }
   ],
 })
 
