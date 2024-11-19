@@ -1,8 +1,11 @@
 <template>
- <v-card
-    class="mx-auto"
-    max-width="344"
-    title="User Registration"
+  <div class="topClass">
+    <v-card
+    class="mx-auto pa-12 pb-8"
+    elevation="8"
+    max-width="448"
+    rounded="lg"
+    title="User Registration 🤗"
   >
     <v-container>
       <v-text-field
@@ -36,7 +39,7 @@
 
       <v-checkbox
         v-model="terms"
-        color="secondary"
+        color="blue"
         label="I agree to site terms and conditions"
       ></v-checkbox>
     </v-container>
@@ -46,13 +49,14 @@
     <v-card-actions>
       <v-spacer></v-spacer>
 
-      <v-btn color="success">
+      <v-btn color="blue">
         Complete Registration
 
         <v-icon icon="mdi-chevron-right" end></v-icon>
       </v-btn>
     </v-card-actions>
-  </v-card>
+    </v-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -60,5 +64,7 @@
 </script>
 
 <style scoped>
-
+  .topClass {
+    margin-top:40px;
+  }
 </style>

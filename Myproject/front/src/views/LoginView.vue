@@ -67,12 +67,13 @@
 
       <v-card-text class="text-center">
         <RouterLink 
-        :to="{name : 'main'}"
+        :to="{name : 'signup'}"
           class="text-blue text-decoration-none"
           rel="noopener noreferrer"
           target="_blank">Sign up now</RouterLink>
       </v-card-text>
     </v-card>
+    
     </div>
   </div>
 </template>
