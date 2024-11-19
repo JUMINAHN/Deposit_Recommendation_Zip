@@ -4,6 +4,7 @@ import './assets/main.css'
 //npm install vuetify@next
 // npm i -D vuetify vite-plugin-vuetify
 //npm i @mdi/font
+//npm install axios
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
