@@ -11,7 +11,7 @@ const router = useRouter()
 
 // 3초후에 페이지 이동하기
   setTimeout(function () {
-    router.push({name : 'main'}) //3초뒤에 메인페이지로 이동하기
+   router.push({name : 'main'}) //3초뒤에 메인페이지로 이동하기
   }, 3000);
 </script>
 

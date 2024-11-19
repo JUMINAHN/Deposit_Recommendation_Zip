@@ -50,8 +50,8 @@
         </v-card-text>
     
         <v-card-actions>
-          <v-btn variant="text" color="primary" text="Share"></v-btn> <!--다른 사람에게 공유하기 : routerLink 추가 예정-->
-          <v-btn variant="text" color="primary" text="Explore"></v-btn> <!--main Link로 가는 것 : 추가 예정-->
+          <RouterLink :to="{name : card.link}"><v-btn variant="text" color="primary" text="EXPLORE"></v-btn></RouterLink>
+          <v-btn variant="text" color="primary" text="SHARE"></v-btn> <!--main Link로 가는 것 : 추가 예정-->
         </v-card-actions>
       </v-card>
     </v-col>
@@ -67,11 +67,12 @@ import recommend from '@/assets/images/recommend.jpg'
 import exchange from '@/assets/images/exchange.jpg'
 import findBank from '@/assets/images/findBank.jpg'
 import moneyFace from '@/assets/images/moneyFace.jpg'
+import { RouterLink } from 'vue-router';
 
 //데이터 정보 입력
 let id = 1
   const imgData = [
-    {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡'},
+    {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend'},
     {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊'},
     {id: id++, src: exchange, title: '환율 검색', number: 'Number3', content: '지금 우리나라 돈으로는 얼마일까? 💱'},
     {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️'},

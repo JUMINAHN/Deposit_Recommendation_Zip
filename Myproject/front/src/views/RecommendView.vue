@@ -1,20 +1,30 @@
 <template>
   <v-container justify="center" align="center">
-    <v-card justify="flex-wrap">
-      <v-container fluid>
-        <v-row>
-          <v-col cols="2"
-          v-for="find in findCondition"
-          :key="find.id">
-            <v-combobox
-              v-model="value"
-              :items="find.content"
-              :label="find.title"
-            ></v-combobox>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card>
+    <v-form @submit.prevent>
+      <v-card justify="flex-wrap">
+        <v-container fluid>
+          <v-row>
+            <v-col cols="2"
+            v-for="find in findCondition"
+            :key="find.id">
+              <v-combobox
+                v-model="value"
+                :items="find.content"
+                :label="find.title"
+              ></v-combobox>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-btn
+          class="mt-4"
+          color="blue"
+          block
+        >
+          나에게 맞는 상품 찾기 CLICK 💨
+        </v-btn>
+      </v-card>
+    </v-form>
+
 
     <img src="@/assets/images/whatsInMyWeb.jpg" alt="" width="600px">
 
