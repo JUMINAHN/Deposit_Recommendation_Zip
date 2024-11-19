@@ -26,6 +26,9 @@
         <li class="nav-item">
           <a class="nav-link" href="#">내가 지폐가 될 상인가?</a>
         </li>
+        <li class="nav-item">
+          <RouterLink :to="{name : 'login'}" class="nav-link" >로그인</RouterLink>
+        </li>
       </ul>
     </div>
   </div>
