@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 import requests
+
 from django.conf import settings
 from .models import DepositOptions, DepositProducts
 from .serializers import DepositOptionsSerializer, DepositProductsSerializer
-# from .models import 
-# from .serializers import 
+
 # Create your views here.
 BASE_URL = 'http://finlife.fss.or.kr/finlifeapi/'
 
@@ -21,17 +21,17 @@ def save_deposit_products(request):
     }
     response = requests.get(url, params=params).json()
     for base in response.get('result').get('baseList'):
-        fin_prdt_cd = base.get('fin_prdt_cd') # 금융회사 코드
-        kor_co_nm = base.get('kor_co_nm') # 금융회사 명 
-        fin_prdt_nm = base.get('fin_prdt_nm') # 금융상품 명
-        if base.get('ect_note'): # 기타유의사항
-            etc_note = base.get('etc_note') 
+        fin_prdt_cd = base.get('fin_prdt_cd')
+        kor_co_nm = base.get('kor_co_nm')
+        fin_prdt_nm = base.get('fin_prdt_nm')
+        if base.get('ect_note'):
+            etc_note = base.get('etc_note')
         else:
-            etc_note = -1 
-        join_deny = base.get('join_deny') # 가입제한
-        join_member = base.get('join_member') # 가입 대상
-        join_way = base.get('join_way') # 가입 방법
-        spcl_cnd = base.get('spcl_cnd') # 우대 조건
+            etc_note = -1
+        join_deny = base.get('join_deny')
+        join_member = base.get('join_member')
+        join_way = base.get('join_way')
+        spcl_cnd = base.get('spcl_cnd')
         if DepositProducts.objects.filter(fin_prdt_cd=fin_prdt_cd, kor_co_nm=kor_co_nm, fin_prdt_nm=fin_prdt_nm,
                                           etc_note=etc_note, join_deny=join_deny, join_member=join_member,
                                           join_way=join_way, spcl_cnd=spcl_cnd).exists():
@@ -53,7 +53,6 @@ def save_deposit_products(request):
     for option in response.get('result').get('optionList'):
         fin_prdt_cd = option.get('fin_prdt_cd')
         intr_rate_type_nm = option.get('intr_rate_type_nm')
-        
         if option.get('intr_rate') == None:
             intr_rate = -1
         else:
@@ -62,7 +61,6 @@ def save_deposit_products(request):
             intr_rate2 = -1
         else:
             intr_rate2 = option.get('intr_rate2')
-
         save_trm = option.get('save_trm')
         if DepositOptions.objects.filter(fin_prdt_cd=fin_prdt_cd, intr_rate_type_nm=intr_rate_type_nm,
                                          intr_rate=intr_rate, intr_rate2=intr_rate2, save_trm=save_trm).exists():
@@ -82,19 +80,25 @@ def save_deposit_products(request):
 
 
 
-@api_view(['GET', 'POST'])
+# @api_view(['GET', 'POST'])
+# def deposit_products(request):
+#     products = DepositProducts.objects.all()
+#     if request.method == 'GET':
+#         serializers = DepositProductsSerializer(products, many=True)
+#         return JsonResponse(serializers.data, safe=False)
+#     elif request.method == 'POST':
+#         serializer = DepositProductsSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse(serializer.data)
+#         else:
+#             return JsonResponse({'message': '이미 있는 데이터이거나, 데이터가 잘못 입력되었습니다.'})
+
+@api_view(['GET'])
 def deposit_products(request):
     products = DepositProducts.objects.all()
-    if request.method == 'GET':
-        serializers = DepositProductsSerializer(products, many=True)
-        return JsonResponse(serializers.data, safe=False)
-    elif request.method == 'POST':
-        serializer = DepositProductsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        else:
-            return JsonResponse({'message': '이미 있는 데이터이거나, 데이터가 잘못 입력되었습니다.'})
+    serializers = DepositProductsSerializer(products, many=True)
+    return Response(serializers.data)
 
 
 @api_view(['GET'])
@@ -120,8 +124,3 @@ def top_rate(request):
         'deposit_product': product_serializers.data,
         'options': option_serializers.data
     })
-
-
-
-
-
