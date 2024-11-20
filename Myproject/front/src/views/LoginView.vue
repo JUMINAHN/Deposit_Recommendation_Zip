@@ -81,7 +81,7 @@
 
 <script setup>
 import loginLogo from '@/assets/images/loginLogo.png'
-import { useBankStore } from '@/stores/bank';
+import { useBankStore } from '@/stores/bank'
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
