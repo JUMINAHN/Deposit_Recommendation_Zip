@@ -7,7 +7,7 @@ class DepositProducts(models.Model):
     kor_co_nm = models.TextField()
     fin_prdt_nm = models.TextField()
     etc_note = models.TextField()
-    join_deny = models.IntegerField()
+    join_deny = models.IntegerField(default= -1)
     join_member = models.TextField()
     join_way = models.TextField()
     spcl_cnd = models.TextField()

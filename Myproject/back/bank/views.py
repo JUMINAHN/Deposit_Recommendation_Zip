@@ -28,7 +28,10 @@ def save_deposit_products(request):
             etc_note = base.get('etc_note')
         else:
             etc_note = -1
-        join_deny = base.get('join_deny')
+        if base.get('join_deny'):
+            join_deny = base.get('join_deny')
+        else:
+            join_deny = -1
         join_member = base.get('join_member')
         join_way = base.get('join_way')
         spcl_cnd = base.get('spcl_cnd')
