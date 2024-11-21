@@ -50,9 +50,6 @@ export const useBankStore = defineStore('bank', () => {
       },
   ])
 
-  
-
-
   //user가 입력한 예치금 데이터
   const userDepositData = ref(null)
   //v-model로 추가 유저 데이터 입력값 받아오기 (아직 미진행)
@@ -70,8 +67,6 @@ export const useBankStore = defineStore('bank', () => {
     {id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월']},
     {id: id++, title: '지역', content: ['서울', '부산', '경기', '인천', '포항']},
   ])
-
-
   
   //로그인 데이터 : 더미 데이터 테스팅
   const findUser = async function(userLoginData) {
@@ -88,9 +83,11 @@ export const useBankStore = defineStore('bank', () => {
     return false
   }
 
+
   //로그인 관련 데이터 확보 : 로그인 데이터 확보
-  //로그인 데이터 토큰 확인 전달이 필요함 
+
 //   const {email, password} = userLoginData
+
   // const findUser = async function(userLoginData){
     //   try {
   //     const response = axios({
@@ -109,6 +106,7 @@ export const useBankStore = defineStore('bank', () => {
   //     return false
   //   }
   // }
+
 
 
   //회원가입 데이터 : 더미 데이터 테스팅
