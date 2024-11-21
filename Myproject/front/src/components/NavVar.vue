@@ -24,6 +24,9 @@
           <a class="nav-link" href="#">주변 은행 검색</a>
         </li>
         <li class="nav-item">
+          <RouterLink :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="#">내가 지폐가 될 상인가?</a>
         </li>
         <li class="nav-item">
@@ -37,7 +40,7 @@
 </template>
 
 <script setup>
-  import { RouterLink } from 'vue-router';
+  import { RouterLink } from 'vue-router'
 
 
 </script>

@@ -1,3 +1,6 @@
+import ArticleCreateView from '@/views/ArticleCreateView.vue'
+import ArticleDetailView from '@/views/ArticleDetailView.vue'
+import CommunityView from '@/views/CommunityView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginRetryView from '@/views/LoginRetryView.vue'
 import LoginView from '@/views/LoginView.vue'
@@ -38,7 +41,22 @@ const router = createRouter({
       path : '/main/login/retry',
       name : 'retry',
       component : LoginRetryView
-    }
+    },
+    {
+      path : '/main/community',
+      name : 'community',
+      component : CommunityView
+    },
+    {
+      path : '/main/community/:id',
+      name : 'articleDetail',
+      component : ArticleDetailView
+    },
+    {
+      path: '/main/community/create',
+      name: 'article-create',
+      component: ArticleCreateView
+    },
   ],
 })
 
