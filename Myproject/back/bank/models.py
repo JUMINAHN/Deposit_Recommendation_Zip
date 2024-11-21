@@ -4,6 +4,7 @@ from django.db import models
 
 class DepositProducts(models.Model):
     fin_prdt_cd = models.TextField(unique=True)
+    dcls_month = models.IntegerField()
     kor_co_nm = models.TextField()
     fin_prdt_nm = models.TextField()
     etc_note = models.TextField()

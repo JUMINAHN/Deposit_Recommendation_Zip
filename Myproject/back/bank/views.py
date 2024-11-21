@@ -27,6 +27,7 @@ def save_deposit_products(request):
         fin_prdt_cd = base.get('fin_prdt_cd')
         save_data = {
             'fin_prdt_cd': fin_prdt_cd,
+            'dcls_month': base.get('dcls_month'),
             'kor_co_nm': base.get('kor_co_nm'),
             'fin_prdt_nm': base.get('fin_prdt_nm'),
             'etc_note': base.get('etc_note', ''),
@@ -92,8 +93,12 @@ def deposit_products(request):
     result = []
     for product in products:
         product_data = {
+            'dcls_month': product.dcls_month,
             'kor_co_nm': product.kor_co_nm,
             'fin_prdt_nm': product.fin_prdt_nm,
+            'join_way': product.join_way,
+            'spcl_cnd': product.spcl_cnd,
+            'join_deny': product.join_deny,
             'options': [
                 {
                     'intr_rate': option.intr_rate,
@@ -105,6 +110,8 @@ def deposit_products(request):
         }
         result.append(product_data)
     return JsonResponse(result, safe=False, encoder=DjangoJSONEncoder)
+
+
 
 @api_view(['GET'])
 def deposit_product_options(request, fin_prdt_cd):

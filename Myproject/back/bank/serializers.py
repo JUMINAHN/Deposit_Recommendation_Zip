@@ -11,7 +11,7 @@ class DepositProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DepositProducts
-        fields = ('kor_co_nm', 'fin_prdt_nm', 'options')
+        fields = ('dcls_month', 'kor_co_nm', 'fin_prdt_nm', 'join_way', 'spcl_cnd', 'join_deny', 'options')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
