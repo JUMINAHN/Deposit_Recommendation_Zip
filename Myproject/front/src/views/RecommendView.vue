@@ -51,7 +51,7 @@
         <!--전체 데이터 -->
         <v-data-table
           :headers="headers"
-          :items="items"
+          
           :search="search"
         ></v-data-table>
       </v-card>
@@ -74,7 +74,7 @@ const headers = dummyKey.map(item => ({
   title: item,
   key: item
 }))
-const items = computed(() => store.dummyData)
+// const items = computed(() => store.dummyData)
 const search = ref('')
 
 

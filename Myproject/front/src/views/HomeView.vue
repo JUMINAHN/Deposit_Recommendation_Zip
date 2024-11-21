@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // 3초후에 페이지 이동하기
