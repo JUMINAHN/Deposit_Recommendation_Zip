@@ -3,17 +3,51 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 
 export const useBankStore = defineStore('bank', () => {
-  //더미 데이터를 생성해서 대략적인 틀을 잡아갈 수 있음
-  //일단은 메인 data만 다뤄보자 => 3개만 만들어보자
-  //순위, 6개월, 12개월, 세전이자, 세후이자, 24개월, 36개월, 금융기관, 상품, update
+  const token = ref(null) //token은 null
+  
+  //더미 데이터 활용 메서드 => 이건 추후 활용할 예정
+  // const dummyData = reactive([
+  //   axios({
+  //     method: 'get',
+  //     url: 'http://127.0.0.1:8000/api/v1/save-deposit-products/',
+  //     })   
+  // ])
 
-  //더미 데이터 그자체를 .. => 해당 데이터 11/20(수) : 수정하기
-  //ref로 반응형 데ㅣㅇ터 담고 보관해서 작업 진행해야 함
+  //예적금 리스트 더미 데이터
   const dummyData = reactive([
-    axios({
-      method: 'get',
-      url: 'http://127.0.0.1:8000/api/v1/save-deposit-products/',
-      })   
+    {'순위': 1,
+      '6개월': 1.30,
+      '12개월': 3.90,
+      '세전이자': 390000,
+      '세후이자': 329940,
+      '24개월': 1.50,
+      '36개월': 1.50,
+      '금융기관': 'MG 보은',
+      '상품': 'Block예금',
+      'update': '11.18'
+      },
+      {'순위': 2,
+      '6개월': '-',
+      '12개월': 3.90,
+      '세전이자': 390000,
+      '세후이자': 329940,
+      '24개월': '-',
+      '36개월': '-',
+      '금융기관': 'MG 보은',
+      '상품': 'MG 더뱅킹 정기예금',
+      'update': '10.28'
+      },
+      {'순위': 3,
+      '6개월': '-',
+      '12개월': 3.90,
+      '세전이자': 380000,
+      '세후이자': 321480,
+      '24개월': '-',
+      '36개월': '-',
+      '금융기관': '봉화 신협',
+      '상품': '파워정기예탁금',
+      'update': '11.18'
+      },
   ])
 
   //user가 입력한 예치금 데이터
@@ -49,10 +83,13 @@ export const useBankStore = defineStore('bank', () => {
     return false
   }
 
-  // 로그인 관련 데이터 확보 : 로그인 데이터 확보
+
+  //로그인 관련 데이터 확보 : 로그인 데이터 확보
+
+//   const {email, password} = userLoginData
+
   // const findUser = async function(userLoginData){
-  //   const {email, password} = userLoginData
-  //   try {
+    //   try {
   //     const response = axios({
   //       method : 'post',
   //       url : '', //login url
@@ -70,6 +107,49 @@ export const useBankStore = defineStore('bank', () => {
   //   }
   // }
 
-  
-  return { dummyData, findCondition, getUserData, findUser }
-})
+
+
+  //회원가입 데이터 : 더미 데이터 테스팅
+  //async => 비동기 작업일때 진행
+  const signUpComplete = function(userData) {
+    const {nickname, name, email, password} = userData //이거로 받는다 => 이것자체가 더미
+    if (nickname !== null
+      && name !== null
+      && email !== null
+      && password !== null) {
+      console.log('응답 확인 : true') // '내부 데이터 확인해보기
+      console.log(nickname, '단순 nickname')
+      // console.log(nickname.value, '단순 nickname.value')
+      return true
+    }
+    return false
+  }
+
+
+  //회원 가입 데이터
+  //토큰 생성이 필요함
+  // const signUpComplete = async function(userData) {
+  //   const {nickname, name, email, password} = userData
+  //   try {
+  //     const response = axios({
+  //       method : 'post',
+  //       url : '/', //회원 가입 URL 추가 예정
+  //       params: { //받아올 애들
+  //         nickname,
+  //         name,
+  //         email,
+  //         password
+  //       }
+  //     })
+  //     console.log(response, ': 응답 데이터 확인') 
+  //     console.log('회원가입이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
+  //     return true //회원가입 로직 확인 완료
+  //   } catch {
+  //     console.log('에러가 발생했습니다.')
+  //     return false
+  //   }
+  // }
+
+
+  return { dummyData, findCondition, getUserData, findUser, signUpComplete }
+}) //추후 persist => pinya넣을 것
