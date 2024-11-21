@@ -13,7 +13,48 @@ export const useBankStore = defineStore('bank', () => {
   //     })   
   // ]
 
+<<<<<<< HEAD
     //user가 입력한 예치금 데이터
+=======
+  //예적금 리스트 더미 데이터
+  const dummyData = reactive([
+    {'순위': 1,
+      '6개월': 1.30,
+      '12개월': 3.90,
+      '세전이자': 390000,
+      '세후이자': 329940,
+      '24개월': 1.50,
+      '36개월': 1.50,
+      '금융기관': 'MG 보은',
+      '상품': 'Block예금',
+      'update': '11.18'
+      },
+      {'순위': 2,
+      '6개월': '-',
+      '12개월': 3.90,
+      '세전이자': 390000,
+      '세후이자': 329940,
+      '24개월': '-',
+      '36개월': '-',
+      '금융기관': 'MG 보은',
+      '상품': 'MG 더뱅킹 정기예금',
+      'update': '10.28'
+      },
+      {'순위': 3,
+      '6개월': '-',
+      '12개월': 3.90,
+      '세전이자': 380000,
+      '세후이자': 321480,
+      '24개월': '-',
+      '36개월': '-',
+      '금융기관': '봉화 신협',
+      '상품': '파워정기예탁금',
+      'update': '11.18'
+      },
+  ])
+
+  //user가 입력한 예치금 데이터
+>>>>>>> 9def84e58c2e1f4cc7237f939d49b9f3726ab1b6
   const userDepositData = ref(null)
   //v-model로 추가 유저 데이터 입력값 받아오기 (아직 미진행)
   const getUserData = function(data){
@@ -30,8 +71,6 @@ export const useBankStore = defineStore('bank', () => {
     {id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월']},
     {id: id++, title: '지역', content: ['서울', '부산', '경기', '인천', '포항']},
   ])
-
-
   
   //로그인 데이터 : 더미 데이터 테스팅
   const findUser = async function(userLoginData) {
@@ -48,9 +87,16 @@ export const useBankStore = defineStore('bank', () => {
     return false
   }
 
+
   //로그인 관련 데이터 확보 : 로그인 데이터 확보
+<<<<<<< HEAD
   //로그인 데이터 토큰 확인 전달이 필요함 
   // const {email, password} = userLoginData
+=======
+
+//   const {email, password} = userLoginData
+
+>>>>>>> 9def84e58c2e1f4cc7237f939d49b9f3726ab1b6
   // const findUser = async function(userLoginData){
   //     try {
   //     const response = axios({
@@ -69,6 +115,7 @@ export const useBankStore = defineStore('bank', () => {
   //     return false
   //   }
   // }
+
 
 
   //회원가입 데이터 : 더미 데이터 테스팅

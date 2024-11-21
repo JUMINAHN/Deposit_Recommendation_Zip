@@ -1,5 +1,6 @@
 asgiref==3.8.1
 certifi==2024.8.30
+<<<<<<< HEAD
 cffi==1.17.1
 charset-normalizer==3.4.0
 cryptography==43.0.3
@@ -17,6 +18,15 @@ python3-openid==3.2.0
 requests==2.32.3
 requests-oauthlib==2.0.0
 sqlparse==0.5.1
+=======
+charset-normalizer==3.4.0
+Django==4.2.16
+django-environ==0.11.2
+djangorestframework==3.15.2
+idna==3.10
+requests==2.32.3
+sqlparse==0.5.2
+>>>>>>> 9def84e58c2e1f4cc7237f939d49b9f3726ab1b6
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
