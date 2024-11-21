@@ -2,9 +2,11 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from .models import Articles, Comments
 from .serializers import ArticleSerializer, CommentSerializer
+
 
 @api_view(['GET', 'POST', 'PUT'])
 def article_list_create(request):
@@ -15,7 +17,8 @@ def article_list_create(request):
     elif request.method == "POST": #게시글 생성
         serializer = ArticleSerializer(data=request.data) #data값으로 post받은 값 전달
         if serializer.is_valid(raise_exception=True): #예외 처리 진행
-            serializer.save()
+            # 정우수정부분
+            serializer.save(user=request.user) 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 @api_view(['GET', 'DELETE', 'PUT'])
