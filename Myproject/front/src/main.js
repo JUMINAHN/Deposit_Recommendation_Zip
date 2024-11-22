@@ -10,7 +10,7 @@ import { createApp } from 'vue'
 // bootstrap import 실행
 // npm i pinia-plugin-persistedstate 설치
 // npm 터미널 설치: npm install bootstrap@5.3.0-alpha1
-// alert
+// alert 
 // npm install sweetalert2
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
