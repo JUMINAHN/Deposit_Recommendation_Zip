@@ -14,6 +14,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 BASE_URL = 'http://finlife.fss.or.kr/finlifeapi/'
 
 @api_view(['GET'])
+@permission_classes([AllowAny]) #모두 권한 설정
 def save_deposit_products(request):
     url = BASE_URL + 'depositProductsSearch.json'
     params = {
