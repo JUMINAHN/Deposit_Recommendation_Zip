@@ -69,14 +69,15 @@
             @click:row="handleRowClick"
             class="cursor-pointer"
           >
-            <!-- v-slot:item 부분 수정 -->
-            <template v-slot:item="props">
-              <tr @click="handleRowClick(props.item)">
-                <td v-for="header in headers" :key="header.key">
-                  {{ props.item[header.key] }}
-                </td>
-              </tr>
-            </template>
+          <template v-slot:item="props">
+            <tr @click="handleRowClick(props.item)">
+              <td v-for="header in headers" :key="header.key"
+                  :class="{ 'highlighted-amount': header.key === '예상금액' && props.item[header.key] !== '-' }"
+              >
+                {{ props.item[header.key] }}
+              </td>
+            </tr>
+          </template>
           </v-data-table>
         </v-card>
       </v-col>
@@ -163,9 +164,19 @@ const findProducts = async function() {
   }
 }
 
+// 클릭된 행을 추적하기 위한 상태 추가
+const clickedRow = ref(null)
+
+// 행이 클릭되었는지 확인하는 함수
+const isClickedRow = (item) => {
+  return clickedRow.value && 
+         item['금융기관'] === clickedRow.value['금융기관'] && 
+         item['상품'] === clickedRow.value['상품']
+}
+
 const handleRowClick = function(item) {
-  // 디버깅을 위한 상세 로그
-  console.log('클릭된 전체 데이터:', item)
+  // 클릭된 행 저장
+  clickedRow.value = item
   
   try {
     const bankName = item['금융기관']
@@ -216,4 +227,20 @@ const handleRowClick = function(item) {
 .v-btn {
   height: 56px !important;
 }
+
+.highlighted-row td {
+  color: red !important;
+  font-weight: bold;
+}
+
+/* 선택된 행에 호버 효과 추가 */
+.v-data-table tr:hover td {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.highlighted-amount {
+  color: red !important;
+  font-weight: bold;
+}
+
 </style>
