@@ -22,12 +22,12 @@
             <v-divider class="divider"></v-divider>
             
             <div class="info-section">
-              <div class="info-item">
-                <div class="info-label">상세 정보</div>
-                <div class="info-content">
-                  {{ detailInfo }}
-                </div>
-              </div>
+              <!-- <div class="info-item"> -->
+                <!-- <div class="info-label">상세 정보</div> -->
+                <!-- <div class="info-content"> -->
+                  <!-- {{ detailInfo }} -->
+                <!-- </div> -->
+              <!-- </div> -->
               
               <div class="info-item">
                 <div class="info-label">가입 방법</div>
