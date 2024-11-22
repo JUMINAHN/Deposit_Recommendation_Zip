@@ -7,6 +7,8 @@ import { useRouter } from 'vue-router'
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //token은 null
   const depositData = ref([])
+  const detailDepositData = ref([]) //상세목록에 있는 값 여기에 값을 담고
+  //비교를 해야하는데? => option과 연동
 
   //save-deposit 자체를 실행하지 않았음을 알 수 있음 이거 진행해야 함
   // const detailInfo = item.etc_note
@@ -59,9 +61,6 @@ export const useBankStore = defineStore('bank', () => {
         // const preTaxInterest = twelve !== '-' ? Math.floor(twelve * 10000) : 0
         // // 세후이자 계산 (세금 15.4% 제외)
         // const postTaxInterest = Math.floor(preTaxInterest * 0.846)
-          // '상세정보' : detailInfo,
-          // '가입방법' : joinWay,
-          // '우대이율' : special
         //추후 계산값 반환
         return {
           '금융기관': bankname,
@@ -71,6 +70,9 @@ export const useBankStore = defineStore('bank', () => {
           '24개월': twenty_four,
           '36개월': thirty_six,
           '예상금액': '-',
+          // '상세정보' : detailInfo,
+          // '가입방법' : joinWay,
+          // '우대이율' : special
         }
       })
 
@@ -81,6 +83,73 @@ export const useBankStore = defineStore('bank', () => {
       throw error
     }
   }
+
+
+
+  //일치하는 애들로 분류해!
+    //그리고 받아온 내용과 필터링 지금 
+    //우리은행/WON플러스예금
+    //즉 bankname과 products => 데이터 두개 가져오는 것이지 router로
+    //그래서 그게맞다면 반환하는 것
+    const getOptionDeposit = async function () {
+      //응답 자체를 받아오고 활용하던지 해야할 것 같음
+      try {
+        const response = await axios({
+          method: 'get',
+          url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
+        })
+        const arrayData = response.data
+        detailDepositData.value = arrayData.map((item, index) => {
+          const bankname = item.kor_co_nm
+          const products = item.fin_prdt_nm
+          const detailInfo = item.etc_note
+          const joinWay = item.joinWay
+          const special = item.spcl_cnd
+          //정보 더 뽑아오기 => 상세정보 가입정보 우대이율
+          // 초기값을 '-'로 설정
+  
+          return {
+            'bankname': bankname,
+            'products': products,
+            'detailInfo' : detailInfo,
+            'joinWay' : joinWay,
+            'special' : special
+          }
+        })
+  
+        return detailDepositData //여기에 데이터 저장하고
+  
+      } catch (error) {
+        console.error('데이터 변환 중 오류 발생:', error)
+        throw error
+      }
+    }
+
+  const findDepositDetail = function(paramsBank, paramsProudct) {
+
+    console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
+    //여기 보면 내가 원하는게 맞게 들어간 것을 볼 수 있음
+
+    const resultData = detailDepositData.value.filter((item) => {
+      console.log(item, '일반 객체 예상') //해당 예상 값은 맞음
+
+
+      console.log(item.bankname) //다시 영여로 변수명 수정했음!!! : 이게 맞걸랑
+      console.log(paramsBank, '파라미터로 받은bank값?')
+      //일치하는애들 보임 그럼 이거 filter로 반환되는 것 같음
+
+      if(item.bankname === paramsBank && item.products === paramsProudct) {
+        //일치해야 반환
+        console.log('--------------------')
+        // console.log('bankname', '일치하냐?', bankname)
+        return item //item 자체를 반환
+      }
+    })
+    return resultData //참일 때 반환되어야하거든?
+  }
+
+
+
 
   let id = 1
   const findCondition = ref([
@@ -199,9 +268,7 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-
-
   return { getDepositData, findCondition, getUserInput,
            findUser, signUpComplete, token, logoutUser,
-           depositData }
+           depositData, detailDepositData, findDepositDetail, getOptionDeposit }
 }, { persist: true }) 

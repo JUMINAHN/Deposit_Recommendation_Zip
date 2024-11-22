@@ -12,20 +12,13 @@
                   v-model="find.selectedValue"
                   :items="find.content || []"
                   :label="find.title"
-                  height="56"
                 ></v-combobox>
               </v-col>
             </v-row>
           </v-col>
-          <!-- 버튼 영역 - 높이와 너비 조정 -->
-          <v-col cols="12" md="4" class="d-flex align-center">
-            <v-btn 
-              color="blue" 
-              block 
-              height="56"
-              class="search-button"
-              @click="findProducts"
-            >
+          <!-- 버튼 영역 -->
+          <v-col cols="12" md="4">
+            <v-btn color="primary" block @click="findProducts">
               나에게 맞는 상품 찾기 CLICK 💨
             </v-btn>
           </v-col>
@@ -38,8 +31,8 @@
       <!-- 이미지 영역 -->
       <v-col cols="12" md="5">
         <v-img 
-          :src="bankservice" 
-          max-height="800" 
+          src="@/assets/images/whatsInMyWeb.jpg" 
+          max-height="600" 
           contain
           class="rounded-lg"
         ></v-img>
@@ -69,11 +62,10 @@
             @click:row="handleRowClick"
             class="cursor-pointer"
           >
-            <!-- v-slot:item 부분 수정 -->
-            <template v-slot:item="props">
-              <tr @click="handleRowClick(props.item)">
+            <template v-slot:item="{ item }">
+              <tr>
                 <td v-for="header in headers" :key="header.key">
-                  {{ props.item[header.key] }}
+                  {{ item[header.key] }}
                 </td>
               </tr>
             </template>
@@ -90,7 +82,6 @@ import { computed, onMounted, onUpdated, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia' //이거 뭐임?
 import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
-import bankservice from '@/assets/images/bankservice.jpg'
 
 
 const store = useBankStore()
@@ -123,8 +114,6 @@ onMounted(async () => {
 const topResult = ref(null)
 const isHighlighted = ref(false)
 // 새로 추가된 코드 끝
-
-
 
 const findProducts = async function() {
   const selectedValues = findCondition.value.map((condition) => condition.selectedValue.trim());
@@ -162,33 +151,20 @@ const findProducts = async function() {
     console.error('데이터 처리 중 오류 발생:', error);
   }
 }
-
-const handleRowClick = function(item) {
-  // 디버깅을 위한 상세 로그
-  console.log('클릭된 전체 데이터:', item)
-  
-  try {
-    const bankName = item['금융기관']
-    const productName = item['상품']
-    
-    console.log('추출된 데이터:', { bankName, productName })
-
-    if (!bankName || !productName) {
-      console.error('데이터 누락:', item)
-      return
-    }
-
-    // 라우팅 시도
+const handleRowClick = function(clickRow) {
+  console.log('클릭된 행의 데이터', clickRow)
+  if (clickRow['금융기관'] && clickRow['상품']) {
     router.push({
-      name: 'compared',
+      name: 'compared',  // 'detail'에서 'compared'로 변경
       params: {
-        bankName: bankName,
-        productName: productName
+        bankName: clickRow['금융기관'],
+        productName: clickRow['상품']
       }
+    }).catch((err) => {
+      console.log('라우팅 오류:', err)
     })
-  } catch (error) {
-    console.error('클릭 처리 중 오류:', error)
-    console.error('문제의 데이터:', item)
+  } else {
+    console.error('필요한 데이터가 누락되었습니다:', clickRow)
   }
 }
 
@@ -199,7 +175,7 @@ const handleRowClick = function(item) {
 </script>
 
 <style scoped>
-.v-img {
+g {
   max-width: 100%;
   height: auto;
 }
@@ -208,12 +184,7 @@ const handleRowClick = function(item) {
   cursor: pointer;
 }
 
-.search-button {
-  margin-top: 0;
-}
-
-/* 버튼과 입력 필드의 높이를 맞추기 위한 스타일 */
-.v-btn {
-  height: 56px !important;
+.v-card {
+  height: 100%;
 }
 </style>
