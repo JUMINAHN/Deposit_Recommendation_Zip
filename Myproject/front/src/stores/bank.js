@@ -99,11 +99,12 @@ export const useBankStore = defineStore('bank', () => {
           url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
         })
         const arrayData = response.data
+        console.log('res.daat!!!!!!!!!!a', arrayData)
         detailDepositData.value = arrayData.map((item, index) => {
           const bankname = item.kor_co_nm
           const products = item.fin_prdt_nm
-          const detailInfo = item.etc_note
-          const joinWay = item.joinWay
+          // const detailInfo = item.etc_note
+          const joinWay = item.join_way
           const special = item.spcl_cnd
           //정보 더 뽑아오기 => 상세정보 가입정보 우대이율
           // 초기값을 '-'로 설정
@@ -111,7 +112,7 @@ export const useBankStore = defineStore('bank', () => {
           return {
             'bankname': bankname,
             'products': products,
-            'detailInfo' : detailInfo,
+            // 'detailInfo' : detailInfo,
             'joinWay' : joinWay,
             'special' : special
           }
@@ -129,6 +130,7 @@ export const useBankStore = defineStore('bank', () => {
 
     console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
     //여기 보면 내가 원하는게 맞게 들어간 것을 볼 수 있음
+    console.log(detailDepositData)
 
     const resultData = detailDepositData.value.filter((item) => {
       console.log(item, '일반 객체 예상') //해당 예상 값은 맞음

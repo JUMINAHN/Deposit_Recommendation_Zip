@@ -71,6 +71,7 @@ const detailInfo = ref('')
 const joinWay = ref('')
 const special = ref('')
 
+
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
@@ -82,14 +83,25 @@ onMounted(async () => {
 
     const resultData = store.findDepositDetail(bankName.value, productName.value)
     console.log('Result Data:', resultData) // 디버깅용
-
-    if (resultData && resultData.length > 0) {
-      special.value = resultData[0].special || '관련 데이터가 없습니다.'
-      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
-      detailInfo.value = resultData[0].detailInfo || '관련 데이터가 없습니다.'
+  // console.log(resultData[0].special)    
+    if (resultData[0].special) {
+      special.value = resultData[0].special
     } else {
-      console.error('데이터를 찾을 수 없습니다')
+      special.value = '관련 데이터가 없습니다.'
     }
+    
+    if (resultData[0].joinWay) {
+      joinWay.value = resultData[0].joinWay
+    } else {
+      joinWay.value ='관련 데이터가 없습니다.'
+    }
+    
+    // if (resultData[0].detailInfo) {
+    //   detailInfo.value = resultData[0].detailInfo
+    // } else {
+    //   detailInfo.value = '관련 데이터가 없습니다.'
+    // }
+  
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
