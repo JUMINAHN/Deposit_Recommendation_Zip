@@ -5,6 +5,8 @@ from django.conf import settings
 
 class Articles(models.Model) :
     #유저 아이디 추후 추가할 예정 => user_id
+    # 정우수정부분
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.TextField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)    
@@ -14,6 +16,7 @@ class Articles(models.Model) :
 class Comments(models.Model):
     #유저랑 아티클 생성 예정 => 아티클은 역참조로 진행해야 함
     article = models.ForeignKey(Articles, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.TextField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)    

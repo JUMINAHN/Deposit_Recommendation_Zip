@@ -1,157 +1,274 @@
 import { ref, computed, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+
 
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //token은 null
-  
-  //더미 데이터 활용 메서드 => 이건 추후 활용할 예정
-  // const dummyData = reactive([
-  //   axios({
-  //     method: 'get',
-  //     url: 'http://127.0.0.1:8000/api/v1/save-deposit-products/',
-  //     })   
-  // ])
+  const depositData = ref([])
 
-  //예적금 리스트 더미 데이터
-  const dummyData = reactive([
-    {'순위': 1,
-      '6개월': 1.30,
-      '12개월': 3.90,
-      '세전이자': 390000,
-      '세후이자': 329940,
-      '24개월': 1.50,
-      '36개월': 1.50,
-      '금융기관': 'MG 보은',
-      '상품': 'Block예금',
-      'update': '11.18'
-      },
-      {'순위': 2,
-      '6개월': '-',
-      '12개월': 3.90,
-      '세전이자': 390000,
-      '세후이자': 329940,
-      '24개월': '-',
-      '36개월': '-',
-      '금융기관': 'MG 보은',
-      '상품': 'MG 더뱅킹 정기예금',
-      'update': '10.28'
-      },
-      {'순위': 3,
-      '6개월': '-',
-      '12개월': 3.90,
-      '세전이자': 380000,
-      '세후이자': 321480,
-      '24개월': '-',
-      '36개월': '-',
-      '금융기관': '봉화 신협',
-      '상품': '파워정기예탁금',
-      'update': '11.18'
-      },
-  ])
+  const detailDepositData = ref([]) //상세목록에 있는 값 여기에 값을 담고
+  //비교를 해야하는데? => option과 연동
 
-  
+  //save-deposit 자체를 실행하지 않았음을 알 수 있음 이거 진행해야 함
+  // const detailInfo = item.etc_note
+  // const joinWay = item.joinWay
+  // const special = item.spcl_cnd
 
 
-  //user가 입력한 예치금 데이터
-  const userDepositData = ref(null)
-  //v-model로 추가 유저 데이터 입력값 받아오기 (아직 미진행)
-  const getUserData = function(data){
-    userDepositData.value = data 
+
+  const getDepositData = async function () {
+    //응답 자체를 받아오고 활용하던지 해야할 것 같음
+    try {
+      const response = await axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
+      })
+      const arrayData = response.data
+
+      depositData.value = arrayData.map((item, index) => {
+        const bankname = item.kor_co_nm
+        const products = item.fin_prdt_nm
+        const options = item.options
+
+        // 초기값을 '-'로 설정
+        let six = '-'
+        let twelve = '-'
+        let twenty_four = '-'
+        let thirty_six = '-'
+
+        // options가 존재하면 처리
+        if (options && Array.isArray(options)) {
+          options.forEach(option => {
+            const rate = option.intr_rate2
+
+            // save_trm에 따라 해당 기간의 이자율 설정
+            switch (option.save_trm) {
+              case 6:
+                six = rate
+                break
+              case 12:
+                twelve = rate
+                break
+              case 24:
+                twenty_four = rate
+                break
+              case 36:
+                thirty_six = rate
+                break
+            }
+          })
+        }
+        // // 세전이자 계산 (12개월 기준)
+        // const preTaxInterest = twelve !== '-' ? Math.floor(twelve * 10000) : 0
+        // // 세후이자 계산 (세금 15.4% 제외)
+        // const postTaxInterest = Math.floor(preTaxInterest * 0.846)
+
+        //추후 계산값 반환
+        return {
+          '금융기관': bankname,
+          '상품': products,
+          '6개월': six,
+          '12개월': twelve,
+          '24개월': twenty_four,
+          '36개월': thirty_six,
+          '예상금액': '-'
+        }
+      })
+
+      return depositData
+
+    } catch (error) {
+      console.error('데이터 변환 중 오류 발생:', error)
+      throw error
+    }
+  }
+  //일치하는 애들로 분류해!
+  //그리고 받아온 내용과 필터링 지금 
+  //우리은행/WON플러스예금
+  //즉 bankname과 products => 데이터 두개 가져오는 것이지 router로
+  //그래서 그게맞다면 반환하는 것
+  const getOptionDeposit = async function () {
+    //응답 자체를 받아오고 활용하던지 해야할 것 같음
+    try {
+      const response = await axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
+      })
+      const arrayData = response.data
+      console.log('res.daat!!!!!!!!!!a', arrayData)
+      detailDepositData.value = arrayData.map((item, index) => {
+        const bankname = item.kor_co_nm
+        const products = item.fin_prdt_nm
+        // const detailInfo = item.etc_note
+        const joinWay = item.join_way
+        const special = item.spcl_cnd
+        //정보 더 뽑아오기 => 상세정보 가입정보 우대이율
+        // 초기값을 '-'로 설정
+
+        return {
+          'bankname': bankname,
+          'products': products,
+          // 'detailInfo' : detailInfo,
+          'joinWay': joinWay,
+          'special': special
+        }
+      })
+
+      return detailDepositData //여기에 데이터 저장하고
+
+    } catch (error) {
+      console.error('데이터 변환 중 오류 발생:', error)
+      throw error
+    }
+  }
+  const findDepositDetail = function (paramsBank, paramsProudct) {
+
+    console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
+    //여기 보면 내가 원하는게 맞게 들어간 것을 볼 수 있음
+    console.log(detailDepositData)
+
+    const resultData = detailDepositData.value.filter((item) => {
+      console.log(item, '일반 객체 예상') //해당 예상 값은 맞음
+
+
+      console.log(item.bankname) //다시 영여로 변수명 수정했음!!! : 이게 맞걸랑
+      console.log(paramsBank, '파라미터로 받은bank값?')
+      //일치하는애들 보임 그럼 이거 filter로 반환되는 것 같음
+
+      if (item.bankname === paramsBank && item.products === paramsProudct) {
+        //일치해야 반환
+        console.log('--------------------')
+        // console.log('bankname', '일치하냐?', bankname)
+        return item //item 자체를 반환
+      }
+    })
+    return resultData //참일 때 반환되어야하거든?
   }
 
   let id = 1
-  const findCondition = reactive([
-    {id: id++, title: '세율', content: ['일반과세', '세금우대', '비과세']},
-    {id: id++, title: '이자지급방식', content: ['전체', '만기지급', '월지급']},
-    {id: id++, title: '가입방식', content: ['전체', '온라인', '방문']},
-    //예치금액은 input받는 값 => v-model로 input받고 또 던져줘야 함
-    {id: id++, title: '예치금액', content: userDepositData},
-    {id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월']},
-    {id: id++, title: '지역', content: ['서울', '부산', '경기', '인천', '포항']},
+  const findCondition = ref([
+    { id: id++, title: '예치금액', content: [], selectedValue: '' }, //해당값 v-binding으로 가져와서 입력받아야 함
+    { id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월'], selectedValue: '' },
   ])
 
+  //지피티 도움
+  const getUserInput = async function (selectedValues) {
+    const [amount, period] = selectedValues
+    const numericAmount = parseFloat(amount)
 
-  
-  //로그인 데이터 : 더미 데이터 테스팅
-  const findUser = async function(userLoginData) {
-    const {email, password} = userLoginData
-    const dummyUser = ({
-      'email' : 'zamwa@naver.com',
-      'password' : 'sleep123'
+    //원화 생성..!! : 지피티
+    const formatter = new Intl.NumberFormat('ko-KR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+
+
+    // depositData.value를 직접 수정
+    depositData.value = depositData.value.map((deposit) => {
+      const rate = parseFloat(deposit[period])
+      const result = !isNaN(rate) && !isNaN(numericAmount)
+        ? (numericAmount * rate / 100)
+        : 0
+      return {
+        ...deposit,
+        '예상금액': result === 0 ? '-' : `${formatter.format(Math.round(result))}원`,
+        // 정렬을 위한 숫자 값 추가
+        '정렬용_예상금액': result
+      }
     })
-    if (dummyUser.email === email && dummyUser.password === password) {
-      console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
-      console.log('응답 확인')
-      return true
-    }
-    return false
+    // 내림차순 정렬 추가 => sort
+    depositData.value.sort((a, b) => b['정렬용_예상금액'] - a['정렬용_예상금액'])
+
+
+    console.log('Updated depositData:', depositData.value)
+    return depositData.value
   }
+
+  // 로그아웃 함수 추가
+  const logoutUser = async function () {
+    try {
+      const response = await axios({
+        method: 'post',
+        url: 'http://127.0.0.1:8000/accounts/logout/',
+        headers: {
+          Authorization: `Token ${token.value}` //토큰 관련 정보
+        }
+      })
+      // 로그아웃 성공 시 토큰 제거
+      localStorage.removeItem('token') //해당 정보 삭제
+      token.value = null
+      return true
+    } catch (error) {
+      console.error('로그아웃 실패:', error)
+      return false
+    }
+  }
+
 
   //로그인 관련 데이터 확보 : 로그인 데이터 확보
-  //로그인 데이터 토큰 확인 전달이 필요함 
-//   const {email, password} = userLoginData
-  // const findUser = async function(userLoginData){
-    //   try {
-  //     const response = axios({
-  //       method : 'post',
-  //       url : '', //login url
-  //       params : {
-  //         email,
-  //         password
-  //       }
-  //     })
-  //     console.log(response, ': 응답 데이터 확인')
-  //     console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
-  //       return true
-  //   } catch{
-  //     console.log('에러 발생')
-  //     return false
-  //   }
-  // }
+  const findUser = async function (userLoginData) {
+    const { username, email, password } = userLoginData
+    console.log(username, email, password, ' 없어?')
+    try {
+      // FormData 객체 생성
+      const formData = new FormData()
+      formData.append('username', username.value)
+      formData.append('email', email.value)
+      formData.append('password', password.value)
+      const response = await axios({
+        method: 'post',
+        url: 'http://127.0.0.1:8000/accounts/login/', //login url
+        data: formData,
 
-
-  //회원가입 데이터 : 더미 데이터 테스팅
-  //async => 비동기 작업일때 진행
-  const signUpComplete = function(userData) {
-    const {nickname, name, email, password} = userData //이거로 받는다 => 이것자체가 더미
-    if (nickname !== null
-      && name !== null
-      && email !== null
-      && password !== null) {
-      console.log('응답 확인 : true') // '내부 데이터 확인해보기
-      console.log(nickname, '단순 nickname')
-      // console.log(nickname.value, '단순 nickname.value')
+      })
+      console.log(response, ': 응답 데이터 확인')
+      token.value = response.data.key  // response.data.key로 수정
+      //local에 저장 => local 저장
+      localStorage.setItem('token', response.data.key)  // localStorage에 저장 추가
+      console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
       return true
+    } catch {
+      console.log('에러 발생')
+      return false
     }
-    return false
+  }
+
+  const router = useRouter()
+  // 회원 가입 데이터
+  // 토큰 생성이 필요함
+  const signUpComplete = async function (userData) {
+    const { name, email, password1, password2 } = userData
+    try {
+      const response = axios({
+        method: 'post',
+        url: 'http://127.0.0.1:8000/accounts/signup/', //회원 가입 URL 추가 예정
+        // 받아올 애들
+        data: { //params는 get으로 받을때 사용
+          // nickname,
+          username: name.value,
+          email: email.value,
+          password1: password1.value,
+          password2: password2.value,
+        }
+      })
+      console.log(response, ': 응답 데이터 확인')
+      console.log('회원가입이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
+      router.push({ name: 'login' }) //로그인 페이지 이동
+      return true //회원가입 로직 확인 완료
+    } catch {
+      console.log('에러가 발생했습니다.')
+      return false
+    }
   }
 
 
-  //회원 가입 데이터
-  //토큰 생성이 필요함
-  // const signUpComplete = async function(userData) {
-  //   const {nickname, name, email, password} = userData
-  //   try {
-  //     const response = axios({
-  //       method : 'post',
-  //       url : '/', //회원 가입 URL 추가 예정
-  //       params: { //받아올 애들
-  //         nickname,
-  //         name,
-  //         email,
-  //         password
-  //       }
-  //     })
-  //     console.log(response, ': 응답 데이터 확인') 
-  //     console.log('회원가입이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
-  //     return true //회원가입 로직 확인 완료
-  //   } catch {
-  //     console.log('에러가 발생했습니다.')
-  //     return false
-  //   }
-  // }
 
-
-  return { dummyData, findCondition, getUserData, findUser, signUpComplete }
-}) //추후 persist => pinya넣을 것
+  return {
+    getDepositData, findCondition, getUserInput,
+    findUser, signUpComplete, token, logoutUser,
+    depositData, detailDepositData, findDepositDetail, getOptionDeposit
+  }
+}, { persist: true }) 

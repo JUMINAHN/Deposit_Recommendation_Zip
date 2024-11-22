@@ -21,7 +21,7 @@
         <!-- 모바일에서는 한 줄에 하나 cols -->
         <!-- 태블릿에서는 한 줄에 둘 sm -->
         <!-- 데스크탑에서는 한 줄에 셋 md -->
-      <v-card
+        <v-card
         class="mx-auto"
         max-width="400"
         elevation="2"
@@ -50,10 +50,9 @@
         </v-card-text>
     
         <v-card-actions>
-          <RouterLink :to="{name : card.link}"><v-btn variant="text" color="primary" text="EXPLORE"></v-btn></RouterLink>
-          <v-btn variant="text" color="primary" text="SHARE"></v-btn> <!--main Link로 가는 것 : 추가 예정-->
+          <v-btn variant="text" color="primary" text="EXPLORE" @click.stop="handleCardClick(card)"></v-btn>
         </v-card-actions>
-      </v-card>
+      </v-card> 
     </v-col>
     </v-row>
   </v-container>
@@ -67,21 +66,39 @@ import recommend from '@/assets/images/recommend.jpg'
 import exchange from '@/assets/images/exchange.jpg'
 import findBank from '@/assets/images/findBank.jpg'
 import moneyFace from '@/assets/images/moneyFace.jpg'
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { useBankStore } from '@/stores/bank'
+
+const router = useRouter()
+const store = useBankStore()
+const isLoggedIn = ref(false)
+onMounted(() => {
+  isLoggedIn.value = !!store.token
+})
 
 //데이터 정보 입력
 let id = 1
-  const imgData = [
-    {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend'},
-    {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊'},
-    {id: id++, src: exchange, title: '환율 검색', number: 'Number3', content: '지금 우리나라 돈으로는 얼마일까? 💱'},
-    {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️'},
-    {id: id++, src: moneyFace, title:'내가 지폐가 될 상인가', number: 'Number5', content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요💲'},
-  ]
+//loginrequried 데이터 추가
+const imgData = [
+  {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend', requiresLogin: false},
+  {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊', link: 'compared', requiresLogin: true},
+  {id: id++, src: exchange, title: '환율 검색', number: 'Number3', content: '지금 우리나라 돈으로는 얼마일까? 💱', requiresLogin: false},
+  {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️', link : 'map', requiresLogin: false},
+  {id: id++, src: moneyFace, title:'내가 지폐가 될 상인가', number: 'Number5', content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요💲', requiresLogin: false},
+]
 
-const tryLogin = function() {
-  //만약 로그인을 시도하면 alert 방지 => user Login => Login page 구현하고 이쪽으로 다시 와야함
-  alert('로그인이 완료되지 않으면 접근할 수 없습니다.')
+const handleCardClick = (card) => {
+  if (card.requiresLogin && !isLoggedIn.value) {
+    alert('로그인이 필요한 서비스입니다.')
+    router.push({ name: 'login' })
+  } else {
+    if (card.link) {
+      router.push({ name: card.link })
+    } else {
+      console.log(`${card.title} 기능은 아직 구현되지 않았습니다.`)
+    }
+  }
 }
 </script>
 

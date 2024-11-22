@@ -13,6 +13,16 @@
       max-width="448"
       rounded="lg"
     >
+      <div class="text-subtitle-1 text-medium-emphasis">Username</div>
+
+      <v-text-field
+        density="compact"
+        placeholder="Username"
+        prepend-inner-icon="mdi-information"
+        variant="outlined"
+        v-model.trim="username"
+      ></v-text-field>
+
       <div class="text-subtitle-1 text-medium-emphasis">Account</div>
 
       <v-text-field
@@ -20,7 +30,7 @@
         placeholder="Email address"
         prepend-inner-icon="mdi-email-outline"
         variant="outlined"
-        v-model="email"
+        v-model.trim="email"
       ></v-text-field>
 
       <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
@@ -39,7 +49,7 @@
         placeholder="Enter your password"
         prepend-inner-icon="mdi-lock-outline"
         variant="outlined"
-        v-model="password"
+        v-model.trim="password"
         @click:append-inner="visible = !visible"
       ></v-text-field>
 
@@ -91,17 +101,20 @@ const router = useRouter()
 //사용자에게 input 받을 로그인 관련 데이터
 const email = ref(null)
 const password = ref(null)
+const username = ref(null)
 
 //서버에 사용자가 입력한 데이터를 전달해서 일치 여부 판단
-const userLoginData = ref({
-  'email' : email,
-  'password' : password
-})
+const userLoginData = {
+  username,
+  email,
+  password
+}
 //서버에 데이터를 보내주고 사용자가 맞다면? True 값이라면 router MainPage
 const IsUserValid = async function(){
-  const result = await store.findUser(userLoginData.value)
+  const result = await store.findUser(userLoginData)
   console.log('result : ', result)
   if (result === true) {//true이면 alert
+    
     alert('로그인에 성공하였습니다!')
     router.push({name : 'main'})
   } else {
