@@ -1,4 +1,4 @@
-<template>
+<<template>
   <div class="detailPage">
     <v-container>
       <v-row>
@@ -59,40 +59,21 @@
 
 <script setup>
 import recommend from '@/assets/images/detailbank.jpg'
-import { useBankStore } from '@/stores/bank'
-import { useRoute } from "vue-router"
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const bankName = ref('')
 const productName = ref('')
-const store = useBankStore()
-const detailInfo = ref('')
-const joinWay = ref('')
+const sixMonth = ref('')
+const twelveMonth = ref('')
+const twentyFourMonth = ref('')
 const special = ref('')
 
-onMounted(async () => {
-  try {
-    bankName.value = route.params.bankName
-    productName.value = route.params.productName
-    console.log('Bank Name:', bankName.value)
-    console.log('Product Name:', productName.value)
-    
-    await store.getOptionDeposit()  // 비동기 호출 대기
-
-    const resultData = store.findDepositDetail(bankName.value, productName.value)
-    console.log('Result Data:', resultData) // 디버깅용
-
-    if (resultData && resultData.length > 0) {
-      special.value = resultData[0].special || '관련 데이터가 없습니다.'
-      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
-      detailInfo.value = resultData[0].detailInfo || '관련 데이터가 없습니다.'
-    } else {
-      console.error('데이터를 찾을 수 없습니다')
-    }
-  } catch (error) {
-    console.error('데이터 로딩 중 오류 발생:', error)
-  }
+onMounted(() => {
+  bankName.value = route.params.bankName
+  productName.value = route.params.productName
+  // 여기서 추가 데이터를 가져오는 로직 구현
 })
 </script>
 
