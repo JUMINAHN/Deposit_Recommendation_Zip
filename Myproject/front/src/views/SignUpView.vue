@@ -35,6 +35,7 @@
         label="Password1"
         placeholder="Enter your password"
         variant="underlined"
+        type="password"
       ></v-text-field>
 
       <v-text-field
@@ -43,6 +44,7 @@
         label="Password2"
         placeholder="Enter your password"
         variant="underlined"
+        type="password"
       ></v-text-field>
 
       <v-checkbox
