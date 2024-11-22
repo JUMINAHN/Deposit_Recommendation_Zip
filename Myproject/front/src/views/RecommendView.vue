@@ -43,32 +43,28 @@
         hide-details
         single-line
       ></v-text-field>
-    </template>
-
+       </template>
+      </v-card>
+      </div>
     <!-- 주석: v-data-table 시작 태그 추가 -->
     <!--depositData 한개씩 : 해당 내용 라우터로 전달해야함-->
+    <div v-if="isLoading">데이터 로딩 중...</div>
     <v-data-table
+      v-else
       :headers="headers"
       :items="depositData"
       :search="search"
-      :key="depositData.length"
+      @click:row="handleRowClick"
+      class="cursor-pointer"
     >
-      <!-- 새로 추가된 코드 시작 -->
       <template v-slot:item="{ item }">
-        <tr>
-          <td v-for="header in headers" :key="header.key" :class="{ 'red-border': header.key === '예상금액' && isHighlighted }">
-            <span :style="{ color: header.key === '예상금액' && isHighlighted ? 'red' : 'inherit' }">
-              {{ item[header.key] }}
-            </span>
+        <tr @click="handleRowClick(item)">
+          <td v-for="header in headers" :key="header.key">
+            {{ item[header.key] }}
           </td>
         </tr>
       </template>
-      <!-- 새로 추가된 코드 끝 -->
-    </v-data-table> 
-    <!-- 주석: v-data-table 닫는 태그 추가 -->
-
-      </v-card>
-    </div>
+    </v-data-table>
   </v-container>
 </template>
 
@@ -77,6 +73,7 @@ import { useBankStore } from '@/stores/bank'
 import { computed, onMounted, onUpdated, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia' //이거 뭐임?
 import Swal from 'sweetalert2'
+import { useRoute, useRouter } from 'vue-router'
 
 
 const store = useBankStore()
@@ -85,7 +82,7 @@ const { depositData, findCondition } = storeToRefs(store)
 //별도 구현하던거 진행
 const displayItems = computed(() => depositData.value) //기존 items 역할
 const search = ref('')
-
+const router = useRouter()
 //data table 만들기
 const dummyKey = ['금융기관', '상품', '6개월', '12개월', '24개월', '36개월', '예상금액']
 const headers = dummyKey.map(item => ({
@@ -93,9 +90,16 @@ const headers = dummyKey.map(item => ({
   key: item
 }))
 
-onMounted(async() => {
-  await store.getDepositData() //비동기로 데이터 받아오면 => store에서 실행되고
-  //관련 getDepositData가 담긴 store.depositData를 활용한다.
+const isLoading = ref(true)
+
+onMounted(async () => {
+  try {
+    await store.getDepositData()
+    isLoading.value = false
+  } catch (error) {
+    console.error('데이터 로딩 실패:', error)
+    isLoading.value = false
+  }
 })
 
 // 새로 추가된 코드 시작
@@ -139,6 +143,23 @@ const findProducts = async function() {
     console.error('데이터 처리 중 오류 발생:', error);
   }
 }
+const handleRowClick = function(clickRow) {
+  console.log('클릭된 행의 데이터', clickRow)
+  if (clickRow['금융기관'] && clickRow['상품']) {
+    router.push({
+      name: 'compared',  // 'detail'에서 'compared'로 변경
+      params: {
+        bankName: clickRow['금융기관'],
+        productName: clickRow['상품']
+      }
+    }).catch((err) => {
+      console.log('라우팅 오류:', err)
+    })
+  } else {
+    console.error('필요한 데이터가 누락되었습니다:', clickRow)
+  }
+}
+
 
 
 

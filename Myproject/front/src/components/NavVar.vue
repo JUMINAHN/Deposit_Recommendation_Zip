@@ -14,9 +14,9 @@
           <li class="nav-item">
             <RouterLink :to="{name : 'recommend'}" class="nav-link" >예적금 추천</RouterLink>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <RouterLink :to="{name : 'compared'}" class="nav-link" @click.prevent="handleProductCompare">예적금 상품비교</RouterLink>
-          </li>
+          </li> -->
   
           <li class="nav-item">
             <a class="nav-link" href="#">환율 검색</a>

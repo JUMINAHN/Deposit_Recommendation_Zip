@@ -9,7 +9,9 @@ export const useBankStore = defineStore('bank', () => {
   const depositData = ref([])
 
   //save-deposit 자체를 실행하지 않았음을 알 수 있음 이거 진행해야 함
-  
+  // const detailInfo = item.etc_note
+  // const joinWay = item.joinWay
+  // const special = item.spcl_cnd
 
 
   const getDepositData = async function () {
@@ -20,18 +22,17 @@ export const useBankStore = defineStore('bank', () => {
         url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
       })
       const arrayData = response.data
-
+ 
       depositData.value = arrayData.map((item, index) => {
         const bankname = item.kor_co_nm
         const products = item.fin_prdt_nm
         const options = item.options
-
+        //정보 더 뽑아오기 => 상세정보 가입정보 우대이율
         // 초기값을 '-'로 설정
         let six = '-'
         let twelve = '-'
         let twenty_four = '-'
         let thirty_six = '-'
-
         // options가 존재하면 처리
         if (options && Array.isArray(options)) {
           options.forEach(option => {
@@ -58,7 +59,9 @@ export const useBankStore = defineStore('bank', () => {
         // const preTaxInterest = twelve !== '-' ? Math.floor(twelve * 10000) : 0
         // // 세후이자 계산 (세금 15.4% 제외)
         // const postTaxInterest = Math.floor(preTaxInterest * 0.846)
-
+          // '상세정보' : detailInfo,
+          // '가입방법' : joinWay,
+          // '우대이율' : special
         //추후 계산값 반환
         return {
           '금융기관': bankname,
@@ -67,7 +70,7 @@ export const useBankStore = defineStore('bank', () => {
           '12개월': twelve,
           '24개월': twenty_four,
           '36개월': thirty_six,
-          '예상금액': '-'
+          '예상금액': '-',
         }
       })
 

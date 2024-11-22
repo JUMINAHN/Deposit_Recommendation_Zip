@@ -30,7 +30,7 @@ const router = createRouter({
       component : RecommendView
     },
     {
-      path : '/main/compared/',
+      path : '/main/recommend/:bankName/:productName',
       name : 'compared',
       component : DepositCompareView
     },
