@@ -84,7 +84,7 @@ const imgData = [
   {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend', requiresLogin: false},
   {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊', link: 'compared', requiresLogin: true},
   {id: id++, src: exchange, title: '환율 검색', number: 'Number3', content: '지금 우리나라 돈으로는 얼마일까? 💱', requiresLogin: false},
-  {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️', requiresLogin: false},
+  {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️', link : 'map', requiresLogin: false},
   {id: id++, src: moneyFace, title:'내가 지폐가 될 상인가', number: 'Number5', content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요💲', requiresLogin: false},
 ]
 
