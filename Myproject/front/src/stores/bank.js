@@ -7,14 +7,11 @@ import { useRouter } from 'vue-router'
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //token은 null
   const depositData = ref([])
-
   const detailDepositData = ref([]) //상세목록에 있는 값 여기에 값을 담고
   //비교를 해야하는데? => option과 연동
+  const userProduct = ref([]) //user가 담을 product => save
 
-  //save-deposit 자체를 실행하지 않았음을 알 수 있음 이거 진행해야 함
-  // const detailInfo = item.etc_note
-  // const joinWay = item.joinWay
-  // const special = item.spcl_cnd
+
 
 
 
@@ -123,6 +120,8 @@ export const useBankStore = defineStore('bank', () => {
       throw error
     }
   }
+
+
   const findDepositDetail = function (paramsBank, paramsProudct) {
 
     console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
@@ -146,6 +145,88 @@ export const useBankStore = defineStore('bank', () => {
     })
     return resultData //참일 때 반환되어야하거든?
   }
+
+  //user가 담을 product
+  //여기서 cart버튼을 눌렀을떄 받아와서 담을 것
+  //일단 => 이거 ref 자체로 가져옴
+  const userSaveProducts = function(bankName, productName) { //이거 실행
+    //이거에 대한 parameter를 user에 보내면
+    //user명과 일치한 경우 => db에 담는다.
+    //save관련 url이 필요한듯
+
+    // try {
+    //   const response = await axios(){ //이거 //res & err
+    //     method : 'post',
+    //     url : '', //user Save관련 url
+    //     data : {
+    //       bankName, //은행명
+    //       productName //은행상품명
+    //     }
+    // } 
+    //response ?
+
+    //ref 객체라서 value로 접근
+    userProduct.value.push({ //userProduct에 담는다.
+      'bankName' : bankName,
+      'productName' : productName
+    })
+    //그냥 담으면 저장 성공 message 
+    alert('장바구니에 상품을 담았습니다!')
+    console.log(userProduct, '담긴 내부 배열')
+    // } catch (error) {
+    //   console.error('에러 발생 :', error)
+    //  }
+  }
+
+  //그럼 장바구니에서 삭제 => 동일하게 접근하면 안됨
+  const userDeleteProducts = async function(bankName, productName) { //이거 실행
+    //동일하게 user에게 접근함 
+    // try {
+    //   const response = await axios(){ //이거 //res & err
+    //     method : 'post',
+    //     url : '', //user Save관련 url
+    //     data : {
+    //       bankName, //은행명
+    //       productName //은행상품명
+    //     }
+    // } 
+    //response ?
+
+
+    //findIndex는 반환함 => 같은 값 자체를 찾음
+    const index = userProduct.value.findIndex((item) => {
+      return (item.bankName === bankName && item.productName === productName) 
+    })
+    if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
+      alert('삭제할 수 없는 상품입니다.')
+    } else {
+      userProduct.value.splice(index, 1) //상품 두개 묶음
+      alert('관심 상품에서 제거되었습니다.')
+      console.log('상품 보유 목록', userProduct)
+    } 
+  }
+
+  //장바구니에 상품이 있는지 확인
+  const userGetProduct = function(bankName, productName) {
+    //user가 상품이 있는지 확인 => //상품 유무 확인
+    //있는지만 확인
+    //value에 접근
+    console.log('getProudct 내부')
+    //some 반환값이 없음
+    const result = userProduct.value.some((item) => {
+      if(item.bankName === bankName && item.productName === productName) {
+        console.log('일치값 발견')
+        return true
+      } else {
+        console.log('일치값이 없음')
+        return false
+      }
+    })
+    return result //some 반환값
+  }
+
+
+
 
   let id = 1
   const findCondition = ref([
@@ -269,6 +350,9 @@ export const useBankStore = defineStore('bank', () => {
   return {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
-    depositData, detailDepositData, findDepositDetail, getOptionDeposit
+    depositData, detailDepositData, findDepositDetail, getOptionDeposit,
+    userSaveProducts, userDeleteProducts, userProduct,
+    userGetProduct
+  
   }
 }, { persist: true }) 

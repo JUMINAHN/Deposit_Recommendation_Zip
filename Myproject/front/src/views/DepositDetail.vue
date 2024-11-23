@@ -44,11 +44,13 @@
               </div>
             </div>
 
+            <!--true이면 바꿔줌 -->
             <v-btn
               class="cart-button"
               elevation="2"
+              @click="toggleProduct"
             >
-              관심상품 등록
+              {{ productResult ? '관심상품 제거' : '관심상품 등록' }}
             </v-btn>
           </div>
         </v-col>
@@ -61,7 +63,7 @@
 import recommend from '@/assets/images/detailbank.jpg'
 import { useBankStore } from '@/stores/bank'
 import { useRoute } from "vue-router"
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const route = useRoute()
 const bankName = ref('')
@@ -70,7 +72,6 @@ const store = useBankStore()
 const detailInfo = ref('')
 const joinWay = ref('')
 const special = ref('')
-
 
 onMounted(async () => {
   try {
@@ -83,6 +84,7 @@ onMounted(async () => {
 
     const resultData = store.findDepositDetail(bankName.value, productName.value)
     console.log('Result Data:', resultData) // 디버깅용
+    //해당 값 활용 여부
   // console.log(resultData[0].special)    
     if (resultData[0].special) {
       special.value = resultData[0].special
@@ -105,7 +107,38 @@ onMounted(async () => {
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
+
 })
+
+//실시간 상황 반영안되나?
+//이거 반응형으로 설정안했는데 왜 ref?
+// const productResult = computed(() => { //한번만 실행됨
+//   return store.userGetProduct(bankName, productName) //trueFlase반환
+// })
+// //어떻게보면 computed(()) 함수가 productResult? => 그리고 결과니까. value?
+// console.log(productResult.value, '실시간 상황 결과 반영, 계속 반영되어야 하는데 한번만 되어서 문제?') //value를 안찍어서
+
+const productResult = computed(() => {
+  return store.userGetProduct(bankName.value, productName.value)
+}) //자체 값
+
+const toggleProduct = async () => { //반응형으로 비동기 처리
+  if (productResult.value) {
+    await store.userDeleteProducts(bankName.value, productName.value)
+  } else {
+    await store.userSaveProducts(bankName.value, productName.value)
+  }
+}
+
+// const saveProducts = function(bankName, productName) {
+//   store.userSaveProducts(bankName, productName)
+// }
+
+// const deleteProducts = function(bankName, productName) {
+//   store.userDeleteProducts(bankName, productName)
+// }
+
+
 </script>
 
 <style scoped>
