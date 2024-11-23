@@ -7,9 +7,10 @@ import LoginView from '@/views/LoginView.vue'
 import MainView from '@/views/MainView.vue'
 import RecommendView from '@/views/RecommendView.vue'
 import SignUpView from '@/views/SignUpView.vue'
-import DepositCompareView from '@/views/DepositCompareView.vue'
+import DepositCompareView from '@/views/DepositDetail.vue'
 import BankMapView from '@/views/BankMapView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import ProfileView from '@/views/ProfileView.vue'
 
 
 const router = createRouter({
@@ -34,6 +35,11 @@ const router = createRouter({
       path : '/main/recommend/:bankName/:productName',
       name : 'compared',
       component : DepositCompareView
+    },
+    {
+      path : '/main/profile',
+      name : 'profile',
+      component : ProfileView
     },
     {
       path : '/main/login',

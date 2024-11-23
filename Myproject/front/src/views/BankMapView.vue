@@ -438,6 +438,7 @@ const districtData = {
 
 <style scoped>
 .main-container {
+  padding-top: 80px; /* 네비게이션 바 높이 + 여유 공간 */
   display: flex;
   height: 100vh;
   background-color: #f5f7fa;

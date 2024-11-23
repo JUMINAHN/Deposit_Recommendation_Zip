@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="main-content">
     <!-- 상단 예금상품 찾기 섹션 -->
     <v-card class="mb-6">
       <v-card-text>
@@ -257,6 +257,10 @@ const handleRowClick = function(item) {
 </script>
 
 <style scoped>
+.main-content {
+  padding-top: 80px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
+}
+
 .v-img {
   max-width: 100%;
   height: auto;

@@ -28,6 +28,15 @@
                   <!-- {{ detailInfo }} -->
                 <!-- </div> -->
               <!-- </div> -->
+
+              <div class="info-item">
+                <div class="info-label">상세 정보</div>
+                <div class="info-content">
+                  우대 금리 : {{ maxRate }} <br>
+                  최고 금리 : {{ maxRate2 ? maxRate2 : '해당 값이 없음'}} <br>
+                  개월 수 : {{ month }} 개월
+                </div>
+              </div>
               
               <div class="info-item">
                 <div class="info-label">가입 방법</div>
@@ -44,11 +53,13 @@
               </div>
             </div>
 
+            <!--true이면 바꿔줌 -->
             <v-btn
               class="cart-button"
               elevation="2"
+              @click="toggleProduct"
             >
-              관심상품 등록
+              {{ productResult ? '관심상품 제거' : '관심상품 등록' }}
             </v-btn>
           </div>
         </v-col>
@@ -61,7 +72,7 @@
 import recommend from '@/assets/images/detailbank.jpg'
 import { useBankStore } from '@/stores/bank'
 import { useRoute } from "vue-router"
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const route = useRoute()
 const bankName = ref('')
@@ -70,7 +81,9 @@ const store = useBankStore()
 const detailInfo = ref('')
 const joinWay = ref('')
 const special = ref('')
-
+const maxRate = ref('')
+const maxRate2 = ref('')
+const month = ref('')
 
 onMounted(async () => {
   try {
@@ -83,6 +96,7 @@ onMounted(async () => {
 
     const resultData = store.findDepositDetail(bankName.value, productName.value)
     console.log('Result Data:', resultData) // 디버깅용
+    //해당 값 활용 여부
   // console.log(resultData[0].special)    
     if (resultData[0].special) {
       special.value = resultData[0].special
@@ -96,6 +110,10 @@ onMounted(async () => {
       joinWay.value ='관련 데이터가 없습니다.'
     }
     
+      maxRate.value = resultData[0].maxRate
+      maxRate2.value = resultData[0].maxRate2 //여기 지금 값이 없음..
+      month.value = resultData[0].month
+
     // if (resultData[0].detailInfo) {
     //   detailInfo.value = resultData[0].detailInfo
     // } else {
@@ -105,12 +123,53 @@ onMounted(async () => {
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
+
 })
+
+console.log('maxRate2', maxRate2)
+console.log('month', month)
+
+//실시간 상황 반영안되나?
+//이거 반응형으로 설정안했는데 왜 ref?
+// const productResult = computed(() => { //한번만 실행됨
+//   return store.userGetProduct(bankName, productName) //trueFlase반환
+// })
+// //어떻게보면 computed(()) 함수가 productResult? => 그리고 결과니까. value?
+// console.log(productResult.value, '실시간 상황 결과 반영, 계속 반영되어야 하는데 한번만 되어서 문제?') //value를 안찍어서
+
+const productResult = computed(() => {
+  return store.userGetProduct(bankName.value, productName.value)
+}) //자체 값
+
+const toggleProduct = async () => { //반응형으로 비동기 처리
+  if (productResult.value) {
+    await store.userDeleteProducts(bankName.value, productName.value)
+  } else {
+    await store.userSaveProducts(bankName.value, productName.value)
+  }
+}
+
+// const saveProducts = function(bankName, productName) {
+//   store.userSaveProducts(bankName, productName)
+// }
+
+// const deleteProducts = function(bankName, productName) {
+//   store.userDeleteProducts(bankName, productName)
+// }
+
+
 </script>
 
 <style scoped>
+/* 문제 원인:고정된(fixed) 네비게이션 바가 페이지 컨텐츠와 겹침
+해결 방법: */
+
 .detailPage {
-  margin: 40px auto;
+  /* margin: 40px auto; 기존 코드 수정 */
+  margin-top: 100px;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 15px;
