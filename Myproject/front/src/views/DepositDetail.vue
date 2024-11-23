@@ -22,12 +22,6 @@
             <v-divider class="divider"></v-divider>
             
             <div class="info-section">
-              <!-- <div class="info-item"> -->
-                <!-- <div class="info-label">상세 정보</div> -->
-                <!-- <div class="info-content"> -->
-                  <!-- {{ detailInfo }} -->
-                <!-- </div> -->
-              <!-- </div> -->
 
               <div class="info-item">
                 <div class="info-label">상세 정보</div>
@@ -95,9 +89,8 @@ onMounted(async () => {
     await store.getOptionDeposit()  // 비동기 호출 대기
 
     const resultData = store.findDepositDetail(bankName.value, productName.value)
-    console.log('Result Data:', resultData) // 디버깅용
+
     //해당 값 활용 여부
-  // console.log(resultData[0].special)    
     if (resultData[0].special) {
       special.value = resultData[0].special
     } else {
@@ -111,15 +104,10 @@ onMounted(async () => {
     }
     
       maxRate.value = resultData[0].maxRate
-      maxRate2.value = resultData[0].maxRate2 //여기 지금 값이 없음..
+      maxRate2.value = resultData[0].maxRate2 
       month.value = resultData[0].month
 
-    // if (resultData[0].detailInfo) {
-    //   detailInfo.value = resultData[0].detailInfo
-    // } else {
-    //   detailInfo.value = '관련 데이터가 없습니다.'
-    // }
-  
+
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
@@ -129,13 +117,7 @@ onMounted(async () => {
 console.log('maxRate2', maxRate2)
 console.log('month', month)
 
-//실시간 상황 반영안되나?
-//이거 반응형으로 설정안했는데 왜 ref?
-// const productResult = computed(() => { //한번만 실행됨
-//   return store.userGetProduct(bankName, productName) //trueFlase반환
-// })
-// //어떻게보면 computed(()) 함수가 productResult? => 그리고 결과니까. value?
-// console.log(productResult.value, '실시간 상황 결과 반영, 계속 반영되어야 하는데 한번만 되어서 문제?') //value를 안찍어서
+
 
 const productResult = computed(() => {
   return store.userGetProduct(bankName.value, productName.value)
@@ -148,14 +130,6 @@ const toggleProduct = async () => { //반응형으로 비동기 처리
     await store.userSaveProducts(bankName.value, productName.value)
   }
 }
-
-// const saveProducts = function(bankName, productName) {
-//   store.userSaveProducts(bankName, productName)
-// }
-
-// const deleteProducts = function(bankName, productName) {
-//   store.userDeleteProducts(bankName, productName)
-// }
 
 
 </script>

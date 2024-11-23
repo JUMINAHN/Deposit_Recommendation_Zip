@@ -37,7 +37,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3rem;  /* 2rem에서 3rem으로 증가하여 간격도 조정 */
+  gap: 3rem;  /* 2rem에서 3rem으로 증가하여 간격 조정 */
 }
 
 .logo-image {

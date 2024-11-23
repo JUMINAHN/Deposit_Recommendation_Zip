@@ -68,12 +68,8 @@ const selectedDistrict = ref(''); // selectedCity 대신 selectedDistrict로 통
 const selectedBank = ref('');
 const districts = ref([]); // cities 대신 districts로 통일
 
-// // 광역시/도, 시/군/구, 은행 목록 (예시 데이터)
-// const regions = ['서울특별시', '경기도', '인천광역시', /* ... */];
-// const cities = ref([]);
-// const banks = ['KB국민은행', '신한은행', '우리은행', '하나은행', /* ... */];
-
-let map, ps, infowindow, markers = [];
+// 11/24-오전 11시 : ps오류
+let map, ps, infowindow, markers = []; 
 
 // 지도 초기화 함수
 const initMap = () => {

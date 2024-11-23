@@ -206,7 +206,7 @@ const checkLogin = async function (userData) {
 /* 반응형 디자인을 위한 미디어 쿼리 추가 */
 @media (max-width: 600px) {
   .signup-container {
-    padding: 60px 16px; /* 모바일에서는 패딩 축소 */
+    padding: 60px 16px; 
   }
 }
 </style>

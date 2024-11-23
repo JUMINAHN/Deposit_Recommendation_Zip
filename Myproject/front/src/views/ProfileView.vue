@@ -106,7 +106,7 @@ const userIncome = ref('')
 const products = ref([]) //가입상품 종류
 
 onMounted(() => {
-  store.getUserInfo() //user info 가져옴
+  store.getUserInfo() //user info
   userName.value = store.userInfo.username
   userEmail.value = store.userInfo.useremail
   userNickName.value = store.userInfo.nickname

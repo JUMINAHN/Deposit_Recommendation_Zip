@@ -67,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-// asset 이미지 호출
 import compare from '@/assets/images/compare.jpg'
 import recommend from '@/assets/images/recommend.jpg'
 import community from '@/assets/images/community.jpg'

@@ -129,10 +129,7 @@ const IsUserValid = async function(){
   }
 }
 
-//visible 로직 구현 => password 눈을 눌렀을 때
-const visible = ref(true) //true -> false : 눈감기 data
-
-//password를 까먹었을 때 => NewPage
+const visible = ref(true) 
 
 
 </script>
