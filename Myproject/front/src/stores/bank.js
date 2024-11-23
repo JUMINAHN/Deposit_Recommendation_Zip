@@ -147,7 +147,14 @@ export const useBankStore = defineStore('bank', () => {
 
   const userSaveProducts = async function(bankName, productName) { //이거 실행
     try {
-
+    //   const response = await axios({ //이거 //res & err
+    //     method : 'post',
+    //     url : 'http://127.0.0.1:8000/user/save-product', //user Save관련 url
+    //     data : {
+    //       bankName, //은행명
+    //       productName //은행상품명
+    //     }
+    // }) 
       
     userProduct.value.push({ //userProduct에 담는다.
       'bankName' : bankName,
