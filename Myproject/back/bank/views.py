@@ -1,13 +1,17 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from rest_framework.response import Response
 
 import requests
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.conf import settings
 from .models import DepositOptions, DepositProducts
 from .serializers import DepositOptionsSerializer, DepositProductsSerializer, DepositOptionsCreateSerializer, DepositProductsCreateSerializer
 from django.core.serializers.json import DjangoJSONEncoder
+import openai 
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -139,7 +143,36 @@ def top_rate(request):
         'options': option_serializers.data
     })
 
+# error_code=invalid_api_key error_message='Incorrect API key provided: sk-proj-*********************************************************************************************************************************************************** You can find your API key at https://platform.openai.com/account/api-keys.' error_param=None error_type=invalid_request_error message='OpenAI API error received' stream_error=False
+# Error occurred: Incorrect API key provided: sk-proj-*********************************************************************************************************************************************************. You can find your API key at https://platform.openai.com/account/api-keys.
 
+openai.api_key = ''
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def chatbot_response(request):
+    try:
+        user_message = request.data.get('message')
+        if not user_message:
+            return Response({'error': 'Message is required'}, status=400)
 
-
+        system_prompt = """
+        당신은 금융 상품 추천 전문가입니다. 
+        예금과 적금 상품에 대한 조언을 제공하고, 
+        사용자의 재무 상황에 맞는 최적의 금융 상품을 추천해주세요.
+        """
+        
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        
+        chatbot_reply = response.choices[0].message.content
+        return Response({'reply': chatbot_reply})
+        
+    except Exception as e:
+        print("Error occurred:", str(e))
+        return Response({'error': str(e)}, status=500)
