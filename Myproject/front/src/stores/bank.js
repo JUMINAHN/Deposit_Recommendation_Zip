@@ -11,10 +11,6 @@ export const useBankStore = defineStore('bank', () => {
   //비교를 해야하는데? => option과 연동
   const userProduct = ref([]) //user가 담을 product => save
 
-
-
-
-
   const getDepositData = async function () {
     //응답 자체를 받아오고 활용하던지 해야할 것 같음
     try {
@@ -121,7 +117,7 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-
+  //예적금 상품 검색
   const findDepositDetail = function (paramsBank, paramsProudct) {
 
     console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
@@ -146,54 +142,37 @@ export const useBankStore = defineStore('bank', () => {
     return resultData //참일 때 반환되어야하거든?
   }
 
-  //user가 담을 product
-  //여기서 cart버튼을 눌렀을떄 받아와서 담을 것
-  //일단 => 이거 ref 자체로 가져옴
-  const userSaveProducts = function(bankName, productName) { //이거 실행
-    //이거에 대한 parameter를 user에 보내면
-    //user명과 일치한 경우 => db에 담는다.
-    //save관련 url이 필요한듯
+  // //유저 상품 감기
+  // if (response.data.success) 일떄 처리
 
-    // try {
-    //   const response = await axios(){ //이거 //res & err
-    //     method : 'post',
-    //     url : '', //user Save관련 url
-    //     data : {
-    //       bankName, //은행명
-    //       productName //은행상품명
-    //     }
-    // } 
-    //response ?
+  const userSaveProducts = async function(bankName, productName) { //이거 실행
+    try {
 
-    //ref 객체라서 value로 접근
+      
     userProduct.value.push({ //userProduct에 담는다.
       'bankName' : bankName,
       'productName' : productName
     })
-    //그냥 담으면 저장 성공 message 
     alert('장바구니에 상품을 담았습니다!')
     console.log(userProduct, '담긴 내부 배열')
-    // } catch (error) {
-    //   console.error('에러 발생 :', error)
-    //  }
-  }
+  } catch (error) {
+    console.log(error)
+    alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+  } 
+}
 
   //그럼 장바구니에서 삭제 => 동일하게 접근하면 안됨
   const userDeleteProducts = async function(bankName, productName) { //이거 실행
-    //동일하게 user에게 접근함 
-    // try {
-    //   const response = await axios(){ //이거 //res & err
-    //     method : 'post',
-    //     url : '', //user Save관련 url
+    //동일하게 user에게 접근
+    try {
+    //   const response = await axios({ //이거 //res & err
+    //     method : 'delete',
+    //     url : 'http://127.0.0.1:8000/user/delete-product', //user Save관련 url
     //     data : {
     //       bankName, //은행명
     //       productName //은행상품명
     //     }
-    // } 
-    //response ?
-
-
-    //findIndex는 반환함 => 같은 값 자체를 찾음
+    // }) 
     const index = userProduct.value.findIndex((item) => {
       return (item.bankName === bankName && item.productName === productName) 
     })
@@ -205,14 +184,16 @@ export const useBankStore = defineStore('bank', () => {
       console.log('상품 보유 목록', userProduct)
     } 
   }
+    catch (error) {
+      console.log(error)
+      alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+    }
+  }
+
 
   //장바구니에 상품이 있는지 확인
   const userGetProduct = function(bankName, productName) {
-    //user가 상품이 있는지 확인 => //상품 유무 확인
-    //있는지만 확인
-    //value에 접근
     console.log('getProudct 내부')
-    //some 반환값이 없음
     const result = userProduct.value.some((item) => {
       if(item.bankName === bankName && item.productName === productName) {
         console.log('일치값 발견')
