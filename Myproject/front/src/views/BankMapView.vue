@@ -1,4 +1,3 @@
-
 <template>
   <div class="main-container">
     <!-- 왼쪽 검색 패널 -->
