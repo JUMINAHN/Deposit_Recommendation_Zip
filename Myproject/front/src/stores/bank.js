@@ -351,63 +351,59 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-  //유저 데이터 정보 업데이트 => 유저 정보 가져오기 => 여러 유저 정보중에 token 비교? 
-  //유저 아이디? => 유저 아이디 
-  //유저 정보 받아와야 함 => 그래서 profile 페이지에서 onMounted 되어야 함
-  //즉 userPage url 에 get해서 받아야 함 => userList중 
-  //token으로? => 일단 
+
   const getUserInfo = async function() {
     try { //뭐를 보내서 user 정보를 받아오지? 일치 여부 판단해야 함 
-    //   const response = await axios({
-    //     method : 'get',
-    //     url : 'http://127.0.0.1:8000/user/', //이게 특정 user인지 어떻게 알지?
-    //     headers : {
-    //       Authorization: `Token ${token.value}`
-    //     }
-    //   }) //일단
+      const response = await axios({
+        method : 'get',
+        url : 'http://127.0.0.1:8000/app/accounts/profile/', //이게 특정 user인지 어떻게 알지?
+        headers : { //username
+          Authorization: `Token ${token.value}`
+        }
+      }) //일단
       //response로 유저 정보 받아옴
-      // userInfo.value = response.data //user관련 데이터를 넣고
+      userInfo.value = response.data //user관련 데이터를 넣고
 
-    const userName = ref('test1')
-    const userEmail = ref('example@example.com')
-    const nickName = ref('test1')
-    const age = ref(30)
-    const currentAssets = ref('1,333,333')
-    const annualIncome = ref('22,432')
-    const response = ref({
-      'useremail' : userEmail.value,
-      'username' : userName.value,
-      'nickname' : nickName.value, 
-      'age' : age.value,
-      'currentassets' : currentAssets.value, 
-      'annualincome' : annualIncome.value,  
-    })
+    // const userName = ref('test1')
+    // const userEmail = ref('example@example.com')
+    // const nickName = ref('test1')
+    // const age = ref(30)
+    // const currentAssets = ref('1,333,333')
+    // const annualIncome = ref('22,432')
+    // const response = ref({
+    //   'useremail' : userEmail.value, 
+    //   'username' : userName.value, 
+    //   'nickname' : nickName.value,  
+    //   'age' : age.value,
+    //   'currentassets' : currentAssets.value, 
+    //   'annualincome' : annualIncome.value,  
+    // })
     userInfo.value = response.value
-    //loadUserProduct()
-    //const nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
+    loadUserProduct()
+    nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
 
     //더미
-    const products = ref([
-      {
-        id: 1,
-        name: '마이드림적금',
-        interestRate: 3.5,
-        maxInterestRate: 4.5,
-      },
-      {
-        id: 2,
-        name: '청년희망적금',
-        interestRate: 4.2,
-        maxInterestRate: 5.2,
-      },
-      {
-        id: 3,
-        name: '디지털예금',
-        interestRate: 3.8,
-        maxInterestRate: 4.8,
-      }
-    ])
-    nowUserProduct.value = products.value
+    // const products = ref([
+    //   {
+    //     id: 1,
+    //     name: '마이드림적금',
+    //     interestRate: 3.5,
+    //     maxInterestRate: 4.5,
+    //   },
+    //   {
+    //     id: 2,
+    //     name: '청년희망적금',
+    //     interestRate: 4.2,
+    //     maxInterestRate: 5.2,
+    //   },
+    //   {
+    //     id: 3,
+    //     name: '디지털예금',
+    //     interestRate: 3.8,
+    //     maxInterestRate: 4.8,
+    //   }
+    // ])
+    // nowUserProduct.value = products.value
 
 
     } catch(error) {
