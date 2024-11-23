@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+//컴포넌트 라이프 사이클 => pinia XX
+
 
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //token은 null
@@ -141,6 +143,38 @@ export const useBankStore = defineStore('bank', () => {
     })
     return resultData //참일 때 반환되어야하거든?
   }
+
+  //실제 유저 정보를 서버에서 받아오기
+  //유저의 정보가 어디에 들어있는가? == token에 
+  //프로필 페이지에서 진행
+  const loadUserProduct = async function() { //이 자체
+    try {
+      const response = await axios({
+        method : 'get',
+        url : 'http://127.0.0.1:8000/user/',
+        headers : {
+          Authorization: `Token ${token.value}`
+        }
+      })
+      // const bankName = response.data.bankName
+      // const productName = response.data.productName
+      // userProduct.value = { 
+      //   'bankName' : bankName,
+      //   'productName' : productName 
+      // }
+      
+      //여러 데이터 반환
+      userProduct.value = response.data.map((item) => ({ //배열형식으로 담기
+        'bankName' : item.bankName,
+        'productName' : item.productName
+      })) //map => 객체 자체로 반환할 것이기 떄문에
+      console.log('사용자의 상품 로드 완료', userProduct.value)
+    } catch (error) {
+      console.log(error, 'error메세지')
+    }
+  }
+
+
 
   // //유저 상품 감기
   // if (response.data.success) 일떄 처리
@@ -340,7 +374,7 @@ export const useBankStore = defineStore('bank', () => {
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userSaveProducts, userDeleteProducts, userProduct,
-    userGetProduct
+    userGetProduct, loadUserProduct
   
   }
 }, { persist: true }) 
