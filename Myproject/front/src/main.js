@@ -11,6 +11,8 @@ import { createApp } from 'vue'
 // npm 터미널 설치: npm install bootstrap@5.3.0-alpha1
 // alert
 // npm install sweetalert2
+//npm install chart.js
+
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 

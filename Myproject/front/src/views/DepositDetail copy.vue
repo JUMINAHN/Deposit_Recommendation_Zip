@@ -1,16 +1,5 @@
 <template>
   <div class="detailPage">
-
-    <div class="back-button-container">
-      <v-btn
-        class="back-button"
-        elevation="2"
-        @click="goBack"
-      >
-        <v-icon left>mdi-arrow-left</v-icon>
-        목록으로 돌아가기
-      </v-btn>
-    </div>
     <v-container>
       <v-row>
         <!-- 왼쪽 이미지 섹션 -->
@@ -27,9 +16,13 @@
         <v-col cols="7">
           <div class="detail-content">
             <h3 class="bank-title">{{ bankName }}</h3>
+            
             <div class="product-name">{{ productName }}</div>
+            
             <v-divider class="divider"></v-divider>
+            
             <div class="info-section">
+
               <div class="info-item">
                 <div class="info-label">상세 정보</div>
                 <div class="info-content">
@@ -38,7 +31,7 @@
                   개월 수 : {{ month }} 개월
                 </div>
               </div>
-
+              
               <div class="info-item">
                 <div class="info-label">가입 방법</div>
                 <div class="info-content">
@@ -72,92 +65,88 @@
 <script setup>
 import recommend from '@/assets/images/detailbank.jpg'
 import { useBankStore } from '@/stores/bank'
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
 
-// 기존 const 선언부 아래에 추가
-const router = useRouter()
-
-// 뒤로가기 함수 추가
-const goBack = () => {
-  router.go(-1)
-}
 const route = useRoute()
-const store = useBankStore()
 const bankName = ref('')
 const productName = ref('')
+const store = useBankStore()
 const detailInfo = ref('')
 const joinWay = ref('')
 const special = ref('')
 const maxRate = ref('')
 const maxRate2 = ref('')
 const month = ref('')
-const productResult = ref(false)
 
-
+// onMounted 수정
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
     productName.value = route.params.productName
-    console.log('Bank Name:', bankName.value)
-    console.log('Product Name:', productName.value)
     
-
+    // 순차적으로 처리
+    await store.fetchUserInfo()
     await store.getOptionDeposit()
+    await checkProductStatus()
+    
     const resultData = store.findDepositDetail(bankName.value, productName.value)
-
-    special.value = resultData[0].special || '관련 데이터가 없습니다.'
-    joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
-    maxRate.value = resultData[0].maxRate
-    maxRate2.value = resultData[0].maxRate2 
-    month.value = resultData[0].month
-
-    await checkProductInPreferences()
+    if (resultData && resultData[0]) {
+      special.value = resultData[0].special || '관련 데이터가 없습니다.'
+      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
+      maxRate.value = resultData[0].maxRate
+      maxRate2.value = resultData[0].maxRate2 
+      month.value = resultData[0].month
+    }
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
 })
 
-const checkProductInPreferences = async () => {
-  const preferences = await store.getPreferences()
-  productResult.value = preferences.some(
-    pref => pref.bankname === bankName.value && pref.products === productName.value
-  )
-}
-
-// const productResult = computed(() => {
-  // return store.userGetProduct(bankName.value, productName.value)
-// }) 
-//자체 값
-
-
-const toggleProduct = async () => {
+// 상품 상태 확인 함수
+const checkProductStatus = async () => {
   try {
-    // 1. userInfo가 없으면 먼저 로드
-    if (!store.userInfo) {
+    if (!store.userInfo?.username) {
       await store.fetchUserInfo()
     }
-
-    // 2. 실제 사용자 정보 확인
-    if (!store.userInfo.username) {
-      throw new Error('사용자 정보를 찾을 수 없습니다')
-    }
-
-    let success
-    if (productResult.value) {
-      success = await store.removeFromPreference(bankName.value, productName.value)
-    } else {
-      success = await store.addToPreference(bankName.value, productName.value)
-    }
-
-    if (success) {
-      productResult.value = !productResult.value
-      await checkProductInPreferences() // loadPreferences 대신 checkProductInPreferences 호출
+    const preferences = await store.getPreferences()
+    if (preferences && Array.isArray(preferences)) {
+      const isProductInPreferences = preferences.some(
+        pref => 
+          pref.bankname?.trim() === bankName.value?.trim() && 
+          pref.products?.trim() === productName.value?.trim()
+      )
+      if (productResult.value !== isProductInPreferences) {
+        productResult.value = isProductInPreferences
+      }
     }
   } catch (error) {
+    console.error('상품 상태 확인 중 오류 발생:', error)
+    productResult.value = false
+  }
+}
+
+const productResult = ref(false)
+// toggleProduct 함수 개선
+const toggleProduct = async () => {
+  try {
+    if (productResult.value) {
+      await store.removeFromPreference(bankName.value, productName.value)
+      productResult.value = false  // 즉시 UI 업데이트
+    } else {
+      await store.addToPreference(bankName.value, productName.value)
+      productResult.value = true   // 즉시 UI 업데이트
+    }
+    
+    // 서버와 상태 동기화
+    setTimeout(async () => {
+      await checkProductStatus()
+    }, 500)
+    
+  } catch (error) {
     console.error('상품 토글 중 오류 발생:', error)
-    alert('상품 처리 중 오류가 발생했습니다.')
+    // 에러 발생 시 상태 복원
+    await checkProductStatus()
   }
 }
 </script>
@@ -172,7 +161,6 @@ const toggleProduct = async () => {
   margin-bottom: 40px;
   margin-left: auto;
   margin-right: auto;
-
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 15px;
@@ -255,24 +243,4 @@ const toggleProduct = async () => {
   background-color: #2980b9 !important;
   transform: translateY(-2px);
 }
-
-.back-button-container {
-  margin-bottom: 20px;
-  padding: 0 20px;
-}
-
-.back-button {
-  background-color: #f8f9fa !important;
-  color: #2c3e50 !important;
-  font-size: 14px !important;
-  text-transform: none !important;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: #e9ecef !important;
-  transform: translateX(-5px);
-}
-
 </style>

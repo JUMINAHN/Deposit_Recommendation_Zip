@@ -3,14 +3,16 @@ from django.conf import settings
 
 #ERD 내용을 기반으로 모델 생성
 
-class Articles(models.Model) :
-    #유저 아이디 추후 추가할 예정 => user_id
-    # 정우수정부분
+class Articles(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.TextField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)    
     updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)
+    
+    def number_of_likes(self):
+        return self.likes.count()
 
 
 class Comments(models.Model):

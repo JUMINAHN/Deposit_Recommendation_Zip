@@ -2,14 +2,24 @@
 from .models import Articles, Comments
 from rest_framework import serializers
 
-
-class ArticleSerializer(serializers.ModelSerializer): #article serializer
+class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Articles
-        fields = '__all__'
-        # 정우수정부분
-        read_only_fields = ('user',)
+        fields = ['id', 'user', 'title', 'content', 'created_at', 'updated_at', 'likes_count', 'is_liked']
+        read_only_fields = ('user', 'likes')
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+    
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
 
 class CommentSerializer(serializers.ModelSerializer): #comment serializer
     user = serializers.StringRelatedField(read_only=True)

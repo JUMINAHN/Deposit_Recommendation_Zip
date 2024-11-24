@@ -1,44 +1,44 @@
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
-//컴포넌트 라이프 사이클 => pinia XX
-
 
 export const useBankStore = defineStore('bank', () => {
-  const token = ref(null) //token은 null
-  const depositData = ref([])
-  const detailDepositData = ref([]) //상세목록에 있는 값 여기에 값을 담고
-  //비교를 해야하는데? => option과 연동
-  const userProduct = ref([]) //user가 담을 product => save
+  const token = ref(null) //회원정보
+  const loginUserName = ref('') //token과 함께 저장해야 함
+  const depositData = ref([]) //예금 정보 받아오기
+  const detailDepositData = ref([]) //예금 상세 정보 받아오기
+  const userInfo = ref([]) //유저 정보
+  const userProduct = ref([]) //user가 담을 product => save 
+  const router = useRouter()
+  const nowUserProduct = ref([]) //지금 유저가 선택한 배열 리스트
+  //사실 userProduct랑 동일함
 
+
+  //서버에 예적금 API 데이터 요청
   const getDepositData = async function () {
-    //응답 자체를 받아오고 활용하던지 해야할 것 같음
     try {
       const response = await axios({
         method: 'get',
         url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
       })
       const arrayData = response.data
-
+      //예적금 데이터 저장
       depositData.value = arrayData.map((item, index) => {
         const bankname = item.kor_co_nm
         const products = item.fin_prdt_nm
         const options = item.options
 
-        // 초기값을 '-'로 설정
         let six = '-'
         let twelve = '-'
         let twenty_four = '-'
         let thirty_six = '-'
 
-        // options가 존재하면 처리
         if (options && Array.isArray(options)) {
           options.forEach(option => {
             const rate = option.intr_rate2
 
-            // save_trm에 따라 해당 기간의 이자율 설정
             switch (option.save_trm) {
               case 6:
                 six = rate
@@ -55,12 +55,7 @@ export const useBankStore = defineStore('bank', () => {
             }
           })
         }
-        // // 세전이자 계산 (12개월 기준)
-        // const preTaxInterest = twelve !== '-' ? Math.floor(twelve * 10000) : 0
-        // // 세후이자 계산 (세금 15.4% 제외)
-        // const postTaxInterest = Math.floor(preTaxInterest * 0.846)
-
-        //추후 계산값 반환
+        
         return {
           '금융기관': bankname,
           '상품': products,
@@ -79,176 +74,105 @@ export const useBankStore = defineStore('bank', () => {
       throw error
     }
   }
-  //일치하는 애들로 분류해!
-  //그리고 받아온 내용과 필터링 지금 
-  //우리은행/WON플러스예금
-  //즉 bankname과 products => 데이터 두개 가져오는 것이지 router로
-  //그래서 그게맞다면 반환하는 것
+
+  //서버에 예적금 상세 페이지 정보 요청
+  //단순 금리 정보 외 => 가입 방법 / 우대 사항
   const getOptionDeposit = async function () {
-    //응답 자체를 받아오고 활용하던지 해야할 것 같음
     try {
       const response = await axios({
         method: 'get',
         url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
       })
       const arrayData = response.data
-      console.log('res.daat!!!!!!!!!!a', arrayData)
+      //상세 데이터 저장
       detailDepositData.value = arrayData.map((item, index) => {
         const bankname = item.kor_co_nm
         const products = item.fin_prdt_nm
-        // const detailInfo = item.etc_note
         const joinWay = item.join_way
         const special = item.spcl_cnd
-        //정보 더 뽑아오기 => 상세정보 가입정보 우대이율
-        // 초기값을 '-'로 설정
+        const options = item.options
+        let six = 0
+        let twelve = 0
+        let twenty_four = 0
+        let thirty_six = 0
+        options.forEach(option => { //뽑은 options에서 우대 금리
+          const rate = option.intr_rate 
+          switch (option.save_trm) {
+            case 6:
+              six = rate
+              break
+            case 12:
+              twelve = rate
+              break
+            case 24:
+              twenty_four = rate
+              break
+            case 36:
+              thirty_six = rate
+              break
+          }
+        })        
+        let month = '' 
+        let maxRate2 = ''
+        const maxRate = Math.max(six, twelve, twenty_four, thirty_six)
+        const resultOption = options.filter((option)=> {
+          return (option.intr_rate === maxRate) 
+        })
+        month = resultOption[0].save_trm
+        maxRate2 = resultOption[0].intr_rate2
 
         return {
           'bankname': bankname,
           'products': products,
-          // 'detailInfo' : detailInfo,
           'joinWay': joinWay,
-          'special': special
+          'special': special,
+          //추가
+          'month' : month, //개월 수
+          'maxRate' : maxRate,  //가장 높은 금리1
+          'maxRate2' : maxRate2 //금리 1 기준 우대 금리1
         }
       })
-
-      return detailDepositData //여기에 데이터 저장하고
-
+      return detailDepositData //저장 값 반환
     } catch (error) {
       console.error('데이터 변환 중 오류 발생:', error)
       throw error
     }
   }
 
-  //예적금 상품 검색
+  //예적금 상세 정보 보유 여부 검색
   const findDepositDetail = function (paramsBank, paramsProudct) {
-
-    console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
-    //여기 보면 내가 원하는게 맞게 들어간 것을 볼 수 있음
-    console.log(detailDepositData)
-
     const resultData = detailDepositData.value.filter((item) => {
-      console.log(item, '일반 객체 예상') //해당 예상 값은 맞음
-
-
-      console.log(item.bankname) //다시 영여로 변수명 수정했음!!! : 이게 맞걸랑
-      console.log(paramsBank, '파라미터로 받은bank값?')
-      //일치하는애들 보임 그럼 이거 filter로 반환되는 것 같음
-
       if (item.bankname === paramsBank && item.products === paramsProudct) {
-        //일치해야 반환
-        console.log('--------------------')
-        // console.log('bankname', '일치하냐?', bankname)
-        return item //item 자체를 반환
+        return item 
       }
     })
-    return resultData //참일 때 반환되어야하거든?
+    return resultData //상세 정보 보유 여부 true/false반환
   }
 
-  //실제 유저 정보를 서버에서 받아오기
-  //유저의 정보가 어디에 들어있는가? == token에 
-  //프로필 페이지에서 진행
-  const loadUserProduct = async function() { //이 자체
-    try {
-      const response = await axios({
-        method : 'get',
-        url : 'http://127.0.0.1:8000/user/',
-        headers : {
-          Authorization: `Token ${token.value}`
+  const userGetProduct = async function(bankName, productName) {
+    console.log('getProudct 내부 들어와졌고 뱔류갑 업떻게 생겼는지 확인')    
+    console.log(userProduct.value, 'value?') 
+    const result = ref(true) 
+    if (Array.isArray(userProduct.value)) {
+      result.value = userProduct.value.some((item) => {
+        if (item.bankName === bankName && item.productName === productName) {
+          console.log('일치값 발견')
+          return result.value = true
+        } else {
+          console.log('일치값이 없음')
+          return result.value = false
         }
       })
-      // const bankName = response.data.bankName
-      // const productName = response.data.productName
-      // userProduct.value = { 
-      //   'bankName' : bankName,
-      //   'productName' : productName 
-      // }
-      
-      //여러 데이터 반환
-      userProduct.value = response.data.map((item) => ({ //배열형식으로 담기
-        'bankName' : item.bankName,
-        'productName' : item.productName
-      })) //map => 객체 자체로 반환할 것이기 떄문에
-      console.log('사용자의 상품 로드 완료', userProduct.value)
-    } catch (error) {
-      console.log(error, 'error메세지')
-    }
-  }
-
-
-
-  // //유저 상품 감기
-  // if (response.data.success) 일떄 처리
-
-  const userSaveProducts = async function(bankName, productName) { //이거 실행
-    try {
-    //   const response = await axios({ //이거 //res & err
-    //     method : 'post',
-    //     url : 'http://127.0.0.1:8000/user/save-product', //user Save관련 url
-    //     data : {
-    //       bankName, //은행명
-    //       productName //은행상품명
-    //     }
-    // }) 
-      
-    userProduct.value.push({ //userProduct에 담는다.
-      'bankName' : bankName,
-      'productName' : productName
-    })
-    alert('장바구니에 상품을 담았습니다!')
-    console.log(userProduct, '담긴 내부 배열')
-  } catch (error) {
-    console.log(error)
-    alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
-  } 
-}
-
-  //그럼 장바구니에서 삭제 => 동일하게 접근하면 안됨
-  const userDeleteProducts = async function(bankName, productName) { //이거 실행
-    //동일하게 user에게 접근
-    try {
-    //   const response = await axios({ //이거 //res & err
-    //     method : 'delete',
-    //     url : 'http://127.0.0.1:8000/user/delete-product', //user Save관련 url
-    //     data : {
-    //       bankName, //은행명
-    //       productName //은행상품명
-    //     }
-    // }) 
-    const index = userProduct.value.findIndex((item) => {
-      return (item.bankName === bankName && item.productName === productName) 
-    })
-    if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
-      alert('삭제할 수 없는 상품입니다.')
     } else {
-      userProduct.value.splice(index, 1) //상품 두개 묶음
-      alert('관심 상품에서 제거되었습니다.')
-      console.log('상품 보유 목록', userProduct)
-    } 
-  }
-    catch (error) {
-      console.log(error)
-      alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
-    }
-  }
-
-
-  //장바구니에 상품이 있는지 확인
-  const userGetProduct = function(bankName, productName) {
-    console.log('getProudct 내부')
-    const result = userProduct.value.some((item) => {
-      if(item.bankName === bankName && item.productName === productName) {
-        console.log('일치값 발견')
-        return true
+      if(userProduct.value.bankName === bankName && userProduct.value.productName === productName) {
+        return result.value = true
       } else {
-        console.log('일치값이 없음')
-        return false
+        return result.value = false
       }
-    })
+    }
+
     return result //some 반환값
   }
-
-
-
 
   let id = 1
   const findCondition = ref([
@@ -256,20 +180,19 @@ export const useBankStore = defineStore('bank', () => {
     { id: id++, title: '예치기간', content: ['6개월', '12개월', '24개월', '36개월'], selectedValue: '' },
   ])
 
-  //지피티 도움
+  //사용자에게 input 받을 값 
   const getUserInput = async function (selectedValues) {
     const [amount, period] = selectedValues
     const numericAmount = parseFloat(amount)
 
-    //원화 생성..!! : 지피티
+    //원화 데이터 생성
     const formatter = new Intl.NumberFormat('ko-KR', {
       style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    });
+    })
 
-
-    // depositData.value를 직접 수정
+    // 결과값 할당
     depositData.value = depositData.value.map((deposit) => {
       const rate = parseFloat(deposit[period])
       const result = !isNaN(rate) && !isNaN(numericAmount)
@@ -278,19 +201,14 @@ export const useBankStore = defineStore('bank', () => {
       return {
         ...deposit,
         '예상금액': result === 0 ? '-' : `${formatter.format(Math.round(result))}원`,
-        // 정렬을 위한 숫자 값 추가
         '정렬용_예상금액': result
       }
     })
-    // 내림차순 정렬 추가 => sort
     depositData.value.sort((a, b) => b['정렬용_예상금액'] - a['정렬용_예상금액'])
-
-
-    console.log('Updated depositData:', depositData.value)
     return depositData.value
   }
 
-  // 로그아웃 함수 추가
+  // 로그아웃
   const logoutUser = async function () {
     try {
       const response = await axios({
@@ -310,13 +228,15 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-
   //로그인 관련 데이터 확보 : 로그인 데이터 확보
   const findUser = async function (userLoginData) {
     const { username, email, password } = userLoginData
     console.log(username, email, password, ' 없어?')
+
+    loginUserName.value = typeof username === 'object' && username.value 
+    ? username.value 
+    : username; //    loginUserName.value = username.value //값이 제대로 안들어가지는데
     try {
-      // FormData 객체 생성
       const formData = new FormData()
       formData.append('username', username.value)
       formData.append('email', email.value)
@@ -328,9 +248,10 @@ export const useBankStore = defineStore('bank', () => {
 
       })
       console.log(response, ': 응답 데이터 확인')
-      token.value = response.data.key  // response.data.key로 수정
-      //local에 저장 => local 저장
-      localStorage.setItem('token', response.data.key)  // localStorage에 저장 추가
+      token.value = response.data.key
+      localStorage.setItem('token', token.value) 
+      await fetchUserInfo() //사용자 정보 가져오기 함수
+      // localStorage에 저장 추가
       console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
       return true
     } catch {
@@ -339,42 +260,174 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-  const router = useRouter()
   // 회원 가입 데이터
   // 토큰 생성이 필요함
   const signUpComplete = async function (userData) {
-    const { name, email, password1, password2 } = userData
     try {
-      const response = axios({
+      const response = await axios({
         method: 'post',
-        url: 'http://127.0.0.1:8000/accounts/signup/', //회원 가입 URL 추가 예정
-        // 받아올 애들
-        data: { //params는 get으로 받을때 사용
-          // nickname,
-          username: name.value,
-          email: email.value,
-          password1: password1.value,
-          password2: password2.value,
+        url: 'http://127.0.0.1:8000/accounts/signup/',
+        data: {
+          username: userData.name.value,
+          email: userData.email.value,
+          password1: userData.password1.value,
+          password2: userData.password2.value,
         }
       })
-      console.log(response, ': 응답 데이터 확인')
-      console.log('회원가입이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
-      router.push({ name: 'login' }) //로그인 페이지 이동
-      return true //회원가입 로직 확인 완료
-    } catch {
-      console.log('에러가 발생했습니다.')
+      
+      if (response.data) {
+        router.push({ name: 'login' })
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('회원가입 실패:', error)
       return false
     }
   }
 
+    const addToPreference = async (bankName, productName) => {
+      try {
+        // 1. userInfo 확인 및 로드
+        if (!userInfo.value || !userInfo.value.username) {
+          await fetchUserInfo()
+          if (!userInfo.value || !userInfo.value.username) {
+            throw new Error('사용자 정보를 불러올 수 없습니다')
+          }
+        }
+    
+        
+        // 2. URL 인코딩
+        const encodedBankName = encodeURIComponent(bankName)
+        const encodedProductName = encodeURIComponent(productName)
+        
+        // 3. API 호출
+        const response = await axios.post(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`,
+          {},
+          {
+            headers: { 
+              Authorization: `Token ${token.value}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+    
+        // 4. 성공 처리
+        alert(response.data.message || '장바구니에 상품을 담았습니다!')
+        return true
+      } catch (error) {
+        console.error('장바구니 추가 실패:', error)
+        alert(error.response?.data?.message || '장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+        return false
+      }
+    }
+
+    const removeFromPreference = async (bankName, productName) => {
+      try {
+        if (!userInfo.value || !userInfo.value.username) {
+          await fetchUserInfo()
+        }
+        
+        const encodedBankName = encodeURIComponent(bankName)
+        const encodedProductName = encodeURIComponent(productName)
+        
+        await axios.delete(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${encodedBankName}/${encodedProductName}/`,
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
+        alert('관심 상품에서 제거되었습니다.')
+        return true
+      } catch (error) {
+        console.error('장바구니 제거 실패:', error)
+        alert(error.response?.data?.message || '장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+        return false
+      }
+    }
+
+    const getPreferences = async () => {
+      try {
+        if (!userInfo.value || !userInfo.value.username) {
+          await fetchUserInfo()
+        }
+        
+        // 예금 상품 데이터 먼저 가져오기
+        const depositResponse = await axios.get(
+          'http://127.0.0.1:8000/api/v1/deposit-products/',
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
+        
+        // 선호 상품 목록 가져오기
+        const prefResponse = await axios.get(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/`,
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
+        
+        // 두 데이터 매핑
+        return prefResponse.data.map(pref => {
+          const depositProduct = depositResponse.data.find(
+            d => d.kor_co_nm === pref.bankname && d.fin_prdt_nm === pref.products
+          )
+          
+          return {
+            bankname: pref.bankname,
+            products: pref.products,
+            maxRate: depositProduct?.options[0]?.intr_rate || 0,
+            maxRate2: depositProduct?.options[0]?.intr_rate2 || 0
+          }
+        })
+      } catch (error) {
+        console.error('선호도 목록 조회 실패:', error)
+        return []
+      }
+    }
+
+    const updateUserProfile = async (fieldName, value) => {
+      try {
+        const response = await axios.put(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/`,
+          { [fieldName]: value },
+          {
+            headers: { 
+              Authorization: `Token ${token.value}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+        // 성공 시 userInfo 업데이트
+        userInfo.value = response.data
+        return true
+      } catch (error) {
+        console.error('프로필 수정 실패:', error)
+        throw error
+      }
+    }
+
+  
+  const fetchUserInfo = async () => { //사용자 정보 가져오기
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/app/accounts/profile/current/', {
+        headers: { Authorization: `Token ${token.value}` }
+      })
+      userInfo.value = response.data
+    } catch (error) {
+      console.error('사용자 정보 가져오기 실패:', error)
+    }
+  } 
 
 
   return {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
-    userSaveProducts, userDeleteProducts, userProduct,
-    userGetProduct, loadUserProduct
-  
+    userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
+    , addToPreference, removeFromPreference, updateUserProfile
+
   }
 }, { persist: true }) 

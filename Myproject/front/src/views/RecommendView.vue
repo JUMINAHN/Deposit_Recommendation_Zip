@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="main-content">
     <!-- 상단 예금상품 찾기 섹션 -->
     <v-card class="mb-6">
       <v-card-text>
@@ -203,53 +203,6 @@ const handleRowClick = function(item) {
   }
 }
 
-//   //상세 페이지 => 내용 가져오기 => router로
-//   //deposit데이터로 호출을 한다 How? 
-//   import { useBankStore } from '@/stores/bank'
-//   import { useRoute } from "vue-router"
-//   import { ref, onMounted } from 'vue'
-
-//   const route = useRoute()
-//   const bankName = ref('')
-//   const productName = ref('')
-//   const store = useBankStore()
-//   const detailInfo = ref('')
-//   const joinWay = ref('')
-//   const special = ref('')
-
-//   //그리고 거기 일치하는 데이터 다시 받아와야함
-//   //store에 있는 내용들 담을 건데 => router로 
-//   onMounted(() => {
-//   // 라우트 파라미터 접근
-//   bankName.value = route.params.bankName //parameter로 router 받아옴
-//   productName.value = route.params.productName //productname로 router 받아옴
-//   console.log('Bank Name:', bankName.value)
-//   console.log('Product Name:', productName.value)
-//     store.getOptionDeposit() 
-
-//   const resultData = store.findDepositDetail(bankName.value, productName.value) //여기에 파라미터로 받아서 일치하는 값을 찾아서 전달
-//   // console.log(resultData[0].special)    
-//   if (resultData[0].special) {
-//     special.value = resultData[0].special
-//   } else {
-//     special.value = '관련 데이터가 없습니다.'
-//   }
-  
-//   if (resultData[0].joinWay) {
-//     joinWay.value = resultData[0].joinWay
-//   } else {
-//     joinWay.value ='관련 데이터가 없습니다.'
-//   }
-  
-//   if (resultData[0].detailInfo) {
-//     detailInfo.value = resultData[0].detailInfo
-//   } else {
-//     detailInfo.value = '관련 데이터가 없습니다.'
-//   }
-  
-
-
-// })
 
 
 
@@ -257,6 +210,10 @@ const handleRowClick = function(item) {
 </script>
 
 <style scoped>
+.main-content {
+  padding-top: 80px; /* 네비게이션 바 높이만큼 상단 패딩 추가 */
+}
+
 .v-img {
   max-width: 100%;
   height: auto;
