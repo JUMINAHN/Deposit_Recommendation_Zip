@@ -1,10 +1,11 @@
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //회원정보
+  const loginUserName = ref('') //token과 함께 저장해야 함
   const depositData = ref([]) //예금 정보 받아오기
   const detailDepositData = ref([]) //예금 상세 정보 받아오기
   const userInfo = ref([]) //유저 정보
@@ -81,7 +82,6 @@ export const useBankStore = defineStore('bank', () => {
         url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
       })
       const arrayData = response.data
-      
       //상세 데이터 저장
       detailDepositData.value = arrayData.map((item, index) => {
         const bankname = item.kor_co_nm
@@ -149,65 +149,52 @@ export const useBankStore = defineStore('bank', () => {
 
 
   //(추후 점검 필요)
-  //실제 유저가 가지고 있는 제품 데이터 정보 받아오기
-  //토큰이 아니라 유저 정보로 비교해야할수도..? ex)userid => 일단 유저정보를 받아오는 배열에서
-  //판단해야할수도 ..? => 일단 받아온 데이터의 정보를 보내서 보유한 값 확인?
   const loadUserProduct = async function() { 
     try {
+      console.log('loginUserName:', loginUserName.value); // 디버깅
       const response = await axios({
         method : 'get',
-        url : 'http://127.0.0.1:8000/user/',
+        url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/preference/`,
         headers : {
           Authorization: `Token ${token.value}`
         }
       })
-      //유저가 보유한 제품 페이지에 받아온 값 전달
-      userProduct.value = response.data.map((item) => ({ //배열형식으로 담기
-        'bankName' : item.bankName,
-        'productName' : item.productName
-      }))
+      console.log(response)
+      console.log(response.data)
+
+      userProduct.value = response.data
+      console.log(userProduct, '맞게 들어갔니?')
       console.log('사용자의 상품 로드 완료', userProduct.value)
     } catch (error) {
       console.log(error, 'error메세지')
+      userProduct.value = [] //에러시 빈 배열 초기화
     }
   }
 
-  //유저가 장바구니에 저장할 제품
-  const userSaveProducts = async function(bankName, productName) { //이거 실행
-    try {
-    //   const response = await axios({ //이거 //res & err
-    //     method : 'post',
-    //     url : 'http://127.0.0.1:8000/user/save-product', //user Save관련 url
-    //     data : {
-    //       bankName, //은행명
-    //       productName //은행상품명
-    //     }
-    // }) 
-      
-    userProduct.value.push({ //userProduct에 담는다.
-      'bankName' : bankName,
-      'productName' : productName
-    })
-    alert('장바구니에 상품을 담았습니다!')
-    console.log(userProduct, '담긴 내부 배열')
-  } catch (error) {
-    console.log(error)
-    alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
-  } 
-}
+  //일단 한번 담아볼까?
+
+ 
+
+
 
   //유저가 장바구니에 삭제할 데이터
   const userDeleteProducts = async function(bankName, productName) { //이거 실행
     //동일하게 user에게 접근
     try {
-    //   const response = await axios({ //이거 //res & err
-    //     method : 'delete',
-    //     url : 'http://127.0.0.1:8000/user/delete-product', //user Save관련 url
-    //     data : {
-    //       bankName, //은행명
-    //       productName //은행상품명
-    //     }
-    // }) 
+      const response = await axios({
+        method : 'delete',
+        url : '`http://127.0.0.1:8000/app/accounts/preference/save/${bankName}/${productName}', //user Save관련 url
+        headers: {
+          Authorization: `Token ${token.value}` //토큰 관련 정보
+        },
+        data : {
+          bankName, //은행명
+          productName //은행상품명
+        },
+      }) 
+      //response가 어떤식으로 받아오는지 확인 => 제품이 엇으니까 삭제가 안되겠지... 고로 현재 테스트 불가
+      console.log(response, 'res')
+      console.log(response.data, 'res.data')
     const index = userProduct.value.findIndex((item) => {
       return (item.bankName === bankName && item.productName === productName) 
     })
@@ -218,28 +205,39 @@ export const useBankStore = defineStore('bank', () => {
       alert('관심 상품에서 제거되었습니다.')
       console.log('상품 보유 목록', userProduct)
     } 
-  }
-    catch (error) {
+  } catch (error) {
+
       console.log(error)
       alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
     }
   }
 
 
-  //장바구니에 유저가 담은 상품이 있는지 확인
-  const userGetProduct = function(bankName, productName) {
-    console.log('getProudct 내부')
-    const result = userProduct.value.some((item) => {
-      if(item.bankName === bankName && item.productName === productName) {
-        console.log('일치값 발견')
-        return true
+  const userGetProduct = async function(bankName, productName) {
+    console.log('getProudct 내부 들어와졌고 뱔류갑 업떻게 생겼는지 확인')    
+    console.log(userProduct.value, 'value?') 
+    const result = ref(true) 
+    if (Array.isArray(userProduct.value)) {
+      result.value = userProduct.value.some((item) => {
+        if (item.bankName === bankName && item.productName === productName) {
+          console.log('일치값 발견')
+          return result.value = true
+        } else {
+          console.log('일치값이 없음')
+          return result.value = false
+        }
+      })
+    } else {
+      if(userProduct.value.bankName === bankName && userProduct.value.productName === productName) {
+        return result.value = true
       } else {
-        console.log('일치값이 없음')
-        return false
+        return result.value = false
       }
-    })
+    }
     return result //some 반환값
   }
+
+
 
 
   //사용자에게 input 받은 값을 기반으로 조건 필터링
@@ -259,7 +257,7 @@ export const useBankStore = defineStore('bank', () => {
       style: 'decimal',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    });
+    })
 
     // 결과값 할당
     depositData.value = depositData.value.map((deposit) => {
@@ -301,6 +299,10 @@ export const useBankStore = defineStore('bank', () => {
   const findUser = async function (userLoginData) {
     const { username, email, password } = userLoginData
     console.log(username, email, password, ' 없어?')
+
+    loginUserName.value = typeof username === 'object' && username.value 
+    ? username.value 
+    : username; //    loginUserName.value = username.value //값이 제대로 안들어가지는데
     try {
       const formData = new FormData()
       formData.append('username', username.value)
@@ -351,36 +353,59 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-
-  const getUserInfo = async function() {
-    try { //뭐를 보내서 user 정보를 받아오지? 일치 여부 판단해야 함 
+   //유저가 장바구니에 저장할 제품
+  //token을 안보내줌 => get ifno쪽으로 위치 옮김
+  const userSaveProducts = async function(bankName, productName) {
+    try {
+      if (!userInfo.value || !userInfo.value.username) {
+        await getUserInfo();
+      }
+      const username = userInfo.value.username;
       const response = await axios({
-        method : 'get',
-        url : 'http://127.0.0.1:8000/app/accounts/profile/', //이게 특정 user인지 어떻게 알지?
-        headers : { //username
+        method: 'post',
+        url: `http://127.0.0.1:8000/app/accounts/profile/${username}/preference/save/${bankName}/${productName}/`,
+        headers: {
           Authorization: `Token ${token.value}`
         }
-      }) //일단
-      //response로 유저 정보 받아옴
-      userInfo.value = response.data //user관련 데이터를 넣고
+      })
+      userProduct.value.push({
+        'bankName': bankName,
+        'productName': productName
+      })
+      alert('장바구니에 상품을 담았습니다!')
+    } catch (error) {
+      console.error("Error details:", error.response ? error.response.data : error.message);
+      alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
+    }
+  }
 
-    // const userName = ref('test1')
-    // const userEmail = ref('example@example.com')
-    // const nickName = ref('test1')
-    // const age = ref(30)
-    // const currentAssets = ref('1,333,333')
-    // const annualIncome = ref('22,432')
-    // const response = ref({
-    //   'useremail' : userEmail.value, 
-    //   'username' : userName.value, 
-    //   'nickname' : nickName.value,  
-    //   'age' : age.value,
-    //   'currentassets' : currentAssets.value, 
-    //   'annualincome' : annualIncome.value,  
-    // })
-    userInfo.value = response.value
-    loadUserProduct()
-    nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
+  //이름을 클릭했을떄 파라미터
+  //근데 로그인한 애들만 보내는거 아니잖아? 그냥 그 사람 정보 누르면 클릭 되어야 하는데 
+  //별도 생성? 일단 로그인한 애만 받아와본다면?
+  //내정보 받아오는데 401에러?
+  const getUserInfo = async function() {
+    try {
+      if (!loginUserName.value) {
+        console.error('loginUserName is not set');
+        return null;
+      }
+      const response = await axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/`,
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      userInfo.value = response.data;
+      return userInfo.value;
+    } catch(error) {
+      console.log(error, 'error 발생!');
+      throw error;
+    }
+  }//userInfo 정보 돌려줄 내용
+      //store에서 userInfo 자체를 받아오려고 했으나 비동기 문제로 지연 발생
+      //loadUserData가 있는데 굳이 nowUserProduct를 사용할 필요가 없을 듯? 데이터만 잘받아오면 문제 없음
+      //nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
 
     //더미
     // const products = ref([
@@ -406,10 +431,10 @@ export const useBankStore = defineStore('bank', () => {
     // nowUserProduct.value = products.value
 
 
-    } catch(error) {
-      console.log(error, 'error 발생!')
-    }
-  }
+  //   } catch(error) {
+  //     console.log(error, 'error 발생!')
+  //   }
+  // }
 
 
   return {

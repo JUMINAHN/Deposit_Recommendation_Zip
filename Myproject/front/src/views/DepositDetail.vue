@@ -78,7 +78,6 @@ const special = ref('')
 const maxRate = ref('')
 const maxRate2 = ref('')
 const month = ref('')
-
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
@@ -87,7 +86,6 @@ onMounted(async () => {
     console.log('Product Name:', productName.value)
     
     await store.getOptionDeposit()  // 비동기 호출 대기
-
     const resultData = store.findDepositDetail(bankName.value, productName.value)
 
     //해당 값 활용 여부
@@ -96,32 +94,43 @@ onMounted(async () => {
     } else {
       special.value = '관련 데이터가 없습니다.'
     }
-    
     if (resultData[0].joinWay) {
       joinWay.value = resultData[0].joinWay
     } else {
       joinWay.value ='관련 데이터가 없습니다.'
     }
-    
       maxRate.value = resultData[0].maxRate
       maxRate2.value = resultData[0].maxRate2 
       month.value = resultData[0].month
-
-
+      //computed => 비동기 처리 때문
+   //자체 값
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
-
 })
-
 console.log('maxRate2', maxRate2)
 console.log('month', month)
 
-
-
-const productResult = computed(() => {
+const productResult = ref(true)
+//이제 자체적으로 됨 => onmounted에서 실행은 안됨 QQQQqq 왜?
+const result = computed(() => {
   return store.userGetProduct(bankName.value, productName.value)
-}) //자체 값
+})
+console.log(result, 'return 값 받았나요?')
+console.log(result.value, 'return 값 받았나요?') //computed로
+//result가 promise니까 활용
+
+//promise로 받은 내용
+result.value
+.then((res) => {
+  console.log(res, 'res 데이터 지금 나우!')
+  console.log(res.value, 'res.val 데이터 지금 나우!')
+  productResult.value = res.value //해당 값
+})
+.catch((err) => {
+  console.log(err)
+})
+console.log(productResult) //참 거짓 여부
 
 const toggleProduct = async () => { //반응형으로 비동기 처리
   if (productResult.value) {

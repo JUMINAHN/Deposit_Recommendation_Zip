@@ -99,21 +99,25 @@ import { useBankStore } from '@/stores/bank';
 const store = useBankStore()
 const userName = ref('')
 const userEmail = ref('')
-const userNickName = ref('')
-const userAge = ref('')
-const userAsset = ref('')
-const userIncome = ref('')
-const products = ref([]) //가입상품 종류
+const userNickName = ref('임시12345') //임시로 부여 => 이부분들 다 사용자가 post로 보내서 수정
+const userAge = ref('25') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
+const userAsset = ref('1000') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
+const userIncome = ref('3000000') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
+const products = ref([]) //가입상품 종류 => 이부분들 다 사용자가 post로 보내서 수정
 
 onMounted(() => {
-  store.getUserInfo() //user info
-  userName.value = store.userInfo.username
-  userEmail.value = store.userInfo.useremail
-  userNickName.value = store.userInfo.nickname
-  userAge.value = store.userInfo.age
-  userAsset.value = store.userInfo.currentassets
-  userIncome.value = store.userInfo.annualincome
-  products.value = store.nowUserProduct
+  //회원 정보 받아오기
+  const userInfo = store.getUserInfo() 
+  userInfo
+  .then((res) => {
+    userName.value = res.username 
+    userEmail.value = res.email
+  })
+  .catch((err) => {
+    console.log('받아오는 과정에서 에러 발생', err)
+  })
+
+  //회원이 가진 상품 받아오기 => bank.js에 선언했는데 현재 지금 이곳에서 사용
 })
 
 
