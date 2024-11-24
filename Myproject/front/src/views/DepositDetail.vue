@@ -1,5 +1,16 @@
 <template>
   <div class="detailPage">
+    <div class="back-button-container">
+      <v-btn
+        class="back-button"
+        elevation="2"
+        @click="goBack"
+      >
+        <v-icon left>mdi-arrow-left</v-icon>
+        목록으로 돌아가기
+      </v-btn>
+    </div>
+
     <v-container>
       <v-row>
         <!-- 왼쪽 이미지 섹션 -->
@@ -65,10 +76,17 @@
 <script setup>
 import recommend from '@/assets/images/detailbank.jpg'
 import { useBankStore } from '@/stores/bank'
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 
+// 기존 const 선언부 아래에 추가
+const router = useRouter()
+
+// 뒤로가기 함수 추가
+const goBack = () => {
+  router.go(-1)
+}
 const route = useRoute()
 const store = useBankStore()
 const bankName = ref('')
@@ -231,5 +249,24 @@ const toggleProduct = async () => {
 .cart-button:hover {
   background-color: #2980b9 !important;
   transform: translateY(-2px);
+}
+
+.back-button-container {
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.back-button {
+  background-color: #f8f9fa !important;
+  color: #2c3e50 !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #e9ecef !important;
+  transform: translateX(-5px);
 }
 </style>
