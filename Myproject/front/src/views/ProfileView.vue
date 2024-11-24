@@ -16,45 +16,110 @@
         </div>
       </div>
       
-      <!-- 재무 정보 카드 -->
-      <div class="financial-info">
-        <div class="info-item">
-          <span class="label">이메일</span>
-          <div class="value-with-button">
-            <span class="value">{{ store.userInfo?.email }}</span>
-            <button class="edit-btn" @click="editField('email')">수정</button>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="label">닉네임</span>
-          <div class="value-with-button">
-            <span class="value">{{ store.userInfo?.nickname }}</span>
-            <button class="edit-btn" @click="editField('nickname')">수정</button>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="label">나이</span>
-          <div class="value-with-button">
-            <span class="value">{{ store.userInfo?.age }}세</span>
-            <button class="edit-btn" @click="editField('age')">수정</button>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="label">현재 자산</span>
-          <div class="value-with-button">
-            <span class="value">{{ store.userInfo?.asset }}원</span>
-            <button class="edit-btn" @click="editField('asset')">수정</button>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="label">연봉</span>
-          <div class="value-with-button">
-            <span class="value">{{ store.userInfo?.income }}원</span>
-            <button class="edit-btn" @click="editField('income')">수정</button>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- 이메일 -->
+<div class="info-item">
+  <span class="label">이메일</span>
+  <div class="value-with-button">
+    <template v-if="editingField === 'email'">
+      <input 
+        v-model="editValue"
+        class="edit-input"
+        :placeholder="store.userInfo?.email || '이메일을 입력하세요'"
+        type="email"
+      >
+      <button class="save-btn" @click="saveEdit('email')">저장</button>
+      <button class="cancel-btn" @click="cancelEdit">취소</button>
+    </template>
+    <template v-else>
+      <span class="value">{{ store.userInfo?.email }}</span>
+      <button class="edit-btn" @click="startEdit('email')">수정</button>
+    </template>
+  </div>
+</div>
+
+<!-- 닉네임 -->
+<div class="info-item">
+  <span class="label">닉네임</span>
+  <div class="value-with-button">
+    <template v-if="editingField === 'nickname'">
+      <input 
+        v-model="editValue"
+        class="edit-input"
+        :placeholder="store.userInfo?.nickname || '닉네임을 입력하세요'"
+      >
+      <button class="save-btn" @click="saveEdit('nickname')">저장</button>
+      <button class="cancel-btn" @click="cancelEdit">취소</button>
+    </template>
+    <template v-else>
+      <span class="value">{{ store.userInfo?.nickname }}</span>
+      <button class="edit-btn" @click="startEdit('nickname')">수정</button>
+    </template>
+  </div>
+</div>
+
+<!-- 나이 -->
+<div class="info-item">
+  <span class="label">나이</span>
+  <div class="value-with-button">
+    <template v-if="editingField === 'age'">
+      <input 
+        v-model="editValue"
+        class="edit-input"
+        type="number"
+        :placeholder="store.userInfo?.age || '나이를 입력하세요'"
+      >
+      <button class="save-btn" @click="saveEdit('age')">저장</button>
+      <button class="cancel-btn" @click="cancelEdit">취소</button>
+    </template>
+    <template v-else>
+      <span class="value">{{ store.userInfo?.age }}세</span>
+      <button class="edit-btn" @click="startEdit('age')">수정</button>
+    </template>
+  </div>
+</div>
+
+<!-- 자산 -->
+<div class="info-item">
+  <span class="label">현재 자산</span>
+  <div class="value-with-button">
+    <template v-if="editingField === 'asset'">
+      <input 
+        v-model="editValue"
+        class="edit-input"
+        type="number"
+        :placeholder="store.userInfo?.asset || '자산을 입력하세요'"
+      >
+      <button class="save-btn" @click="saveEdit('asset')">저장</button>
+      <button class="cancel-btn" @click="cancelEdit">취소</button>
+    </template>
+    <template v-else>
+      <span class="value">{{ store.userInfo?.asset }}원</span>
+      <button class="edit-btn" @click="startEdit('asset')">수정</button>
+    </template>
+  </div>
+</div>
+
+<!-- 연봉 -->
+<div class="info-item">
+  <span class="label">연봉</span>
+  <div class="value-with-button">
+    <template v-if="editingField === 'income'">
+      <input 
+        v-model="editValue"
+        class="edit-input"
+        type="number"
+        :placeholder="store.userInfo?.income || '연봉을 입력하세요'"
+      >
+      <button class="save-btn" @click="saveEdit('income')">저장</button>
+      <button class="cancel-btn" @click="cancelEdit">취소</button>
+    </template>
+    <template v-else>
+      <span class="value">{{ store.userInfo?.income }}원</span>
+      <button class="edit-btn" @click="startEdit('income')">수정</button>
+    </template>
+  </div>
+</div>
+</div>
 
     <!-- 오른쪽 섹션 -->
     <div class="right-section">
@@ -159,6 +224,29 @@ const removePreference = async (bankName, productName) => {
 const addToPreference = async (bankName, productName) => {
   await store.addToPreference(bankName, productName)
   await loadPreferences()
+}
+
+const editingField = ref(null)
+const editValue = ref('')
+
+const startEdit = (field) => {
+  editingField.value = field
+  editValue.value = store.userInfo[field]
+}
+
+const cancelEdit = () => {
+  editingField.value = null
+  editValue.value = ''
+}
+
+const saveEdit = async (field) => {
+  try {
+    await store.updateUserProfile(field, editValue.value)
+    editingField.value = null
+    editValue.value = ''
+  } catch (error) {
+    alert('프로필 수정에 실패했습니다.')
+  }
 }
 
 
@@ -369,14 +457,23 @@ const closeGraph = () => {
 .info-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #e6f0ff;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .value-with-button {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
+}
+
+.edit-input {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 200px;
 }
 
 .edit-btn {
@@ -492,5 +589,50 @@ canvas {
   --light-blue: #e6f0ff;
   --pastel-blue: #f0f7ff;
   --white: #ffffff;
+}
+
+.save-btn {
+  padding: 0.5rem 1rem;
+  background-color: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+  background-color: #38a169;
+}
+
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+  background-color: #c53030;
+}
+
+.edit-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-btn:hover {
+  background-color: #cbd5e0;
 }
 </style>

@@ -454,6 +454,27 @@ export const useBankStore = defineStore('bank', () => {
       }
     }
 
+    const updateUserProfile = async (fieldName, value) => {
+      try {
+        const response = await axios.put(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/`,
+          { [fieldName]: value },
+          {
+            headers: { 
+              Authorization: `Token ${token.value}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+        // 성공 시 userInfo 업데이트
+        userInfo.value = response.data
+        return true
+      } catch (error) {
+        console.error('프로필 수정 실패:', error)
+        throw error
+      }
+    }
+
   
   const fetchUserInfo = async () => { //사용자 정보 가져오기
     try {
@@ -472,6 +493,6 @@ export const useBankStore = defineStore('bank', () => {
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
-    , addToPreference, removeFromPreference
+    , addToPreference, removeFromPreference, updateUserProfile
   }
 }, { persist: true }) 
