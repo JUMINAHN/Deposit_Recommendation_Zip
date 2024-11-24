@@ -1,44 +1,81 @@
 <template>
-  <div class="profile-container">
-    <!-- 왼쪽 섹션 -->
-    <div class="left-section">
-      <!-- 프로필 이미지 및 기본 정보 -->
-      <div class="profile-card">
-        <div class="profile-image">
-          <img src="@/assets/images/bankchar.jpg" alt="프로필 이미지">
-        </div>
-        <div class="profile-info">
-          <h2>{{ userInfo.nickname || userInfo.username }}</h2>
-          <div class="follow-stats">
-            <span>팔로워 {{ followers.length }}</span>
-            <span>팔로잉 {{ followings.length }}</span>
-          </div>
-          <button 
-            v-if="store.userInfo?.username !== route.params.username"
-            @click="toggleFollow" 
-            :class="['follow-button', { 'following': isFollowing }]"
-          >
-            {{ isFollowing ? '팔로잉' : '팔로우' }}
-          </button>
-        </div>
-      </div>
+  <div class="page-container">
+    <!-- 뒤로가기 버튼을 상단에 배치 -->
+    <div class="back-button-container">
+      <button class="back-button" @click="router.go(-1)">
+        ← 목록으로 돌아가기
+      </button>
     </div>
 
-    <!-- 오른쪽 섹션 -->
-    <div class="right-section">
-      <h3>작성한 게시글</h3>
-      <div class="user-articles">
-        <div v-for="article in userArticles" 
-             :key="article.id" 
-             class="article-item"
-             @click="goToArticle(article.id)">
-          <h4>{{ article.title }}</h4>
-          <span class="article-date">{{ formatDate(article.created_at) }}</span>
+    <div class="profile-container">
+      <!-- 왼쪽 섹션 -->
+      <div class="left-section">
+        <!-- 프로필 이미지 및 기본 정보 -->
+        <div class="profile-card">
+          <div class="profile-image">
+            <img src="@/assets/images/bankchar.jpg" alt="프로필 이미지">
+          </div>
+          <div class="profile-info">
+            <h2>{{ userInfo.nickname || userInfo.username }}</h2>
+            <div class="follow-stats">
+              <span>팔로워 {{ followers.length }}</span>
+              <span>팔로잉 {{ followings.length }}</span>
+            </div>
+            <button 
+              v-if="store.userInfo?.username !== route.params.username"
+              @click="toggleFollow" 
+              :class="['follow-button', { 'following': isFollowing }]"
+            >
+              {{ isFollowing ? '팔로잉' : '팔로우' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽 섹션 -->
+      <div class="right-section">
+        <div class="tabs">
+          <button 
+            :class="['tab-button', { active: activeTab === 'posts' }]"
+            @click="activeTab = 'posts'"
+          >
+            작성한 게시글
+          </button>
+          <button 
+            :class="['tab-button', { active: activeTab === 'comments' }]"
+            @click="activeTab = 'comments'"
+          >
+            작성한 댓글
+          </button>
+        </div>
+
+        <!-- 게시글 목록 -->
+        <div v-if="activeTab === 'posts'" class="content-section">
+          <div v-for="article in userArticles" 
+               :key="article.id" 
+               class="article-item"
+               @click="goToArticle(article.id)">
+            <h4>{{ article.title }}</h4>
+            <span class="article-date">{{ formatDate(article.created_at) }}</span>
+          </div>
+        </div>
+
+        <!-- 댓글 목록 -->
+        <div v-else class="content-section">
+          <div v-for="comment in userComments" 
+               :key="comment.id" 
+               class="comment-item"
+               @click="goToArticle(comment.article)">
+            <p class="comment-content">{{ comment.content }}</p>
+            <span class="article-date">{{ formatDate(comment.created_at) }}</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
@@ -132,6 +169,7 @@ const toggleFollow = async () => {
 onMounted(() => {
   fetchUserProfile()
   fetchUserArticles()
+  fetchUserComments()
 })
 
 // UserProfile.vue의 script에 추가
@@ -142,6 +180,25 @@ const goToArticle = (articleId) => {
   })
 }
 
+// 탭 상태 관리
+const activeTab = ref('posts')
+const userComments = ref([])
+
+// 댓글 목록 가져오기
+const fetchUserComments = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/articles/comments/', {
+      headers: { Authorization: `Token ${store.token}` }
+    })
+    // 해당 사용자의 댓글만 필터링
+    userComments.value = response.data.filter(comment => comment.user === route.params.username)
+  } catch (error) {
+    console.error('댓글 로드 실패:', error)
+  }
+}
+
+
+
 </script>
 
 <style scoped>
@@ -150,16 +207,18 @@ const goToArticle = (articleId) => {
   grid-template-columns: 300px 1fr;
   gap: 30px;
   max-width: 1200px;
-  margin: 80px auto 40px;
+  margin: 120px auto 40px; /* 상단 마진을 120px로 증가 */
   padding: 40px;
-  background: linear-gradient(to bottom, #ffffff, #f0f8ff);
+  background: linear-gradient(to bottom, #ffffff, #e6f0ff);
+  position: relative; /* 상대 위치 설정 */
 }
+
 
 .profile-card {
   background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(110, 151, 246, 0.1);
 }
 
 .profile-image {
@@ -197,15 +256,15 @@ const goToArticle = (articleId) => {
   padding: 8px 24px;
   border-radius: 20px;
   border: none;
-  background: #4f46e5;
+  background: #6e97f6;  /* 이미지의 파란색과 유사한 톤 */
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .follow-button.following {
-  background: #e5e7eb;
-  color: #374151;
+  background: #e6f0ff;
+  color: #6e97f6;
 }
 
 .right-section {
@@ -213,6 +272,7 @@ const goToArticle = (articleId) => {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid #e6f0ff;
 }
 
 .right-section h3 {
@@ -231,7 +291,7 @@ const goToArticle = (articleId) => {
 }
 
 .article-item:hover {
-  background: #f8fafc;
+  background: #f0f7ff;
   transform: translateX(5px);
 }
 
@@ -246,11 +306,102 @@ const goToArticle = (articleId) => {
   font-size: 0.9rem;
 }
 
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e6f0ff;
+  padding-bottom: 0.5rem;
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  color: #6e97f6;
+  border-bottom: 2px solid #6e97f6;  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  color: #4f46e5;
+  font-weight: 600;
+  border-bottom: 2px solid #4f46e5;
+}
+
+.comment-item {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+  background: #f0f7ff;
+  transform: translateX(5px);
+}
+
+.comment-content {
+  color: #2c3e50;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.back-button-container {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  position: fixed; /* 고정 위치로 변경 */
+  top: 100px; /* 네비게이션 바 아래로 위치 조정 */
+  left: calc((100% - 1200px) / 2); /* 중앙 정렬 */
+  padding: 8px 20px;
+  background-color: white;
+  color: #6e97f6;
+  border: 1px solid #6e97f6;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  z-index: 100; /* 다른 요소들보다 위에 표시 */
+}
+
+
+.back-button:hover {
+  background-color: #f0f7ff;
+}
+
+.profile-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 120px auto 40px; /* 상단 여백 120px로 증가 */
+  padding: 40px;
+  background: linear-gradient(to bottom, #ffffff, #e6f0ff);
+  position: relative; /* 상대 위치 설정 */
+}
+
+
+@media (max-width: 1200px) {
+  .back-button {
+    left: 20px; /* 화면이 작아질 때 왼쪽 여백 조정 */
+  }
+}
+
 @media (max-width: 768px) {
   .profile-container {
+    margin-top: 140px; /* 모바일에서 상단 여백 더 증가 */
     grid-template-columns: 1fr;
     padding: 20px;
-    margin: 60px 20px;
+  }
+  
+  .back-button {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    width: auto;
   }
 }
 
