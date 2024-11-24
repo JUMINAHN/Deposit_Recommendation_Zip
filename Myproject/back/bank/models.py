@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-
+# 이름은 예금이지만 적금이랑 뽑아오는 필드 다 똑같아서 그냥 진행할게용~
 class DepositProducts(models.Model):
     fin_prdt_cd = models.TextField(unique=True)
     dcls_month = models.IntegerField()
