@@ -10,6 +10,7 @@ import SignUpView from '@/views/SignUpView.vue'
 import DepositCompareView from '@/views/DepositCompareView.vue'
 import BankMapView from '@/views/BankMapView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import ExchangeRateView from '@/views/ExchangeRateView.vue'
 
 
 const router = createRouter({
@@ -69,6 +70,11 @@ const router = createRouter({
       path : '/main/map',
       name : 'map',
       component : BankMapView
+    },
+    {
+      path : '/main/exchangerate',
+      name : 'exchangerate',
+      component : ExchangeRateView
     },
   ],
 })
