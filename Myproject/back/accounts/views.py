@@ -10,47 +10,57 @@ from .serializers import PreferenceSerializer
 
 
 
-@api_view(['GET', 'PUT'])
+@api_view(['GET', 'PUT']) #기존에는 request.user 정보만 반환해서 다른 유저의 정보를 받아올 수 없었음
 @permission_classes([IsAuthenticated])
 def profile_view(request, username):
-    #request user? 
-    # User = get_user_model()
-    user = request.user
-    # profile_user = User.objects.get(username=username) #username
-    # 프로필 조회
-    if request.method == 'GET':
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
-    # 프로필 수정
-    elif request.method == 'PUT':
-        serializer = ProfileSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+    try:
+        User = get_user_model()
+        profile_user = User.objects.get(username=username)
+        
+        if request.method == 'GET':
+            serializer = ProfileSerializer(profile_user)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'PUT':
+            # 자신의 프로필만 수정 가능
+            if request.user != profile_user:
+                return Response({'message': '권한이 없습니다.'}, status=403)
+            serializer = ProfileSerializer(profile_user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=400)
+    except User.DoesNotExist:
+        return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
 
 
 # 이건 메서드가 뭘로가야됨..? 일단 다 되게 해놨음
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def follow(request, user_pk):
-    User = get_user_model()
-    you = User.objects.get(pk=user_pk)
-    me = request.user
+    try:
+        User = get_user_model()
+        you = User.objects.get(pk=user_pk)
+        me = request.user
 
-    if me != you:
+        # 자기 자신을 팔로우할 수 없음
+        if me == you:
+            return Response({'message': '자기 자신을 팔로우할 수 없습니다.'}, status=400)
+
         if me in you.followers.all():
             you.followers.remove(me)
-            # me.followings.remove(you)
             is_followed = False
         else:
             you.followers.add(me)
-            # me.followings.add(you)
             is_followed = True
+
         context = {
             'is_followed': is_followed,
-            'followings_count': you.followings.count(),
-            'followers_count': you.followers.count(),
+            'followers': [user.username for user in you.followers.all()],
+            'followings': [user.username for user in you.followings.all()],
         }
-        return JsonResponse(context)
+        return Response(context)
+    except User.DoesNotExist:
+        return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
 
 
 #전체 조회 관련 내용 추가
