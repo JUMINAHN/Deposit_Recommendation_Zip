@@ -9,14 +9,10 @@
         </div>
         <div class="profile-info">
           <div class="info-row">
-            <h2>{{ userName }}</h2>
-            <button class="edit-btn" @click="editField('userName')">수정</button>
+            <h2>{{ store.userInfo?.username }}</h2>
+            <button class="edit-btn" @click="editField('username')">수정</button>
           </div>
-          <!-- <div class="info-row">
-            <p class="user-id">{{ userName }}</p>
-            <button class="edit-btn" @click="editField('userId')">수정</button>
-          </div> -->
-          <p class="email">{{ userEmail }}</p>
+          <p class="email">{{ store.userInfo?.email }}</p>
         </div>
       </div>
       
@@ -25,35 +21,35 @@
         <div class="info-item">
           <span class="label">이메일</span>
           <div class="value-with-button">
-            <span class="value">{{ userEmail }}</span>
+            <span class="value">{{ store.userInfo?.email }}</span>
             <button class="edit-btn" @click="editField('email')">수정</button>
           </div>
         </div>
         <div class="info-item">
           <span class="label">닉네임</span>
           <div class="value-with-button">
-            <span class="value">{{ userNickName }}</span>
-            <button class="edit-btn" @click="editField('nickName')">수정</button>
+            <span class="value">{{ store.userInfo?.nickname }}</span>
+            <button class="edit-btn" @click="editField('nickname')">수정</button>
           </div>
         </div>
         <div class="info-item">
           <span class="label">나이</span>
           <div class="value-with-button">
-            <span class="value">{{ userAge }}세</span>
+            <span class="value">{{ store.userInfo?.age }}세</span>
             <button class="edit-btn" @click="editField('age')">수정</button>
           </div>
         </div>
         <div class="info-item">
           <span class="label">현재 자산</span>
           <div class="value-with-button">
-            <span class="value">{{ userAsset }}원</span>
-            <button class="edit-btn" @click="editField('assets')">수정</button>
+            <span class="value">{{ store.userInfo?.asset }}원</span>
+            <button class="edit-btn" @click="editField('asset')">수정</button>
           </div>
         </div>
         <div class="info-item">
           <span class="label">연봉</span>
           <div class="value-with-button">
-            <span class="value">{{ userIncome }}원</span>
+            <span class="value">{{ store.userInfo?.income }}원</span>
             <button class="edit-btn" @click="editField('income')">수정</button>
           </div>
         </div>
@@ -64,12 +60,13 @@
     <div class="right-section">
       <h3>가입 상품 현황</h3>
       <div class="products-list">
-        <div v-for="product in products" :key="product.id" class="product-card">
-          <h4>{{ product.name }}</h4>
+        <div v-for="product in preferences" :key="product.bankname + product.products" class="product-card">
+          <h4>{{ product.products }}</h4>
           <div class="product-info">
-            <p>금리: {{ product.interestRate }}%</p>
-            <p>최고 금리: {{ product.maxInterestRate }}</p>
+            <p>금리: {{ product.maxRate }}%</p>
+            <p>최고 금리: {{ product.maxRate2 }}%</p>
           </div>
+          <button @click="removePreference(product.bankname, product.products)">제거</button>
         </div>
       </div>
       <button class="compare-btn" @click="showGraph">
@@ -90,35 +87,67 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import bankchar from '@/assets/images/bankchar.jpg'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Chart } from 'chart.js/auto'
-import { useBankStore } from '@/stores/bank';
+import { useBankStore } from '@/stores/bank'
+import { useRoute } from 'vue-router'
 
 const store = useBankStore()
-const userName = ref('')
-const userEmail = ref('')
-const userNickName = ref('임시12345') //임시로 부여 => 이부분들 다 사용자가 post로 보내서 수정
-const userAge = ref('25') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
-const userAsset = ref('1000') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
-const userIncome = ref('3000000') //임시로 부여  => 이부분들 다 사용자가 post로 보내서 수정
-const products = ref([]) //가입상품 종류 => 이부분들 다 사용자가 post로 보내서 수정
+const userInfo = ref(null)
+const route = useRoute();
+const bankname = route.params.bankname
+const productname = route.params.productname
+const preferences = ref([])
+const userName = computed(() => store.userInfo?.username || '')
+const userEmail = computed(() => store.userInfo?.email || '')
+const userNickName = computed(() => store.userInfo?.nickname || '')
+const userAge = computed(() => store.userInfo?.age || '')
+const userAsset = computed(() => store.userInfo?.asset || '')
+const userIncome = computed(() => store.userInfo?.income || '')
 
-onMounted(() => {
+
+
+onMounted(async () => {
+  if (!store.userInfo) {
+    await store.fetchUserInfo()
+  }
+  userInfo.value = store.userInfo
+  loadPreferences()
+})
+
+const loadPreferences = async () => {
+  await store.loadUserProduct()
+  preferences.value = store.userProduct
+}
+
+const removePreference = async (bankName, productName) => {
+  await store.removeFromPreference(bankName, productName)
+  await loadPreferences()
+}
+
+const addToPreference = async (bankName, productName) => {
+  await store.addToPreference(bankName, productName)
+  await loadPreferences()
+}
+
+
+// onMounted(() => {
   //회원 정보 받아오기
-  const userInfo = store.getUserInfo() 
-  userInfo
-  .then((res) => {
-    userName.value = res.username 
-    userEmail.value = res.email
-  })
-  .catch((err) => {
-    console.log('받아오는 과정에서 에러 발생', err)
-  })
+  // const userInfo = store.getUserInfo() 
+  // userInfo
+  // .then((res) => {
+  //   userName.value = res.username 
+  //   userEmail.value = res.email
+  // })
+  // .catch((err) => {
+  //   console.log('받아오는 과정에서 에러 발생', err)
+  // })
 
   //회원이 가진 상품 받아오기 => bank.js에 선언했는데 현재 지금 이곳에서 사용
-})
+//})
 
 
 // 팝업 상태 관리
@@ -128,19 +157,18 @@ let chart: Chart | null = null
 // 차트 생성 함수
 const createChart = () => {
   const ctx = document.getElementById('interestChart') as HTMLCanvasElement
-  if (ctx && products.value.length > 0) {
+  if (ctx && preferences.value.length > 0) {
     if (chart) {
       chart.destroy()
     }
-    
     chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: products.value.map(p => p.name),
+        labels: preferences.value.map(p => p.products),
         datasets: [
           {
             label: '기본금리 (%)',
-            data: products.value.map(p => p.interestRate),
+            data: preferences.value.map(p => p.maxRate),
             backgroundColor: ['#90cdf4', '#63b3ed', '#4299e1'],
             borderColor: ['#63b3ed', '#4299e1', '#3182ce'],
             borderWidth: 1,
@@ -148,7 +176,7 @@ const createChart = () => {
           },
           {
             label: '최고우대금리 (%)',
-            data: products.value.map(p => p.maxInterestRate),
+            data: preferences.value.map(p => p.maxRate2),
             backgroundColor: ['#fed7d7', '#feb2b2', '#fc8181'],
             borderColor: ['#feb2b2', '#fc8181', '#f56565'],
             borderWidth: 1,

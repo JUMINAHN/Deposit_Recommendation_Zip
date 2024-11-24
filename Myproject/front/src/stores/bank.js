@@ -149,68 +149,65 @@ export const useBankStore = defineStore('bank', () => {
 
 
   //(추후 점검 필요)
-  const loadUserProduct = async function() { 
-    try {
-      console.log('loginUserName:', loginUserName.value); // 디버깅
-      const response = await axios({
-        method : 'get',
-        url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/preference/`,
-        headers : {
-          Authorization: `Token ${token.value}`
-        }
-      })
-      console.log(response)
-      console.log(response.data)
+  // const loadUserProduct = async function() { 
+  //   try {
+  //     console.log('loginUserName:', loginUserName.value); // 디버깅
+  //     const response = await axios({
+  //       method : 'get',
+  //       url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/preference/`,
+  //       headers : {
+  //         Authorization: `Token ${token.value}`
+  //       }
+  //     })
+  //     console.log(response)
+  //     console.log(response.data)
 
-      userProduct.value = response.data
-      console.log(userProduct, '맞게 들어갔니?')
-      console.log('사용자의 상품 로드 완료', userProduct.value)
-    } catch (error) {
-      console.log(error, 'error메세지')
-      userProduct.value = [] //에러시 빈 배열 초기화
-    }
-  }
+  //     userProduct.value = response.data
+  //     console.log(userProduct, '맞게 들어갔니?')
+  //     console.log('사용자의 상품 로드 완료', userProduct.value)
+  //   } catch (error) {
+  //     console.log(error, 'error메세지')
+  //     userProduct.value = [] //에러시 빈 배열 초기화
+  //   }
+  // }
 
-  //일단 한번 담아볼까?
-
- 
 
 
 
   //유저가 장바구니에 삭제할 데이터
-  const userDeleteProducts = async function(bankName, productName) { //이거 실행
-    //동일하게 user에게 접근
-    try {
-      const response = await axios({
-        method : 'delete',
-        url : '`http://127.0.0.1:8000/app/accounts/preference/save/${bankName}/${productName}', //user Save관련 url
-        headers: {
-          Authorization: `Token ${token.value}` //토큰 관련 정보
-        },
-        data : {
-          bankName, //은행명
-          productName //은행상품명
-        },
-      }) 
-      //response가 어떤식으로 받아오는지 확인 => 제품이 엇으니까 삭제가 안되겠지... 고로 현재 테스트 불가
-      console.log(response, 'res')
-      console.log(response.data, 'res.data')
-    const index = userProduct.value.findIndex((item) => {
-      return (item.bankName === bankName && item.productName === productName) 
-    })
-    if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
-      alert('삭제할 수 없는 상품입니다.')
-    } else {
-      userProduct.value.splice(index, 1) //상품 두개 묶음
-      alert('관심 상품에서 제거되었습니다.')
-      console.log('상품 보유 목록', userProduct)
-    } 
-  } catch (error) {
+  // const userDeleteProducts = async function(bankName, productName) { //이거 실행
+  //   //동일하게 user에게 접근
+  //   try {
+  //     const response = await axios({
+  //       method : 'delete',
+  //       url : '`http://127.0.0.1:8000/app/accounts/preference/save/${bankName}/${productName}', //user Save관련 url
+  //       headers: {
+  //         Authorization: `Token ${token.value}` //토큰 관련 정보
+  //       },
+  //       data : {
+  //         bankName, //은행명
+  //         productName //은행상품명
+  //       },
+  //     }) 
+  //     //response가 어떤식으로 받아오는지 확인 => 제품이 엇으니까 삭제가 안되겠지... 고로 현재 테스트 불가
+  //     console.log(response, 'res')
+  //     console.log(response.data, 'res.data')
+  //   const index = userProduct.value.findIndex((item) => {
+  //     return (item.bankName === bankName && item.productName === productName) 
+  //   })
+  //   if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
+  //     alert('삭제할 수 없는 상품입니다.')
+  //   } else {
+  //     userProduct.value.splice(index, 1) //상품 두개 묶음
+  //     alert('관심 상품에서 제거되었습니다.')
+  //     console.log('상품 보유 목록', userProduct)
+  //   } 
+  // } catch (error) {
 
-      console.log(error)
-      alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
-    }
-  }
+  //     console.log(error)
+  //     alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+  //   }
+  // }
 
 
   const userGetProduct = async function(bankName, productName) {
@@ -315,9 +312,10 @@ export const useBankStore = defineStore('bank', () => {
 
       })
       console.log(response, ': 응답 데이터 확인')
-      token.value = response.data.key  // response.data.key로 수정
-      //local에 저장 => local 저장
-      localStorage.setItem('token', response.data.key)  // localStorage에 저장 추가
+      token.value = response.data.key
+      localStorage.setItem('token', token.value) 
+      await fetchUserInfo() //사용자 정보 가져오기 함수
+      // localStorage에 저장 추가
       console.log('로그인이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
       return true
     } catch {
@@ -355,54 +353,107 @@ export const useBankStore = defineStore('bank', () => {
 
    //유저가 장바구니에 저장할 제품
   //token을 안보내줌 => get ifno쪽으로 위치 옮김
-  const userSaveProducts = async function(bankName, productName) {
-    try {
-      if (!userInfo.value || !userInfo.value.username) {
-        await getUserInfo();
+    // 장바구니에 상품 추가
+    const addToPreference = async (bankName, productName) => {
+      try {
+        await axios.post(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${bankName}/${productName}/`, {}, {
+          headers: { Authorization: `Token ${token.value}` }
+        })
+        alert('장바구니에 상품을 담았습니다!')
+      } catch (error) {
+        console.error('장바구니 추가 실패:', error)
+        alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
       }
-      const username = userInfo.value.username;
-      const response = await axios({
-        method: 'post',
-        url: `http://127.0.0.1:8000/app/accounts/profile/${username}/preference/save/${bankName}/${productName}/`,
-        headers: {
-          Authorization: `Token ${token.value}`
-        }
-      })
-      userProduct.value.push({
-        'bankName': bankName,
-        'productName': productName
-      })
-      alert('장바구니에 상품을 담았습니다!')
-    } catch (error) {
-      console.error("Error details:", error.response ? error.response.data : error.message);
-      alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
     }
-  }
+
+    const removeFromPreference = async (bankName, productName) => {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${bankName}/${productName}/`, {
+          headers: { Authorization: `Token ${token.value}` }
+        })
+        alert('관심 상품에서 제거되었습니다.')
+      } catch (error) {
+        console.error('장바구니 제거 실패:', error)
+        alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+      }
+    }
+
+  // const userSaveProducts = async function(bankName, productName) {
+  //   try {
+  //     if (!userInfo.value || !userInfo.value.username) {
+  //       await getUserInfo();
+  //     }
+  //     const username = userInfo.value.username;
+  //     const response = await axios({
+  //       method: 'post',
+  //       url: `http://127.0.0.1:8000/app/accounts/profile/${username}/preference/save/${bankName}/${productName}/`,
+  //       headers: {
+  //         Authorization: `Token ${token.value}`
+  //       }
+  //     })
+  //     userProduct.value.push({
+  //       'bankName': bankName,
+  //       'productName': productName
+  //     })
+  //     alert('장바구니에 상품을 담았습니다!')
+  //   } catch (error) {
+  //     console.error("Error details:", error.response ? error.response.data : error.message);
+  //     alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
+  //   }
+  // }
 
   //이름을 클릭했을떄 파라미터
   //근데 로그인한 애들만 보내는거 아니잖아? 그냥 그 사람 정보 누르면 클릭 되어야 하는데 
   //별도 생성? 일단 로그인한 애만 받아와본다면?
   //내정보 받아오는데 401에러?
-  const getUserInfo = async function() {
+  
+    //일단 한번 담아볼까?
+  //장바구니 목록 조회
+  const getPreferences = async () => {
     try {
-      if (!loginUserName.value) {
-        console.error('loginUserName is not set');
-        return null;
-      }
-      const response = await axios({
-        method: 'get',
-        url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/`,
-        headers: {
-          Authorization: `Token ${token.value}`
-        }
-      });
-      userInfo.value = response.data;
-      return userInfo.value;
-    } catch(error) {
-      console.log(error, 'error 발생!');
-      throw error;
+      const response = await axios.get(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/`, {
+        headers: { Authorization: `Token ${token.value}` }
+      })
+      return response.data
+    } catch (error) {
+      console.error('장바구니 목록 조회 실패:', error)
+      return []
     }
-  }//userInfo 정보 돌려줄 내용
+  }
+ 
+
+  
+  const fetchUserInfo = async () => { //사용자 정보 가져오기
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/app/accounts/profile/current/', {
+        headers: { Authorization: `Token ${token.value}` }
+      })
+      userInfo.value = response.data
+    } catch (error) {
+      console.error('사용자 정보 가져오기 실패:', error)
+    }
+  } 
+
+  // const getUserInfo = async function() {
+  //   try {
+  //     if (!loginUserName.value) {
+  //       console.error('loginUserName is not set');
+  //       return null;
+  //     }
+  //     const response = await axios({
+  //       method: 'get',
+  //       url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/`,
+  //       headers: {
+  //         Authorization: `Token ${token.value}`
+  //       }
+  //     });
+  //     userInfo.value = response.data;
+  //     return userInfo.value;
+  //   } catch(error) {
+  //     console.log(error, 'error 발생!');
+  //     throw error;
+  //   }
+  // }//userInfo 정보 돌려줄 내용
       //store에서 userInfo 자체를 받아오려고 했으나 비동기 문제로 지연 발생
       //loadUserData가 있는데 굳이 nowUserProduct를 사용할 필요가 없을 듯? 데이터만 잘받아오면 문제 없음
       //nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
@@ -441,9 +492,7 @@ export const useBankStore = defineStore('bank', () => {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
-    userSaveProducts, userDeleteProducts, userProduct,
-    userGetProduct, loadUserProduct, getUserInfo, userInfo,
-    nowUserProduct
-  
+    userProduct, nowUserProduct,userGetProduct, userInfo, // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
+
   }
 }, { persist: true }) 
