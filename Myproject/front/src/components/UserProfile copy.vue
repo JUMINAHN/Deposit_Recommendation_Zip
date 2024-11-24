@@ -2,25 +2,19 @@
   <div class="profile-container">
     <!-- 왼쪽 섹션 -->
     <div class="left-section">
-      <!-- 프로필 이미지 및 기본 정보 -->
-      <div class="profile-card">
-        <div class="profile-image">
-          <img src="@/assets/images/bankchar.jpg" alt="프로필 이미지">
+      <div class="profile-info">
+        <h2>{{ userInfo.nickname || userInfo.username }}</h2>
+        <div class="follow-stats">
+          <span>팔로워 {{ followers.length }}</span>
+          <span>팔로잉 {{ followings.length }}</span>
         </div>
-        <div class="profile-info">
-          <h2>{{ userInfo.nickname || userInfo.username }}</h2>
-          <div class="follow-stats">
-            <span>팔로워 {{ followers.length }}</span>
-            <span>팔로잉 {{ followings.length }}</span>
-          </div>
-          <button 
-            v-if="store.userInfo?.username !== route.params.username"
-            @click="toggleFollow" 
-            :class="['follow-button', { 'following': isFollowing }]"
-          >
-            {{ isFollowing ? '팔로잉' : '팔로우' }}
-          </button>
-        </div>
+        <button 
+        v-if="store.userInfo?.username !== route.params.username"
+          @click="toggleFollow" 
+          :class="['follow-button', { 'following': isFollowing }]"
+        >
+          {{ isFollowing ? '팔로잉' : '팔로우' }}
+        </button>
       </div>
     </div>
 
@@ -150,57 +144,31 @@ const goToArticle = (articleId) => {
   grid-template-columns: 300px 1fr;
   gap: 30px;
   max-width: 1200px;
-  margin: 80px auto 40px;
-  padding: 40px;
-  background: linear-gradient(to bottom, #ffffff, #f0f8ff);
+  margin: 120px auto 40px;
+  padding: 30px;
 }
 
-.profile-card {
+.left-section {
   background: white;
-  padding: 2rem;
+  padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.profile-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  margin: 0 auto 1.5rem;
-  overflow: hidden;
-}
-
-.profile-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-info {
-  text-align: center;
-}
-
-.profile-info h2 {
-  color: #2c3e50;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.follow-stats {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 1rem 0;
+.right-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .follow-button {
-  padding: 8px 24px;
+  padding: 8px 16px;
   border-radius: 20px;
   border: none;
   background: #4f46e5;
   color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .follow-button.following {
@@ -208,50 +176,13 @@ const goToArticle = (articleId) => {
   color: #374151;
 }
 
-.right-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.right-section h3 {
-  color: #2c3e50;
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e6f0ff;
-}
-
 .article-item {
-  padding: 1rem;
+  padding: 15px;
   border-bottom: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .article-item:hover {
-  background: #f8fafc;
-  transform: translateX(5px);
+  background: #f9fafb;
 }
-
-.article-item h4 {
-  color: #2c3e50;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.article-date {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-  .profile-container {
-    grid-template-columns: 1fr;
-    padding: 20px;
-    margin: 60px 20px;
-  }
-}
-
 </style>
