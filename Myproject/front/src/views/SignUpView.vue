@@ -123,8 +123,43 @@ const userData = {
 }
 
 // 기존 checkLogin 함수 유지
-const checkLogin = function (userData) {
+const checkLogin = async function (userData) {
+  // 입력값 검증
+  if (!userData.name.value || !userData.email.value || !userData.password1.value || !userData.password2.value) {
+    alert('모든 필드를 입력해주세요.')
+    return
+  }
+  // 비밀번호 일치 확인
+  if (userData.password1.value !== userData.password2.value) {
+    alert('비밀번호가 일치하지 않습니다.')
+    return
+  }
 
+  // 약관 동의 확인
+  if (!terms.value) {
+    alert('이용약관에 동의해주세요.')
+    return
+  }
+
+  try {
+    // bank.js의 signUpComplete 함수 형식에 맞게 데이터 전달
+    const result = await store.signUpComplete({
+      name: userData.name,
+      email: userData.email,
+      password1: userData.password1,
+      password2: userData.password2
+    })
+    
+    if (result) {
+      alert('회원가입이 완료되었습니다.')
+      router.push({ name: 'login' })
+    } else {
+      alert('회원가입 처리 중 오류가 발생했습니다.')
+    }
+  } catch (error) {
+    console.error('회원가입 오류:', error)
+    alert('회원가입 처리 중 오류가 발생했습니다.')
+  }
 }
 </script>
 

@@ -19,16 +19,16 @@
           </li> -->
   
           <li class="nav-item">
-            <a class="nav-link" href="#">환율 검색</a>
+            <RouterLink :to="{name: 'exchangerate'}" class="nav-link">환율 검색</RouterLink> 
           </li>
           <li class="nav-item">
-            <RouterLink :to="{name: 'map'}" class="nav-link" >주변 은행 검색</RouterLink>
+            <RouterLink :to="{name: 'map'}" class="nav-link" >주변 은행 검색</RouterLink> 
           </li>
           <li class="nav-item">
-            <RouterLink :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
+            <RouterLink :to="{name: 'community'}" class="nav-link">게시판</RouterLink> 
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">내가 지폐가 될 상인가?</a>
+            <a class="nav-link" href="#">내가 지폐가 될 상인가?</a> 
           </li>
           <li class="nav-item">
           <RouterLink 
