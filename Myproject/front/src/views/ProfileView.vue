@@ -119,8 +119,7 @@ onMounted(async () => {
 })
 
 const loadPreferences = async () => {
-  await store.loadUserProduct()
-  preferences.value = store.userProduct
+  preferences.value = await store.getPreferences()
 }
 
 const removePreference = async (bankName, productName) => {

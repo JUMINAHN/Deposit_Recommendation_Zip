@@ -356,13 +356,22 @@ export const useBankStore = defineStore('bank', () => {
     // 장바구니에 상품 추가
     const addToPreference = async (bankName, productName) => {
       try {
-        await axios.post(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${bankName}/${productName}/`, {}, {
+        if (!userInfo.value || !userInfo.value.username) {
+          throw new Error('User information is not available');
+        }
+        const encodedBankName = encodeURIComponent(bankName);
+        const encodedProductName = encodeURIComponent(productName);
+        const url = `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`;
+        
+        const response = await axios.post(url, {}, {
           headers: { Authorization: `Token ${token.value}` }
-        })
-        alert('장바구니에 상품을 담았습니다!')
+        });
+        alert(response.data.message);
+        return true;
       } catch (error) {
-        console.error('장바구니 추가 실패:', error)
-        alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+        console.error('장바구니 추가 실패:', error);
+        alert(error.response?.data?.message || '장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
+        return false;
       }
     }
 
@@ -377,6 +386,16 @@ export const useBankStore = defineStore('bank', () => {
         alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
       }
     }
+    // const userSaveProducts = async function(bankName, productName) {
+    //   try {
+    //     await addToPreference(bankName, productName)
+    //     // Update the userProduct array if needed
+    //     userProduct.value.push({ bankName, productName })
+    //   } catch (error) {
+    //     console.error("Error saving product:", error)
+    //     throw error
+    //   }
+    // }
 
   // const userSaveProducts = async function(bankName, productName) {
   //   try {
@@ -492,7 +511,7 @@ export const useBankStore = defineStore('bank', () => {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
-    userProduct, nowUserProduct,userGetProduct, userInfo, // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
-
+    userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
+    , addToPreference, removeFromPreference
   }
 }, { persist: true }) 
