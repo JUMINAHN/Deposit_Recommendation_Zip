@@ -146,7 +146,7 @@ def top_rate(request):
 # error_code=invalid_api_key error_message='Incorrect API key provided: sk-proj-*********************************************************************************************************************************************************** You can find your API key at https://platform.openai.com/account/api-keys.' error_param=None error_type=invalid_request_error message='OpenAI API error received' stream_error=False
 # Error occurred: Incorrect API key provided: sk-proj-*********************************************************************************************************************************************************. You can find your API key at https://platform.openai.com/account/api-keys.
 
-openai.api_key = ''
+openai.api_key=''
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
