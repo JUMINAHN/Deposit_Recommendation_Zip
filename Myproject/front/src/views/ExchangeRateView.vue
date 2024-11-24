@@ -176,7 +176,7 @@ select:focus, input:focus {
 }
 
 .result-section p {
-  color: #0053a6;
+  color: #51b7dc6;
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -199,7 +199,7 @@ select:focus, input:focus {
 
 
 .chart-title {
-  color: #0053a6;
+  color: #51b7dc;
   font-size: 18px;
   font-weight: 600;
 }
@@ -219,7 +219,7 @@ select:focus, input:focus {
 }
 
 .period-button:hover {
-  background-color: #0053a6;
+  background-color: #51b7dc;
   color: #ffffff;
 }
 
@@ -250,7 +250,7 @@ select:focus, input:focus {
 }
 
 .comparison-value {
-  color: #0053a6;
+  color: #51b7dc;
   font-size: 20px;
   font-weight: bold;
 }
@@ -311,7 +311,7 @@ select:focus, input:focus {
 }
 
 .line-chart h3, .bar-chart h3 {
-  color: #0053a6;
+  color: #51b7dc;
   font-size: 16px;
   margin-bottom: 15px;
 }
