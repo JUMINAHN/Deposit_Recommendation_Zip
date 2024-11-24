@@ -356,22 +356,37 @@ export const useBankStore = defineStore('bank', () => {
     // 장바구니에 상품 추가
     const addToPreference = async (bankName, productName) => {
       try {
+        // 1. userInfo 확인 및 로드
         if (!userInfo.value || !userInfo.value.username) {
-          throw new Error('User information is not available');
+          await fetchUserInfo()
+          if (!userInfo.value || !userInfo.value.username) {
+            throw new Error('사용자 정보를 불러올 수 없습니다')
+          }
         }
-        const encodedBankName = encodeURIComponent(bankName);
-        const encodedProductName = encodeURIComponent(productName);
-        const url = `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`;
+    
+        // 2. URL 인코딩
+        const encodedBankName = encodeURIComponent(bankName)
+        const encodedProductName = encodeURIComponent(productName)
         
-        const response = await axios.post(url, {}, {
-          headers: { Authorization: `Token ${token.value}` }
-        });
-        alert(response.data.message);
-        return true;
+        // 3. API 호출
+        const response = await axios.post(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`,
+          {},
+          {
+            headers: { 
+              Authorization: `Token ${token.value}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+    
+        // 4. 성공 처리
+        alert(response.data.message || '장바구니에 상품을 담았습니다!')
+        return true
       } catch (error) {
-        console.error('장바구니 추가 실패:', error);
-        alert(error.response?.data?.message || '장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
-        return false;
+        console.error('장바구니 추가 실패:', error)
+        alert(error.response?.data?.message || '장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+        return false
       }
     }
 

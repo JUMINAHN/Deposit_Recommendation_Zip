@@ -112,20 +112,32 @@ const checkProductInPreferences = async () => {
 
 const toggleProduct = async () => {
   try {
-    let success;
-    if (productResult.value) {
-      success = await store.removeFromPreference(bankName.value, productName.value);
-    } else {
-      success = await store.addToPreference(bankName.value, productName.value);
+    // 1. userInfo가 없으면 먼저 로드
+    if (!store.userInfo) {
+      await store.fetchUserInfo()
     }
+
+    // 2. 실제 사용자 정보 확인
+    if (!store.userInfo.username) {
+      throw new Error('사용자 정보를 찾을 수 없습니다')
+    }
+
+    let success
+    if (productResult.value) {
+      success = await store.removeFromPreference(bankName.value, productName.value)
+    } else {
+      success = await store.addToPreference(bankName.value, productName.value)
+    }
+
     if (success) {
-      productResult.value = !productResult.value;
-      await loadPreferences();
+      productResult.value = !productResult.value
+      await checkProductInPreferences() // loadPreferences 대신 checkProductInPreferences 호출
     }
   } catch (error) {
-    console.error('상품 토글 중 오류 발생:', error);
+    console.error('상품 토글 중 오류 발생:', error)
+    alert('상품 처리 중 오류가 발생했습니다.')
   }
-};
+}
 </script>
 
 <style scoped>

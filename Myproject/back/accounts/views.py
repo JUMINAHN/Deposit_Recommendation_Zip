@@ -71,20 +71,32 @@ def preference_list(request, username):
 @permission_classes([IsAuthenticated])
 def add_to_preference(request, username, bankname, preference):
     try:
-        # 요청한 사용자와 대상 사용자가 같은지 확인
         if request.user.username != username:
             return Response({'message': '권한이 없습니다.'}, status=403)
             
-        product = Product.objects.get(bankname=bankname, products=preference)
+        # 상품이 없으면 생성
+        product, created = Product.objects.get_or_create(
+            bankname=bankname,
+            products=preference,
+            defaults={
+                'joinway': '',  # 기본값 설정
+                'special': '',
+                'month': 0,
+                'maxRate': 0.0,
+                'maxRate2': 0.0
+            }
+        )
+        
         request.user.preference.add(product)
         return Response({
             'bankName': bankname,
             'productName': preference,
             'message': '장바구니에 상품을 담았습니다!'
         })
-    except Product.DoesNotExist:
-        return Response({'message': '상품을 찾을 수 없습니다.'}, status=404)
-
+    except Exception as e:
+        return Response({'message': f'상품 저장 중 오류가 발생했습니다: {str(e)}'}, status=400)
+    
+    
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_from_preference(request, username, bankname, preference):
