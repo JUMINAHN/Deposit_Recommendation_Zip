@@ -327,30 +327,28 @@ export const useBankStore = defineStore('bank', () => {
   // 회원 가입 데이터
   // 토큰 생성이 필요함
   const signUpComplete = async function (userData) {
-    const { name, email, password1, password2 } = userData
     try {
-      const response = axios({
+      const response = await axios({
         method: 'post',
-        url: 'http://127.0.0.1:8000/accounts/signup/', //회원 가입 URL 추가 예정
-        // 받아올 애들
-        data: { //params는 get으로 받을때 사용
-          // nickname,
-          username: name.value,
-          email: email.value,
-          password1: password1.value,
-          password2: password2.value,
+        url: 'http://127.0.0.1:8000/accounts/signup/',
+        data: {
+          username: userData.name.value,
+          email: userData.email.value,
+          password1: userData.password1.value,
+          password2: userData.password2.value,
         }
       })
-      console.log(response, ': 응답 데이터 확인')
-      console.log('회원가입이 완료되었습니다.') //서버에 단순 요청함으로써 일치여부 확인
-      router.push({ name: 'login' }) //로그인 페이지 이동
-      return true //회원가입 로직 확인 완료
-    } catch {
-      console.log('에러가 발생했습니다.')
+      
+      if (response.data) {
+        router.push({ name: 'login' })
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('회원가입 실패:', error)
       return false
     }
   }
-
 
     const addToPreference = async (bankName, productName) => {
       try {

@@ -16,29 +16,30 @@
     </div>
 
     <div v-else class="article-list">
-      <div 
-        v-for="article in articles" 
-        :key="article.id" 
-        @click="goToArticle(article.id)"
-        class="article-item"
-      >
-        <div class="article-content">
-          <h3 class="article-title">{{ article.title }}</h3>
-          <p class="article-preview" v-if="article.content">
-            {{ article.content.substring(0, 100) }}...
-          </p>
-        </div>
-        <div class="article-meta">
-          <span class="author">{{ article.user }}</span>
-          <span class="date">{{ formatDate(article.created_at) }}</span>
-        </div>
-      </div>
-
-      <div v-if="articles.length === 0" class="no-articles">
-        <p>첫 게시글의 주인공이 되어보세요!</p>
-      </div>
+  <div 
+    v-for="article in articles" 
+    :key="article.id" 
+    @click="goToArticle(article.id)"
+    class="article-item"
+  >
+    <div class="article-content">
+      <h3 class="article-title">{{ article.title }}</h3>
+      <p class="article-preview" v-if="article.content">
+        {{ article.content.substring(0, 100) }}...
+      </p>
+    </div>
+    <div class="article-meta">
+      <span class="author" @click.stop="goToUserProfile(article.user)">{{ article.user }}</span>
+      <span class="date">{{ formatDate(article.created_at) }}</span>
     </div>
   </div>
+
+  <div v-if="articles.length === 0" class="no-articles">
+    <p>첫 게시글의 주인공이 되어보세요!</p>
+  </div>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -52,6 +53,11 @@ const articles = ref([])
 const router = useRouter()
 const loading = ref(false)
 const error = ref(null)
+
+//follow
+const goToUserProfile = (username) => {
+  router.push({ name: 'userProfile', params: { username } })
+}
 
 const fetchArticles = async () => {
   loading.value = true
