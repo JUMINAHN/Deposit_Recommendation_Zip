@@ -187,7 +187,7 @@ const userComments = ref([])
 // 댓글 목록 가져오기
 const fetchUserComments = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/articles/comments/', {
+    const response = await axios.get(`http://127.0.0.1:8000/articles/${route.params.username}/comments/`, {
       headers: { Authorization: `Token ${store.token}` }
     })
     // 해당 사용자의 댓글만 필터링
@@ -369,7 +369,9 @@ const fetchUserComments = async () => {
 
 
 .back-button:hover {
-  background-color: #f0f7ff;
+  background-color: rgb(63, 156, 232);
+  color: white;
+  transform: translateX(-5px);
 }
 
 .profile-container {

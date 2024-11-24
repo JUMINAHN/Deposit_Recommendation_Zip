@@ -11,8 +11,12 @@
       <div class="article-header">
         <h2 class="article-title">{{ article.title }}</h2>
         <div class="article-meta">
-          <span class="author">{{ article.user }}</span>
-          <span class="date">{{ formatDate(article.created_at) }}</span>
+          <span class="author" @click="goToUserProfile(article.user)">
+            👤 {{ article.user }}
+          </span>
+          <span class="date">
+            📅 {{ formatDate(article.created_at) }}
+          </span>
         </div>
       </div>
 
@@ -69,8 +73,12 @@
             <div class="comment-content">
               <p>{{ comment.content }}</p>
               <div class="comment-meta">
-                <span class="author">{{ comment.user }}</span>
-                <span class="date">{{ formatDate(comment.created_at) }}</span>
+                <span class="author" @click="goToUserProfile(comment.user)">
+                  👤 {{ comment.user }}
+                </span>
+                <span class="date">
+                  📅 {{ formatDate(comment.created_at) }}
+                </span>
               </div>
             </div>
 
@@ -307,6 +315,14 @@ onMounted(async () => {
 const goBack = () => {
   router.go(-1)
 }
+
+const goToUserProfile = (username) => {
+  router.push({ 
+    name: 'userProfile', 
+    params: { username } 
+  })
+}
+
 </script>
 
 <style scoped>
@@ -547,4 +563,27 @@ const goBack = () => {
   color: #6b7280;
   font-size: 14px;
 }
+
+.article-meta .author,
+.comment-meta .author {
+  cursor: pointer;
+  color: #6e97f6;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.article-meta .author:hover,
+.comment-meta .author:hover {
+  color: #4f46e5;
+  transform: translateX(2px);
+}
+
+.comment-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
 </style>

@@ -95,3 +95,13 @@ def article_comment_detail(request, comment_pk): #단일 댓글 조회
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_comments(request, username):
+    try:
+        comments = Comments.objects.filter(user__username=username)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'message': str(e)}, status=404)
