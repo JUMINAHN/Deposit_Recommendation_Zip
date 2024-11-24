@@ -33,32 +33,29 @@ def profile_view(request, username):
         return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
 
 
-# 이건 메서드가 뭘로가야됨..? 일단 다 되게 해놨음
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def follow(request, user_pk):
+def follow(request, username):
     try:
         User = get_user_model()
-        you = User.objects.get(pk=user_pk)
-        me = request.user
+        to_follow = User.objects.get(username=username)
+        user = request.user
 
-        # 자기 자신을 팔로우할 수 없음
-        if me == you:
+        if user == to_follow:
             return Response({'message': '자기 자신을 팔로우할 수 없습니다.'}, status=400)
 
-        if me in you.followers.all():
-            you.followers.remove(me)
+        if user in to_follow.followers.all():
+            to_follow.followers.remove(user)
             is_followed = False
         else:
-            you.followers.add(me)
+            to_follow.followers.add(user)
             is_followed = True
 
-        context = {
+        return Response({
             'is_followed': is_followed,
-            'followers': [user.username for user in you.followers.all()],
-            'followings': [user.username for user in you.followings.all()],
-        }
-        return Response(context)
+            'followers': [user.username for user in to_follow.followers.all()],
+            'followings': [user.username for user in to_follow.followings.all()]
+        })
     except User.DoesNotExist:
         return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
 

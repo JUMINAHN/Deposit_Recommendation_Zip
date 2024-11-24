@@ -9,7 +9,7 @@
           <span>팔로잉 {{ followings.length }}</span>
         </div>
         <button 
-          v-if="store.userInfo?.username !== route.params.username"
+        v-if="store.userInfo?.username !== route.params.username"
           @click="toggleFollow" 
           :class="['follow-button', { 'following': isFollowing }]"
         >
@@ -107,22 +107,16 @@ const fetchUserArticles = async () => {
 const toggleFollow = async () => {
   try {
     const response = await axios.post(
-      `http://127.0.0.1:8000/app/accounts/${userInfo.value.id}/follow/`,
+      `http://127.0.0.1:8000/app/accounts/accounts/${route.params.username}/follow/`,
       {},
       { headers: { Authorization: `Token ${store.token}` } }
     )
     
-    if (response.data.message) {
-      alert(response.data.message)
-      return
+    if (response.data) {
+      isFollowing.value = response.data.is_followed
+      followers.value = response.data.followers
+      followings.value = response.data.followings
     }
-    
-    isFollowing.value = response.data.is_followed
-    followers.value = response.data.followers
-    followings.value = response.data.followings
-    
-    // 프로필 정보 다시 불러오기
-    await fetchUserProfile()
   } catch (error) {
     console.error('팔로우 실패:', error)
     alert(error.response?.data?.message || '팔로우 처리 중 오류가 발생했습니다.')
