@@ -3,20 +3,15 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+//컴포넌트 라이프 사이클 => pinia XX
+
 
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //token은 null
   const depositData = ref([])
-
   const detailDepositData = ref([]) //상세목록에 있는 값 여기에 값을 담고
   //비교를 해야하는데? => option과 연동
-
-  //save-deposit 자체를 실행하지 않았음을 알 수 있음 이거 진행해야 함
-  // const detailInfo = item.etc_note
-  // const joinWay = item.joinWay
-  // const special = item.spcl_cnd
-
-
+  const userProduct = ref([]) //user가 담을 product => save
 
   const getDepositData = async function () {
     //응답 자체를 받아오고 활용하던지 해야할 것 같음
@@ -123,6 +118,8 @@ export const useBankStore = defineStore('bank', () => {
       throw error
     }
   }
+
+  //예적금 상품 검색
   const findDepositDetail = function (paramsBank, paramsProudct) {
 
     console.log(detailDepositData.value, 'value') //지금 하는 방향이 맞고
@@ -146,6 +143,112 @@ export const useBankStore = defineStore('bank', () => {
     })
     return resultData //참일 때 반환되어야하거든?
   }
+
+  //실제 유저 정보를 서버에서 받아오기
+  //유저의 정보가 어디에 들어있는가? == token에 
+  //프로필 페이지에서 진행
+  const loadUserProduct = async function() { //이 자체
+    try {
+      const response = await axios({
+        method : 'get',
+        url : 'http://127.0.0.1:8000/user/',
+        headers : {
+          Authorization: `Token ${token.value}`
+        }
+      })
+      // const bankName = response.data.bankName
+      // const productName = response.data.productName
+      // userProduct.value = { 
+      //   'bankName' : bankName,
+      //   'productName' : productName 
+      // }
+      
+      //여러 데이터 반환
+      userProduct.value = response.data.map((item) => ({ //배열형식으로 담기
+        'bankName' : item.bankName,
+        'productName' : item.productName
+      })) //map => 객체 자체로 반환할 것이기 떄문에
+      console.log('사용자의 상품 로드 완료', userProduct.value)
+    } catch (error) {
+      console.log(error, 'error메세지')
+    }
+  }
+
+
+
+  // //유저 상품 감기
+  // if (response.data.success) 일떄 처리
+
+  const userSaveProducts = async function(bankName, productName) { //이거 실행
+    try {
+    //   const response = await axios({ //이거 //res & err
+    //     method : 'post',
+    //     url : 'http://127.0.0.1:8000/user/save-product', //user Save관련 url
+    //     data : {
+    //       bankName, //은행명
+    //       productName //은행상품명
+    //     }
+    // }) 
+      
+    userProduct.value.push({ //userProduct에 담는다.
+      'bankName' : bankName,
+      'productName' : productName
+    })
+    alert('장바구니에 상품을 담았습니다!')
+    console.log(userProduct, '담긴 내부 배열')
+  } catch (error) {
+    console.log(error)
+    alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+  } 
+}
+
+  //그럼 장바구니에서 삭제 => 동일하게 접근하면 안됨
+  const userDeleteProducts = async function(bankName, productName) { //이거 실행
+    //동일하게 user에게 접근
+    try {
+    //   const response = await axios({ //이거 //res & err
+    //     method : 'delete',
+    //     url : 'http://127.0.0.1:8000/user/delete-product', //user Save관련 url
+    //     data : {
+    //       bankName, //은행명
+    //       productName //은행상품명
+    //     }
+    // }) 
+    const index = userProduct.value.findIndex((item) => {
+      return (item.bankName === bankName && item.productName === productName) 
+    })
+    if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
+      alert('삭제할 수 없는 상품입니다.')
+    } else {
+      userProduct.value.splice(index, 1) //상품 두개 묶음
+      alert('관심 상품에서 제거되었습니다.')
+      console.log('상품 보유 목록', userProduct)
+    } 
+  }
+    catch (error) {
+      console.log(error)
+      alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+    }
+  }
+
+
+  //장바구니에 상품이 있는지 확인
+  const userGetProduct = function(bankName, productName) {
+    console.log('getProudct 내부')
+    const result = userProduct.value.some((item) => {
+      if(item.bankName === bankName && item.productName === productName) {
+        console.log('일치값 발견')
+        return true
+      } else {
+        console.log('일치값이 없음')
+        return false
+      }
+    })
+    return result //some 반환값
+  }
+
+
+
 
   let id = 1
   const findCondition = ref([
@@ -269,6 +372,9 @@ export const useBankStore = defineStore('bank', () => {
   return {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
-    depositData, detailDepositData, findDepositDetail, getOptionDeposit
+    depositData, detailDepositData, findDepositDetail, getOptionDeposit,
+    userSaveProducts, userDeleteProducts, userProduct,
+    userGetProduct, loadUserProduct
+  
   }
 }, { persist: true }) 
