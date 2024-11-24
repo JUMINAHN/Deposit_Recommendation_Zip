@@ -6,6 +6,9 @@ from .models import User, Product
 from .serializers import ProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
+from .serializers import PreferenceSerializer  
+
+
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -56,11 +59,13 @@ def follow(request, user_pk):
 def preference_list(request, username):
     try:
         User = get_user_model()
-        user = User.objects.get(username=username) #유저의 정보를 기반으로 제품 찾기
+        user = User.objects.get(username=username)
         preferences = user.preference.all()
         data = [{
-            'bankName': product.bankname,
-            'productName': product.products
+            'bankname': product.bankname,
+            'products': product.products,
+            'maxRate': product.maxRate,
+            'maxRate2': product.maxRate2
         } for product in preferences]
         return Response(data)
     except User.DoesNotExist:
@@ -74,29 +79,22 @@ def add_to_preference(request, username, bankname, preference):
         if request.user.username != username:
             return Response({'message': '권한이 없습니다.'}, status=403)
             
-        # 상품이 없으면 생성
-        product, created = Product.objects.get_or_create(
+        # 상품 조회 또는 생성
+        product = Product.objects.filter(
             bankname=bankname,
-            products=preference,
-            defaults={
-                'joinway': '',  # 기본값 설정
-                'special': '',
-                'month': 0,
-                'maxRate': 0.0,
-                'maxRate2': 0.0
-            }
-        )
+            products=preference
+        ).first()
+        
+        if not product:
+            return Response({'message': '존재하지 않는 상품입니다.'}, status=404)
         
         request.user.preference.add(product)
-        return Response({
-            'bankName': bankname,
-            'productName': preference,
-            'message': '장바구니에 상품을 담았습니다!'
-        })
+        serializer = PreferenceSerializer(product)
+        return Response(serializer.data)
     except Exception as e:
-        return Response({'message': f'상품 저장 중 오류가 발생했습니다: {str(e)}'}, status=400)
+        return Response({'message': str(e)}, status=400)
     
-    
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_from_preference(request, username, bankname, preference):

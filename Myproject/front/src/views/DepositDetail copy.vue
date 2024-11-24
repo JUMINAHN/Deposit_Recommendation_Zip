@@ -78,69 +78,77 @@ const special = ref('')
 const maxRate = ref('')
 const maxRate2 = ref('')
 const month = ref('')
+
+// onMounted 수정
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
     productName.value = route.params.productName
-    console.log('Bank Name:', bankName.value)
-    console.log('Product Name:', productName.value)
     
-    await store.getOptionDeposit()  // 비동기 호출 대기
+    // 순차적으로 처리
+    await store.fetchUserInfo()
+    await store.getOptionDeposit()
+    await checkProductStatus()
+    
     const resultData = store.findDepositDetail(bankName.value, productName.value)
-
-    //해당 값 활용 여부
-    if (resultData[0].special) {
-      special.value = resultData[0].special
-    } else {
-      special.value = '관련 데이터가 없습니다.'
-    }
-    if (resultData[0].joinWay) {
-      joinWay.value = resultData[0].joinWay
-    } else {
-      joinWay.value ='관련 데이터가 없습니다.'
-    }
+    if (resultData && resultData[0]) {
+      special.value = resultData[0].special || '관련 데이터가 없습니다.'
+      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
       maxRate.value = resultData[0].maxRate
       maxRate2.value = resultData[0].maxRate2 
       month.value = resultData[0].month
-      //computed => 비동기 처리 때문
-   //자체 값
+    }
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
 })
-console.log('maxRate2', maxRate2)
-console.log('month', month)
 
-const productResult = ref(true)
-//이제 자체적으로 됨 => onmounted에서 실행은 안됨 QQQQqq 왜?
-const result = computed(() => {
-  return store.userGetProduct(bankName.value, productName.value)
-})
-console.log(result, 'return 값 받았나요?')
-console.log(result.value, 'return 값 받았나요?') //computed로
-//result가 promise니까 활용
-
-//promise로 받은 내용
-result.value
-.then((res) => {
-  console.log(res, 'res 데이터 지금 나우!')
-  console.log(res.value, 'res.val 데이터 지금 나우!')
-  productResult.value = res.value //해당 값
-})
-.catch((err) => {
-  console.log(err)
-})
-console.log(productResult) //참 거짓 여부
-
-const toggleProduct = async () => { //반응형으로 비동기 처리
-  if (productResult.value) {
-    await store.userDeleteProducts(bankName.value, productName.value)
-  } else {
-    await store.userSaveProducts(bankName.value, productName.value)
+// 상품 상태 확인 함수
+const checkProductStatus = async () => {
+  try {
+    if (!store.userInfo?.username) {
+      await store.fetchUserInfo()
+    }
+    const preferences = await store.getPreferences()
+    if (preferences && Array.isArray(preferences)) {
+      const isProductInPreferences = preferences.some(
+        pref => 
+          pref.bankname?.trim() === bankName.value?.trim() && 
+          pref.products?.trim() === productName.value?.trim()
+      )
+      if (productResult.value !== isProductInPreferences) {
+        productResult.value = isProductInPreferences
+      }
+    }
+  } catch (error) {
+    console.error('상품 상태 확인 중 오류 발생:', error)
+    productResult.value = false
   }
 }
 
-
+const productResult = ref(false)
+// toggleProduct 함수 개선
+const toggleProduct = async () => {
+  try {
+    if (productResult.value) {
+      await store.removeFromPreference(bankName.value, productName.value)
+      productResult.value = false  // 즉시 UI 업데이트
+    } else {
+      await store.addToPreference(bankName.value, productName.value)
+      productResult.value = true   // 즉시 UI 업데이트
+    }
+    
+    // 서버와 상태 동기화
+    setTimeout(async () => {
+      await checkProductStatus()
+    }, 500)
+    
+  } catch (error) {
+    console.error('상품 토글 중 오류 발생:', error)
+    // 에러 발생 시 상태 복원
+    await checkProductStatus()
+  }
+}
 </script>
 
 <style scoped>

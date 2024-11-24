@@ -3,13 +3,16 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Product(models.Model):
-    bankname = models.TextField() # 은행명
-    products = models.TextField() # 상품명
-    joinway = models.TextField() # 가입방법
-    special = models.TextField() # 이거모얌
-    month = models.IntegerField() # 가입기간
-    maxRate = models.FloatField()
-    maxRate2 = models.FloatField()
+    bankname = models.CharField(max_length=255)  # TextField 대신 CharField 사용
+    products = models.CharField(max_length=255)
+    joinway = models.TextField(blank=True)
+    special = models.TextField(blank=True)
+    month = models.IntegerField(default=0)
+    maxRate = models.FloatField(default=0.0)
+    maxRate2 = models.FloatField(default=0.0)
+    
+    class Meta:
+        unique_together = ('bankname', 'products')  # 은행명과 상품명의 조합이 유일하도록
     
 
 

@@ -59,15 +59,19 @@
     <!-- 오른쪽 섹션 -->
     <div class="right-section">
       <h3>가입 상품 현황</h3>
+      <div v-if="isLoading">로딩 중...</div>
+      <div v-else-if="error">에러 발생: {{ error }}</div>
+      <div v-else>
       <div class="products-list">
         <div v-for="product in preferences" :key="product.bankname + product.products" class="product-card">
-          <h4>{{ product.products }}</h4>
+          <h4>{{ product.bankname }} - {{ product.products }}</h4>
           <div class="product-info">
             <p>금리: {{ product.maxRate }}%</p>
             <p>최고 금리: {{ product.maxRate2 }}%</p>
           </div>
           <button @click="removePreference(product.bankname, product.products)">제거</button>
         </div>
+      </div>
       </div>
       <button class="compare-btn" @click="showGraph">
         상품 금리 비교
@@ -107,19 +111,44 @@ const userNickName = computed(() => store.userInfo?.nickname || '')
 const userAge = computed(() => store.userInfo?.age || '')
 const userAsset = computed(() => store.userInfo?.asset || '')
 const userIncome = computed(() => store.userInfo?.income || '')
+const isLoading = ref(true)
+const error = ref(null)
 
 
 
 onMounted(async () => {
-  if (!store.userInfo) {
-    await store.fetchUserInfo()
+  try {
+    isLoading.value = true
+    if (!store.userInfo) {
+      await store.fetchUserInfo()
+    }
+    userInfo.value = store.userInfo
+    await store.getOptionDeposit() // 상세 정보 먼저 로드
+    await loadPreferences()
+  } catch (error) {
+    console.error('데이터 로딩 중 오류 발생:', error)
+    error.value = error.message
+  } finally {
+    isLoading.value = false
   }
-  userInfo.value = store.userInfo
-  loadPreferences()
 })
 
 const loadPreferences = async () => {
-  preferences.value = await store.getPreferences()
+  try {
+    isLoading.value = true
+    await store.getOptionDeposit() // 먼저 상세 정보 로드
+    const prefs = await store.getPreferences()
+    preferences.value = prefs.map(pref => ({
+      ...pref,
+      maxRate: parseFloat(pref.maxRate || 0).toFixed(2),
+      maxRate2: parseFloat(pref.maxRate2 || 0).toFixed(2)
+    }))
+  } catch (err) {
+    console.error('선호도 목록 로딩 실패:', err)
+    error.value = err.message
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const removePreference = async (bankName, productName) => {

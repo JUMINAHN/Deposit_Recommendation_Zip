@@ -351,9 +351,7 @@ export const useBankStore = defineStore('bank', () => {
     }
   }
 
-   //유저가 장바구니에 저장할 제품
-  //token을 안보내줌 => get ifno쪽으로 위치 옮김
-    // 장바구니에 상품 추가
+
     const addToPreference = async (bankName, productName) => {
       try {
         // 1. userInfo 확인 및 로드
@@ -364,6 +362,7 @@ export const useBankStore = defineStore('bank', () => {
           }
         }
     
+        
         // 2. URL 인코딩
         const encodedBankName = encodeURIComponent(bankName)
         const encodedProductName = encodeURIComponent(productName)
@@ -392,69 +391,68 @@ export const useBankStore = defineStore('bank', () => {
 
     const removeFromPreference = async (bankName, productName) => {
       try {
-        await axios.delete(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${bankName}/${productName}/`, {
-          headers: { Authorization: `Token ${token.value}` }
-        })
+        if (!userInfo.value || !userInfo.value.username) {
+          await fetchUserInfo()
+        }
+        
+        const encodedBankName = encodeURIComponent(bankName)
+        const encodedProductName = encodeURIComponent(productName)
+        
+        await axios.delete(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${encodedBankName}/${encodedProductName}/`,
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
         alert('관심 상품에서 제거되었습니다.')
+        return true
       } catch (error) {
         console.error('장바구니 제거 실패:', error)
-        alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+        alert(error.response?.data?.message || '장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
+        return false
       }
     }
-    // const userSaveProducts = async function(bankName, productName) {
-    //   try {
-    //     await addToPreference(bankName, productName)
-    //     // Update the userProduct array if needed
-    //     userProduct.value.push({ bankName, productName })
-    //   } catch (error) {
-    //     console.error("Error saving product:", error)
-    //     throw error
-    //   }
-    // }
 
-  // const userSaveProducts = async function(bankName, productName) {
-  //   try {
-  //     if (!userInfo.value || !userInfo.value.username) {
-  //       await getUserInfo();
-  //     }
-  //     const username = userInfo.value.username;
-  //     const response = await axios({
-  //       method: 'post',
-  //       url: `http://127.0.0.1:8000/app/accounts/profile/${username}/preference/save/${bankName}/${productName}/`,
-  //       headers: {
-  //         Authorization: `Token ${token.value}`
-  //       }
-  //     })
-  //     userProduct.value.push({
-  //       'bankName': bankName,
-  //       'productName': productName
-  //     })
-  //     alert('장바구니에 상품을 담았습니다!')
-  //   } catch (error) {
-  //     console.error("Error details:", error.response ? error.response.data : error.message);
-  //     alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.');
-  //   }
-  // }
-
-  //이름을 클릭했을떄 파라미터
-  //근데 로그인한 애들만 보내는거 아니잖아? 그냥 그 사람 정보 누르면 클릭 되어야 하는데 
-  //별도 생성? 일단 로그인한 애만 받아와본다면?
-  //내정보 받아오는데 401에러?
-  
-    //일단 한번 담아볼까?
-  //장바구니 목록 조회
-  const getPreferences = async () => {
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/`, {
-        headers: { Authorization: `Token ${token.value}` }
-      })
-      return response.data
-    } catch (error) {
-      console.error('장바구니 목록 조회 실패:', error)
-      return []
+    const getPreferences = async () => {
+      try {
+        if (!userInfo.value || !userInfo.value.username) {
+          await fetchUserInfo()
+        }
+        
+        // 예금 상품 데이터 먼저 가져오기
+        const depositResponse = await axios.get(
+          'http://127.0.0.1:8000/api/v1/deposit-products/',
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
+        
+        // 선호 상품 목록 가져오기
+        const prefResponse = await axios.get(
+          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/`,
+          {
+            headers: { Authorization: `Token ${token.value}` }
+          }
+        )
+        
+        // 두 데이터 매핑
+        return prefResponse.data.map(pref => {
+          const depositProduct = depositResponse.data.find(
+            d => d.kor_co_nm === pref.bankname && d.fin_prdt_nm === pref.products
+          )
+          
+          return {
+            bankname: pref.bankname,
+            products: pref.products,
+            maxRate: depositProduct?.options[0]?.intr_rate || 0,
+            maxRate2: depositProduct?.options[0]?.intr_rate2 || 0
+          }
+        })
+      } catch (error) {
+        console.error('선호도 목록 조회 실패:', error)
+        return []
+      }
     }
-  }
- 
 
   
   const fetchUserInfo = async () => { //사용자 정보 가져오기
@@ -467,59 +465,6 @@ export const useBankStore = defineStore('bank', () => {
       console.error('사용자 정보 가져오기 실패:', error)
     }
   } 
-
-  // const getUserInfo = async function() {
-  //   try {
-  //     if (!loginUserName.value) {
-  //       console.error('loginUserName is not set');
-  //       return null;
-  //     }
-  //     const response = await axios({
-  //       method: 'get',
-  //       url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/`,
-  //       headers: {
-  //         Authorization: `Token ${token.value}`
-  //       }
-  //     });
-  //     userInfo.value = response.data;
-  //     return userInfo.value;
-  //   } catch(error) {
-  //     console.log(error, 'error 발생!');
-  //     throw error;
-  //   }
-  // }//userInfo 정보 돌려줄 내용
-      //store에서 userInfo 자체를 받아오려고 했으나 비동기 문제로 지연 발생
-      //loadUserData가 있는데 굳이 nowUserProduct를 사용할 필요가 없을 듯? 데이터만 잘받아오면 문제 없음
-      //nowUserProduct.value = userProduct.value //지금 유저가 가진 정보
-
-    //더미
-    // const products = ref([
-    //   {
-    //     id: 1,
-    //     name: '마이드림적금',
-    //     interestRate: 3.5,
-    //     maxInterestRate: 4.5,
-    //   },
-    //   {
-    //     id: 2,
-    //     name: '청년희망적금',
-    //     interestRate: 4.2,
-    //     maxInterestRate: 5.2,
-    //   },
-    //   {
-    //     id: 3,
-    //     name: '디지털예금',
-    //     interestRate: 3.8,
-    //     maxInterestRate: 4.8,
-    //   }
-    // ])
-    // nowUserProduct.value = products.value
-
-
-  //   } catch(error) {
-  //     console.log(error, 'error 발생!')
-  //   }
-  // }
 
 
   return {

@@ -10,11 +10,24 @@ class ProfileSerializer(serializers.ModelSerializer):
 class PreferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['bankname', 'products', 'joinway', 'special', 'month', 'maxRate', 'maxRate2']
+        fields = ['bankname', 'products', 'maxRate', 'maxRate2']
 
+        
 class UserPreferenceSerializer(serializers.ModelSerializer):
-    preference = PreferenceSerializer(many=True, read_only=True)
+    preference = PreferenceSerializer(many=True)
     
     class Meta:
         model = User
         fields = ['username', 'preference']
+        
+    def update(self, instance, validated_data):
+        preference_data = validated_data.pop('preference', [])
+        instance = super().update(instance, validated_data)
+        
+        if preference_data:
+            instance.preference.clear()
+            for pref in preference_data:
+                product = Product.objects.get_or_create(**pref)[0]
+                instance.preference.add(product)
+                
+        return instance
