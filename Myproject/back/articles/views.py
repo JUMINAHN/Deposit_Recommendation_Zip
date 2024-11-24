@@ -105,3 +105,38 @@ def user_comments(request, username):
         return Response(serializer.data)
     except Exception as e:
         return Response({'message': str(e)}, status=404)
+    
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def article_like(request, pk):
+    article = get_object_or_404(Articles, pk=pk)
+    user = request.user
+    
+    if article.likes.filter(id=user.id).exists():
+        article.likes.remove(user)
+        is_liked = False
+    else:
+        article.likes.add(user)
+        is_liked = True
+    
+    return Response({
+        'is_liked': is_liked,
+        'like_count': article.likes.count()
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_like(request, pk):
+    article = get_object_or_404(Articles, id=pk)
+    if article.likes.filter(id=request.user.id).exists():
+        article.likes.remove(request.user)
+        is_liked = False
+    else:
+        article.likes.add(request.user)
+        is_liked = True
+    return Response({
+        'is_liked': is_liked,
+        'likes_count': article.likes.count()
+    })

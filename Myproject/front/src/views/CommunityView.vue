@@ -1,11 +1,30 @@
 <template>
   <div class="board-container">
     <div class="board-header">
-      <h2>금융상품 리뷰 게시판</h2>
-      <RouterLink :to="{ name: 'article-create' }" class="write-button">
-        새글쓰기
-      </RouterLink>
+  <h2>금융상품 리뷰 게시판</h2>
+  <div class="search-section">
+    <select v-model="searchType" class="search-type">
+      <option value="title">제목</option>
+      <option value="content">내용</option>
+      <option value="user">작성자</option>
+    </select>
+    <div class="search-box">
+      <input 
+        type="text" 
+        v-model="searchQuery" 
+        @input="handleSearch" 
+        placeholder="검색어를 입력하세요"
+        class="search-input"
+      >
+      <button class="search-button" @click="handleSearch">
+        🔍
+      </button>
     </div>
+  </div>
+  <RouterLink :to="{ name: 'article-create' }" class="write-button">
+    새글쓰기
+  </RouterLink>
+</div>
 
     <div v-if="loading" class="loading-wrapper">
       <div class="loading-spinner"></div>
@@ -16,12 +35,12 @@
     </div>
 
     <div v-else class="article-list">
-  <div 
-    v-for="article in articles" 
-    :key="article.id" 
-    @click="goToArticle(article.id)"
-    class="article-item"
-  >
+      <div 
+        v-for="article in filteredArticles" 
+        :key="article.id" 
+        @click="goToArticle(article.id)"
+        class="article-item"
+      >
     <div class="article-content">
       <h3 class="article-title">{{ article.title }}</h3>
       <p class="article-preview" v-if="article.content">
@@ -43,10 +62,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useBankStore } from '@/stores/bank'
+
+
+// 검색 관련 상태 추가
+const searchType = ref('title')
+const searchQuery = ref('')
+const filteredArticles = computed(() => {
+  if (!searchQuery.value) return articles.value
+  
+  return articles.value.filter(article => {
+    const query = searchQuery.value.toLowerCase()
+    switch (searchType.value) {
+      case 'title':
+        return article.title.toLowerCase().includes(query)
+      case 'content':
+        return article.content.toLowerCase().includes(query)
+      case 'user':
+        return article.user.toLowerCase().includes(query)
+      default:
+        return true
+    }
+  })
+})
+
 
 const store = useBankStore()
 const articles = ref([])
@@ -77,6 +119,11 @@ const fetchArticles = async () => {
   }
 }
 
+// 검색 핸들러
+const handleSearch = () => {
+  // 실시간 검색 결과가 filteredArticles에 반영됨
+}
+
 const goToArticle = (id) => {
   router.push({ name: 'articleDetail', params: { id } })
 }
@@ -102,12 +149,10 @@ onMounted(() => {
 }
 
 .board-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
   align-items: center;
-  margin-bottom: 40px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
 }
 
 .board-header h2 {
@@ -233,6 +278,56 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 500;
 }
+
+.search-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-type {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6e97f6;
+  background-color: white;
+  font-size: 14px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-input {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  width: 250px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #6e97f6;
+  box-shadow: 0 0 0 3px rgba(110, 151, 246, 0.1);
+}
+
+.search-button {
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.search-button:hover {
+  transform: scale(1.1);
+}
+
 
 @keyframes spin {
   0% { transform: rotate(0deg); }

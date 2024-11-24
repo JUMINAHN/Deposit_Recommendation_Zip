@@ -11,20 +11,34 @@
       <div class="article-header">
         <h2 class="article-title">{{ article.title }}</h2>
         <div class="article-meta">
-          <span class="author" @click="goToUserProfile(article.user)">
-            👤 {{ article.user }}
-          </span>
-          <span class="date">
-            📅 {{ formatDate(article.created_at) }}
-          </span>
+          <div class="meta-left">
+            <span class="author" @click.stop="goToUserProfile(article.user)">{{ article.user }}</span>
+            <span class="date">{{ formatDate(article.created_at) }}</span>
+          </div>
+          <button 
+            class="like-button" 
+            @click.stop="toggleLike"
+            :class="{ 'liked': isLiked }"
+          >
+            <span class="heart-emoji">{{ isLiked ? '❤️' : '🤍' }}</span>
+            <span class="like-count">{{ likeCount }}</span>
+          </button>
         </div>
       </div>
-
       <!-- 게시글 내용 -->
       <div class="article-content">
         <p>{{ article.content }}</p>
-      </div>
-
+        <div class="like-section">
+          <button 
+            class="like-button" 
+            @click="toggleLike"
+            :class="{ 'liked': isLiked }"
+          >
+            <!-- <span class="heart-emoji">{{ isLiked ? '좋아요 ❤️' : '좋아요 취소 🤍' }}</span> -->
+            <!-- <span class="like-count">{{ likeCount }}</span> -->
+          </button>
+        </div>
+        </div>
       <!-- 게시글 수정/삭제 버튼 -->
       <div v-if="article.user === currentUser.username" class="action-buttons">
         <button @click="editArticle" class="edit-button">수정</button>
@@ -119,6 +133,28 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useBankStore } from '@/stores/bank'
+const store = useBankStore()  // 이미 import된 useBankStore 사용
+
+
+
+const isLiked = ref(false)
+const likeCount = ref(0)
+const toggleLike = async () => {
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:8000/articles/${article.value.id}/like/`,
+      {},
+      { headers: { Authorization: `Token ${store.token}` } }
+    )
+    
+    if (response.data) {
+      isLiked.value = response.data.is_liked
+      likeCount.value = response.data.likes_count
+    }
+  } catch (error) {
+    console.error('좋아요 처리 실패:', error)
+  }
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -222,13 +258,17 @@ const addComment = async () => {
 const fetchArticle = async () => {
   try {
     const response = await axios.get(`http://127.0.0.1:8000/articles/${route.params.id}/`, {
-      headers : {
-        'Authorization' : `Token ${bankStore.token}`
+      headers: {
+        'Authorization': `Token ${store.token}`
       }
     })
     article.value = response.data
+    // 수정 폼을 위한 초기값 설정
     updatedTitle.value = article.value.title
     updatedContent.value = article.value.content
+    // 좋아요 상태 초기화
+    isLiked.value = response.data.is_liked
+    likeCount.value = response.data.likes_count
   } catch (error) {
     console.error('게시글 로드 실패:', error)
   }
@@ -306,10 +346,11 @@ const fetchCurrentUser = async () => {
 }
 
 onMounted(async () => {
-  await fetchCurrentUser() // 사용자 정보 로드
-  fetchArticle()
-  fetchComments()
-
+  if (route.params.id) {
+    await fetchCurrentUser() // 사용자 정보 로드
+    await fetchArticle() // 게시글 정보 로드
+    await fetchComments() // 댓글 정보 로드
+  }
 })
 
 const goBack = () => {
@@ -370,9 +411,11 @@ const goToUserProfile = (username) => {
 /* 메타 정보 (작성자, 날짜) */
 .article-meta {
   display: flex;
-  gap: 16px;
-  color: #666;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
   font-size: 14px;
+  color: #94a3b8;
 }
 
 /* 게시글 내용 */
@@ -584,6 +627,59 @@ const goToUserProfile = (username) => {
   display: flex;
   gap: 16px;
   align-items: center;
+}
+
+.like-section {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+
+.heart-emoji {
+  font-size: 16px;
+  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.like-button:hover .heart-emoji {
+  transform: scale(1.3);
+}
+
+.like-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.liked .heart-emoji {
+  animation: heartBeat 0.3s ease;
+}
+.meta-left {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
 </style>
