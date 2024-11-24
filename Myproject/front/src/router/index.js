@@ -6,12 +6,14 @@ import LoginRetryView from '@/views/LoginRetryView.vue'
 import LoginView from '@/views/LoginView.vue'
 import MainView from '@/views/MainView.vue'
 import RecommendView from '@/views/RecommendView.vue'
+
 import DepositCompareView from '@/views/DepositDetail.vue'
 import BankMapView from '@/views/BankMapView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import ProfileView from '@/views/ProfileView.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import SignUpView from '@/views/SignUpView.vue'
+import ExchangeRateView from '@/views/ExchangeRateView.vue'
 
 
 
@@ -82,6 +84,11 @@ const router = createRouter({
       path : '/main/map',
       name : 'map',
       component : BankMapView
+    },
+    {
+      path : '/main/exchangerate',
+      name : 'exchangerate',
+      component : ExchangeRateView
     },
   ],
 })

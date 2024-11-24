@@ -64,6 +64,9 @@
       </v-row>
     </v-container>
   </div>
+   <div>
+    <ChatBot />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -73,6 +76,7 @@ import community from '@/assets/images/community.jpg'
 import exchange from '@/assets/images/exchange.jpg'
 import findBank from '@/assets/images/findBank.jpg'
 import moneyFace from '@/assets/images/moneyFace.jpg'
+import ChatBot from '@/components/ChatBot.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { useBankStore } from '@/stores/bank'

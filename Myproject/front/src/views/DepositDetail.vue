@@ -1,5 +1,6 @@
 <template>
   <div class="detailPage">
+
     <div class="back-button-container">
       <v-btn
         class="back-button"
@@ -10,7 +11,6 @@
         목록으로 돌아가기
       </v-btn>
     </div>
-
     <v-container>
       <v-row>
         <!-- 왼쪽 이미지 섹션 -->
@@ -27,13 +27,9 @@
         <v-col cols="7">
           <div class="detail-content">
             <h3 class="bank-title">{{ bankName }}</h3>
-            
             <div class="product-name">{{ productName }}</div>
-            
             <v-divider class="divider"></v-divider>
-            
             <div class="info-section">
-
               <div class="info-item">
                 <div class="info-label">상세 정보</div>
                 <div class="info-content">
@@ -42,7 +38,7 @@
                   개월 수 : {{ month }} 개월
                 </div>
               </div>
-              
+
               <div class="info-item">
                 <div class="info-label">가입 방법</div>
                 <div class="info-content">
@@ -99,6 +95,7 @@ const maxRate2 = ref('')
 const month = ref('')
 const productResult = ref(false)
 
+
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
@@ -106,6 +103,7 @@ onMounted(async () => {
     console.log('Bank Name:', bankName.value)
     console.log('Product Name:', productName.value)
     
+
     await store.getOptionDeposit()
     const resultData = store.findDepositDetail(bankName.value, productName.value)
 
@@ -127,6 +125,12 @@ const checkProductInPreferences = async () => {
     pref => pref.bankname === bankName.value && pref.products === productName.value
   )
 }
+
+// const productResult = computed(() => {
+  // return store.userGetProduct(bankName.value, productName.value)
+// }) 
+//자체 값
+
 
 const toggleProduct = async () => {
   try {
@@ -168,6 +172,7 @@ const toggleProduct = async () => {
   margin-bottom: 40px;
   margin-left: auto;
   margin-right: auto;
+
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 15px;
@@ -269,4 +274,5 @@ const toggleProduct = async () => {
   background-color: #e9ecef !important;
   transform: translateX(-5px);
 }
+
 </style>

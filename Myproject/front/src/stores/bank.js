@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+
 export const useBankStore = defineStore('bank', () => {
   const token = ref(null) //회원정보
   const loginUserName = ref('') //token과 함께 저장해야 함
@@ -13,6 +14,7 @@ export const useBankStore = defineStore('bank', () => {
   const router = useRouter()
   const nowUserProduct = ref([]) //지금 유저가 선택한 배열 리스트
   //사실 userProduct랑 동일함
+
 
   //서버에 예적금 API 데이터 요청
   const getDepositData = async function () {
@@ -147,69 +149,6 @@ export const useBankStore = defineStore('bank', () => {
     return resultData //상세 정보 보유 여부 true/false반환
   }
 
-
-  //(추후 점검 필요)
-  // const loadUserProduct = async function() { 
-  //   try {
-  //     console.log('loginUserName:', loginUserName.value); // 디버깅
-  //     const response = await axios({
-  //       method : 'get',
-  //       url: `http://127.0.0.1:8000/app/accounts/profile/${loginUserName.value}/preference/`,
-  //       headers : {
-  //         Authorization: `Token ${token.value}`
-  //       }
-  //     })
-  //     console.log(response)
-  //     console.log(response.data)
-
-  //     userProduct.value = response.data
-  //     console.log(userProduct, '맞게 들어갔니?')
-  //     console.log('사용자의 상품 로드 완료', userProduct.value)
-  //   } catch (error) {
-  //     console.log(error, 'error메세지')
-  //     userProduct.value = [] //에러시 빈 배열 초기화
-  //   }
-  // }
-
-
-
-
-  //유저가 장바구니에 삭제할 데이터
-  // const userDeleteProducts = async function(bankName, productName) { //이거 실행
-  //   //동일하게 user에게 접근
-  //   try {
-  //     const response = await axios({
-  //       method : 'delete',
-  //       url : '`http://127.0.0.1:8000/app/accounts/preference/save/${bankName}/${productName}', //user Save관련 url
-  //       headers: {
-  //         Authorization: `Token ${token.value}` //토큰 관련 정보
-  //       },
-  //       data : {
-  //         bankName, //은행명
-  //         productName //은행상품명
-  //       },
-  //     }) 
-  //     //response가 어떤식으로 받아오는지 확인 => 제품이 엇으니까 삭제가 안되겠지... 고로 현재 테스트 불가
-  //     console.log(response, 'res')
-  //     console.log(response.data, 'res.data')
-  //   const index = userProduct.value.findIndex((item) => {
-  //     return (item.bankName === bankName && item.productName === productName) 
-  //   })
-  //   if (index === -1) {//값이 없다면 => 삭제X => 삭제할 내용이 없음
-  //     alert('삭제할 수 없는 상품입니다.')
-  //   } else {
-  //     userProduct.value.splice(index, 1) //상품 두개 묶음
-  //     alert('관심 상품에서 제거되었습니다.')
-  //     console.log('상품 보유 목록', userProduct)
-  //   } 
-  // } catch (error) {
-
-  //     console.log(error)
-  //     alert('장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
-  //   }
-  // }
-
-
   const userGetProduct = async function(bankName, productName) {
     console.log('getProudct 내부 들어와졌고 뱔류갑 업떻게 생겼는지 확인')    
     console.log(userProduct.value, 'value?') 
@@ -231,13 +170,10 @@ export const useBankStore = defineStore('bank', () => {
         return result.value = false
       }
     }
+
     return result //some 반환값
   }
 
-
-
-
-  //사용자에게 input 받은 값을 기반으로 조건 필터링
   let id = 1
   const findCondition = ref([
     { id: id++, title: '예치금액', content: [], selectedValue: '' }, //해당값 v-binding으로 가져와서 입력받아야 함
@@ -492,5 +428,6 @@ export const useBankStore = defineStore('bank', () => {
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
     , addToPreference, removeFromPreference, updateUserProfile
+
   }
 }, { persist: true }) 

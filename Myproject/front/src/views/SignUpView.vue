@@ -132,12 +132,15 @@ const checkLogin = async function (userData) {
     alert('모든 필드를 입력해주세요.')
     return
   }
-  
+
+  // 비밀번호 일치 확인
   if (userData.password1.value !== userData.password2.value) {
     alert('비밀번호가 일치하지 않습니다.')
     return
   }
 
+
+  // 약관 동의 확인
   if (!terms.value) {
     alert('이용약관에 동의해주세요.')
     return

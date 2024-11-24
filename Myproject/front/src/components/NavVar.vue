@@ -11,7 +11,7 @@
         <RouterLink :to="{name: 'recommend'}" class="nav-link">예적금 추천</RouterLink>
         <RouterLink :to="{name: 'map'}" class="nav-link">주변 은행 검색</RouterLink>
         <RouterLink v-if="isLoggedIn" :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
-        <a href="#" class="nav-link">환율 검색</a>
+        <RouterLink :to="{name: 'exchangerate'}" class="nav-link">환율 검색</RouterLink> 
         <a href="#" class="nav-link">EVENT </a>
 
       </div>
@@ -26,6 +26,7 @@
         <a v-else @click.prevent="handleLogout" href="#" class="auth-link logout-btn">
           로그아웃
         </a>
+
       </div>
     </div>
   </nav>

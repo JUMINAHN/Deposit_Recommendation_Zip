@@ -21,6 +21,7 @@ import environ
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 API_KEY = env('API_KEY')
+EXCHANGE_RATE_API_KEY = env('EXCHANGE_RATE_API_KEY')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'articles',
     'bank',
+    'exchangerate',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -168,3 +170,18 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
