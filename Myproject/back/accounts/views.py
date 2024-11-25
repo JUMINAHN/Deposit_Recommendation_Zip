@@ -7,6 +7,7 @@ from .serializers import ProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from .serializers import PreferenceSerializer  
+from django.utils.http import unquote
 
 
 
@@ -31,6 +32,25 @@ def profile_view(request, username):
             return Response(serializer.errors, status=400)
     except User.DoesNotExist:
         return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def preference_list(request, username):
+    try:
+        User = get_user_model()
+        user = User.objects.get(username=username)
+        preferences = user.preference.all()
+        data = [{
+            'bankname': product.bankname,
+            'products': product.products,
+            'maxRate': product.maxRate,
+            'maxRate2': product.maxRate2
+        } for product in preferences]
+        return Response(data)
+    except User.DoesNotExist:
+        return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
+
 
 
 @api_view(['POST'])
@@ -61,22 +81,30 @@ def follow(request, username):
 
 
 #전체 조회 관련 내용 추가
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def preference_list(request, username):
+def add_to_preference(request, username, bankname, preference):
     try:
-        User = get_user_model()
-        user = User.objects.get(username=username)
-        preferences = user.preference.all()
-        data = [{
-            'bankname': product.bankname,
-            'products': product.products,
-            'maxRate': product.maxRate,
-            'maxRate2': product.maxRate2
-        } for product in preferences]
-        return Response(data)
-    except User.DoesNotExist:
-        return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
+        if request.user.username != username:
+            return Response({'message': '권한이 없습니다.'}, status=403)
+
+        # URL 디코딩 처리
+        decoded_bankname = unquote(bankname).strip()
+        decoded_preference = unquote(preference).strip()
+
+        product = Product.objects.filter(
+            bankname=decoded_bankname,
+            products=decoded_preference
+        ).first()
+
+        if not product:
+            return Response({'message': '존재하지 않는 상품입니다.'}, status=404)
+
+        request.user.preference.add(product)
+        serializer = PreferenceSerializer(product)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'message': str(e)}, status=400)
 
 
 @api_view(['POST'])
@@ -86,14 +114,21 @@ def add_to_preference(request, username, bankname, preference):
         if request.user.username != username:
             return Response({'message': '권한이 없습니다.'}, status=403)
             
-        # 상품 조회 또는 생성
-        product = Product.objects.filter(
-            bankname=bankname,
-            products=preference
-        ).first()
+        decoded_bankname = unquote(bankname)
+        decoded_preference = unquote(preference)
         
-        if not product:
-            return Response({'message': '존재하지 않는 상품입니다.'}, status=404)
+        # 상품이 없으면 생성
+        product, created = Product.objects.get_or_create(
+            bankname=decoded_bankname,
+            products=decoded_preference,
+            defaults={
+                'joinway': '',  # getOptionDeposit에서 가져온 데이터
+                'special': '',  # getOptionDeposit에서 가져온 데이터
+                'month': 0,    # getOptionDeposit에서 가져온 데이터
+                'maxRate': 0,  # getOptionDeposit에서 가져온 데이터
+                'maxRate2': 0  # getOptionDeposit에서 가져온 데이터
+            }
+        )
         
         request.user.preference.add(product)
         serializer = PreferenceSerializer(product)
@@ -101,14 +136,36 @@ def add_to_preference(request, username, bankname, preference):
     except Exception as e:
         return Response({'message': str(e)}, status=400)
     
+@api_view(['POST'])
+def sync_products(request):
+    try:
+        data = request.data  # getOptionDeposit의 데이터
+        for item in data:
+            Product.objects.update_or_create(
+                bankname=item['bankname'],
+                products=item['products'],
+                defaults={
+                    'joinway': item['joinWay'],
+                    'special': item['special'],
+                    'month': item['month'],
+                    'maxRate': item['maxRate'],
+                    'maxRate2': item['maxRate2']
+                }
+            )
+        return Response({'message': '상품 동기화 완료'})
+    except Exception as e:
+        return Response({'message': str(e)}, status=400)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def remove_from_preference(request, username, bankname, preference):
     try:
-        # 요청한 사용자와 대상 사용자가 같은지 확인
         if request.user.username != username:
             return Response({'message': '권한이 없습니다.'}, status=403)
+
+        bankname = unquote(bankname)
+        preference = unquote(preference)
             
         product = Product.objects.get(bankname=bankname, products=preference)
         request.user.preference.remove(product)
