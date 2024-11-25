@@ -100,9 +100,12 @@ onMounted(async () => {
   try {
     bankName.value = route.params.bankName
     productName.value = route.params.productName
-    console.log('Bank Name:', bankName.value)
-    console.log('Product Name:', productName.value)
-    
+    // 디버깅을 위한 로그 추가
+    console.log('마운트 시 데이터:', {
+      bankName: bankName.value,
+      productName: productName.value,
+      params: route.params
+    })
 
     await store.getOptionDeposit()
     const resultData = store.findDepositDetail(bankName.value, productName.value)
@@ -134,12 +137,17 @@ const checkProductInPreferences = async () => {
 
 const toggleProduct = async () => {
   try {
-    // 1. userInfo가 없으면 먼저 로드
+    // 디버깅을 위한 로그 추가
+    console.log('토글 시작:', {
+      bankName: bankName.value,
+      productName: productName.value,
+      productResult: productResult.value
+    })
+
     if (!store.userInfo) {
       await store.fetchUserInfo()
     }
 
-    // 2. 실제 사용자 정보 확인
     if (!store.userInfo.username) {
       throw new Error('사용자 정보를 찾을 수 없습니다')
     }
@@ -153,7 +161,7 @@ const toggleProduct = async () => {
 
     if (success) {
       productResult.value = !productResult.value
-      await checkProductInPreferences() // loadPreferences 대신 checkProductInPreferences 호출
+      await checkProductInPreferences()
     }
   } catch (error) {
     console.error('상품 토글 중 오류 발생:', error)

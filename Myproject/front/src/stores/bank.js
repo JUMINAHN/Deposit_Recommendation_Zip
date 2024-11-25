@@ -285,68 +285,82 @@ export const useBankStore = defineStore('bank', () => {
       return false
     }
   }
-
-    const addToPreference = async (bankName, productName) => {
-      try {
-        // 1. userInfo 확인 및 로드
+  const addToPreference = async (bankName, productName) => {
+    try {
+      if (!userInfo.value || !userInfo.value.username) {
+        await fetchUserInfo()
         if (!userInfo.value || !userInfo.value.username) {
-          await fetchUserInfo()
-          if (!userInfo.value || !userInfo.value.username) {
-            throw new Error('사용자 정보를 불러올 수 없습니다')
+          throw new Error('사용자 정보를 불러올 수 없습니다')
+        }
+      }
+
+          // 디버깅을 위한 로그 추가
+    console.log('전송 전 데이터:', {
+      bankName,
+      productName,
+      username: userInfo.value.username
+    })
+
+      // URL 인코딩 전 공백과 특수문자 처리
+      const cleanBankName = bankName.trim().replace(/\//g, '-')
+      const cleanProductName = productName.trim().replace(/\//g, '-')
+      
+      const encodedBankName = encodeURIComponent(bankName.trim())
+      const encodedProductName = encodeURIComponent(productName.trim())
+  
+      // URL 구성 확인을 위한 로그
+      const url = `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`
+      console.log('요청 URL:', url)
+  
+      const response = await axios.post(
+        url,
+        {},
+        {
+          headers: {
+            Authorization: `Token ${token.value}`,
+            'Content-Type': 'application/json'
           }
         }
-    
-        
-        // 2. URL 인코딩
-        const encodedBankName = encodeURIComponent(bankName)
-        const encodedProductName = encodeURIComponent(productName)
-        
-        // 3. API 호출
-        const response = await axios.post(
-          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/save/${encodedBankName}/${encodedProductName}/`,
-          {},
-          {
-            headers: { 
-              Authorization: `Token ${token.value}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        )
-    
-        // 4. 성공 처리
-        alert(response.data.message || '장바구니에 상품을 담았습니다!')
-        return true
-      } catch (error) {
-        console.error('장바구니 추가 실패:', error)
-        alert(error.response?.data?.message || '장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
-        return false
-      }
+      )
+  
+      console.log('서버 응답:', response.data)
+      alert('장바구니에 상품을 담았습니다!')
+      return true
+    } catch (error) {
+      console.error('장바구니 추가 실패:', error.response || error)
+      alert('장바구니 상품을 담는 과정에서 에러가 발생했습니다.')
+      return false
     }
+  }
 
-    const removeFromPreference = async (bankName, productName) => {
-      try {
-        if (!userInfo.value || !userInfo.value.username) {
-          await fetchUserInfo()
+  const removeFromPreference = async (bankName, productName) => {
+    try {
+      if (!userInfo.value || !userInfo.value.username) {
+        await fetchUserInfo();
+      }
+  
+      const encodedBankName = encodeURIComponent(bankName.trim());
+      const encodedProductName = encodeURIComponent(productName.trim());
+  
+      await axios.delete(
+`http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${encodedBankName}/${encodedProductName}/`,        {
+          headers: {
+            Authorization: `Token ${token.value}`
+          }
         }
-        
-        const encodedBankName = encodeURIComponent(bankName)
-        const encodedProductName = encodeURIComponent(productName)
-        
-        await axios.delete(
-          `http://127.0.0.1:8000/app/accounts/profile/${userInfo.value.username}/preference/delete/${encodedBankName}/${encodedProductName}/`,
-          {
-            headers: { Authorization: `Token ${token.value}` }
-          }
-        )
-        alert('관심 상품에서 제거되었습니다.')
-        return true
-      } catch (error) {
-        console.error('장바구니 제거 실패:', error)
-        alert(error.response?.data?.message || '장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.')
-        return false
-      }
+      );
+  
+      alert('관심 상품에서 제거되었습니다.');
+      return true;
+    } catch (error) {
+      console.error('장바구니 제거 실패:', error);
+      alert(error.response?.data?.message || '장바구니 상품을 삭제하는 과정에서 에러가 발생했습니다.');
+      return false;
     }
+  }
 
+
+   
     const getPreferences = async () => {
       try {
         if (!userInfo.value || !userInfo.value.username) {
