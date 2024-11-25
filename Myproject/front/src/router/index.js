@@ -16,6 +16,7 @@ import SignUpView from '@/views/SignUpView.vue'
 import ExchangeRateView from '@/views/ExchangeRateView.vue'
 // import RecommendedProducts from '@/components/RecommendedProductsView.vue'
 import RecommendedProductsView from '@/views/RecommendedProductsView.vue'
+import TeachableMachine from '@/views/TeachableMachine.vue'
 
 
 
@@ -96,6 +97,11 @@ const router = createRouter({
       path: '/main/recommendations',
       name: 'recommendations',
       component : RecommendedProductsView
+    },
+    {
+      path: '/main/teachablemachine',
+      name: 'teachablemachine',
+      component : TeachableMachine
     }
   ],
 })
