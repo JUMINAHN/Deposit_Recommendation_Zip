@@ -1,65 +1,75 @@
 <template>
   <div class="teachable-machine">
-    <h2 class="text-xl mb-4">Teachable Machine Image Model</h2>
+    <h2 class="title">나와 닮은 지폐 찾기</h2>
 
-    <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+    <div v-if="error" class="error-message">
       {{ error }}
     </div>
 
-    <div class="mb-4">
+    <div class="upload-container">
+      <label for="file-upload" class="upload-button">
+        <v-icon>mdi-cloud-upload</v-icon>
+        사진 업로드하기
+      </label>
       <input
+        id="file-upload"
         type="file"
         @change="handleImageUpload"
         accept="image/*"
-        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-               file:rounded-full file:border-0 file:text-sm file:font-semibold 
-               file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        class="hidden-input"
       />
+      <p class="upload-hint">5MB 이하의 이미지 파일을 선택해주세요</p>
     </div>
 
-    <div v-if="imageUrl" class="mb-4">
+    <div v-if="imageUrl" class="image-preview-container">
       <img
         ref="imagePreview"
         :src="imageUrl"
         alt="uploaded image"
-        class="max-w-xs rounded shadow"
+        class="preview-image"
         @load="analyzeImage"
       />
     </div>
 
-    <div v-if="predictions.length > 0" class="mt-4 p-4 bg-gray-50 rounded">
-      <h3 class="font-bold mb-2">분석 결과:</h3>
-      <div v-for="(prediction, index) in predictions" :key="index" class="mb-2">
-        <div class="flex justify-between items-center">
-          <span class="font-medium">{{ prediction.className }}:</span>
-          <span>{{ (prediction.probability * 100).toFixed(2) }}%</span>
+    <div v-if="predictions.length > 0" class="results-container">
+      <h3 class="results-title">분석 결과</h3>
+      <div v-for="(prediction, index) in predictions" 
+           :key="index" 
+           class="prediction-item">
+        <div class="prediction-header">
+          <span class="prediction-name">{{ prediction.className }}</span>
+          <span class="prediction-value">{{ (prediction.probability * 100).toFixed(2) }}%</span>
         </div>
-        <div class="w-full bg-gray-200 rounded h-2">
+        <div class="progress-bar-bg">
           <div
-            class="bg-blue-600 rounded h-2"
+            class="progress-bar-fill"
             :style="{ width: `${prediction.probability * 100}%` }"
           ></div>
         </div>
       </div>
 
-      <div class="mt-4 space-x-2">
-        <button
+      <!-- <div class="export-buttons">
+        <v-btn
           @click="getFormattedResults('object')"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          color="primary"
+          class="export-btn"
         >
+          <v-icon left>mdi-file-document</v-icon>
           객체로 내보내기
-        </button>
-        <button
+        </v-btn>
+        <v-btn
           @click="getFormattedResults('array')"
-          class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          color="success"
+          class="export-btn"
         >
+          <v-icon left>mdi-file-table</v-icon>
           배열로 내보내기
-        </button>
-      </div>
+        </v-btn>
+      </div> -->
 
-      <div v-if="formattedResult" class="mt-4">
-        <h4 class="font-bold mb-2">포맷된 결과:</h4>
-        <pre class="bg-gray-100 p-4 rounded overflow-x-auto">{{ formattedResult }}</pre>
+      <div v-if="formattedResult" class="formatted-result">
+        <h4 class="formatted-title">상세 분석 결과</h4>
+        <pre class="result-code">{{ formattedResult }}</pre>
       </div>
     </div>
   </div>
@@ -244,16 +254,155 @@ defineExpose({
 
 <style>
 .teachable-machine {
-  color: white;
-  padding: 20px;
+  max-width: 800px;
+  /* margin-top: 100px; */
+  margin: 150px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.teachable-machine {
-  color: #333;  /* 어두운 색상으로 변경 */
-  padding: 20px;
-  margin-top: 64px;  /* 네비게이션 바 고려 */
-  background-color: white;
+.title {
+  font-size: 2rem;
+  color: #1976D2;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.upload-container {
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+
+.upload-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #1976D2;
+  color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+  background: #1565C0;
+  transform: translateY(-2px);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.upload-hint {
+  color: #666;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.image-preview-container {
+  text-align: center;
+  margin: 2rem 0;
+  width: 100%;
+  max-width: 300px; /* 컨테이너 크기도 제한 */
+  margin: 2rem auto; /* 중앙 정렬 */
+}
+
+.preview-image {
+  max-width: 300px;  /* 400px에서 300px로 축소 */
+  max-height: 300px; /* 400px에서 300px로 축소 */
+  width: 100%;       /* 컨테이너에 맞춰 반응형으로 조정 */
+  object-fit: contain; /* 비율 유지 */
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.results-container {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+
+.results-title {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.prediction-item {
+  margin-bottom: 1.5rem;
+}
+
+.prediction-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.prediction-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.prediction-value {
+  color: #1976D2;
+  font-weight: 600;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1976D2, #64B5F6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.export-btn {
+  flex: 1;
+}
+
+.formatted-result {
+  margin-top: 2rem;
+}
+
+.formatted-title {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.result-code {
+  background: #2c3e50;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: monospace;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 </style>
