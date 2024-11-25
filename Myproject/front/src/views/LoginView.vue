@@ -65,6 +65,7 @@
         ></v-text-field>
 
         <v-alert
+          v-if="loginAttempts.showWarning"
           type="warning"
           variant="tonal"
           density="comfortable"
@@ -99,7 +100,7 @@
 <script setup>
 import loginLogo from '@/assets/images/logo.png'
 import { useBankStore } from '@/stores/bank'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
 
@@ -109,24 +110,34 @@ const router = useRouter()
 const email = ref(null)
 const password = ref(null)
 const username = ref(null)
+// ================================= 5번 경고문구 표시부분관련
+const loginAttempts = reactive({
+  count: 0, // 로그인 시도 횟수 초기화
+  showWarning: false, // 경고 메시지 표시 여부
+})
+const IsUserValid = async function() {
+  const result = await store.findUser(userLoginData)
+  console.log('result : ', result)
+  if (result === true) {
+    alert('로그인에 성공하였습니다!')
+    loginAttempts.count = 0 // 성공 시 로그인 시도 초기화
+    loginAttempts.showWarning = false
+    router.push({ name: 'main' })
+  } else {
+    loginAttempts.count += 1 // 실패 시 횟수 증가
+    if (loginAttempts.count >= 1) {
+      loginAttempts.showWarning = true // 5번 이상 실패 시 경고 표시
+    }
+    alert('로그인에 실패하였습니다! 다시 확인해주세요!')
+  }
+}
+// ==================================================
 
 //서버에 사용자가 입력한 데이터를 전달해서 일치 여부 판단
 const userLoginData = {
   username,
   email,
   password
-}
-//서버에 데이터를 보내주고 사용자가 맞다면? True 값이라면 router MainPage
-const IsUserValid = async function(){
-  const result = await store.findUser(userLoginData)
-  console.log('result : ', result)
-  if (result === true) {//true이면 alert
-    
-    alert('로그인에 성공하였습니다!')
-    router.push({name : 'main'})
-  } else {
-    alert('로그인에 실패하였습니다! 다시 확인해주세요!')
-  }
 }
 
 const visible = ref(true) 
