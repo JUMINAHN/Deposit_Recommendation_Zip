@@ -100,21 +100,19 @@ onMounted(async () => {
   try {
     bankName.value = route.params.bankName
     productName.value = route.params.productName
-    // 디버깅을 위한 로그 추가
-    console.log('마운트 시 데이터:', {
-      bankName: bankName.value,
-      productName: productName.value,
-      params: route.params
-    })
 
     await store.getOptionDeposit()
     const resultData = store.findDepositDetail(bankName.value, productName.value)
 
-    special.value = resultData[0].special || '관련 데이터가 없습니다.'
-    joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
-    maxRate.value = resultData[0].maxRate
-    maxRate2.value = resultData[0].maxRate2 
-    month.value = resultData[0].month
+    if (resultData && resultData.length > 0) {
+      special.value = resultData[0].special || '관련 데이터가 없습니다.'
+      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
+      maxRate.value = resultData[0].maxRate || 0
+      maxRate2.value = resultData[0].maxRate2 || 0
+      month.value = resultData[0].month || 0
+    } else {
+      console.error('상품 정보를 찾을 수 없습니다.')
+    }
 
     await checkProductInPreferences()
   } catch (error) {
