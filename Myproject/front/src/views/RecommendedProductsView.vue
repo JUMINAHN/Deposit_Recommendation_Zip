@@ -38,6 +38,20 @@
                      :key="product.bankname + product.products" 
                      cols="12" md="4">
                 <v-card elevation="2" class="product-item">
+                  <!-- 매칭률 표시 -->
+                  <div class="match-rate">
+                    <v-progress-circular
+                      :rotate="-90"
+                      :size="50"
+                      :width="7"
+                      :model-value="calculateMatchRate(product.score)"
+                      color="primary"
+                    >
+                      {{ calculateMatchRate(product.score) }}%
+                    </v-progress-circular>
+                  </div>
+                  
+                  <!-- 상품 정보 -->
                   <v-card-title class="text-h6">{{ product.bankname }}</v-card-title>
                   <v-card-text>
                     <div class="product-info">
@@ -50,9 +64,17 @@
                         <span class="rate-label">우대금리</span>
                         <span class="rate-value primary--text">{{ product.maxRate2 }}%</span>
                       </div>
-                      <div class="recommendation-reason">
-                        <v-icon small color="primary" class="mr-1">mdi-information</v-icon>
-                        {{ getRecommendationReason(product) }}
+                      <!-- 추천 태그들 -->
+                      <div class="recommendation-tags">
+                        <v-chip
+                          v-for="reason in getProductReasons(product)"
+                          :key="reason"
+                          color="primary"
+                          small
+                          class="ma-1"
+                        >
+                          {{ reason }}
+                        </v-chip>
                       </div>
                     </div>
                   </v-card-text>
@@ -65,6 +87,7 @@
     </v-row>
   </div>
 </template>
+          
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'  // onMounted를 한 번만 import
@@ -73,27 +96,125 @@ import { useBankStore } from '@/stores/bank'
 
 const store = useBankStore()
 const { detailDepositData, userInfo } = storeToRefs(store)
+
+
+const recommendedProducts = computed(() => {
+  if (!detailDepositData.value || !userInfo.value) return []
+  
+  const age = userInfo.value.age
+  const asset = userInfo.value.asset
+  const income = userInfo.value.income  // income 추가
+
+  return detailDepositData.value
+    .map(product => ({
+      ...product,
+      score: calculateRecommendationScore(product, age, asset, income),
+      recommendationReason: getRecommendationReason(product, age, asset, income)
+    }))
+    .filter(product => product.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+})
+const getRecommendationReason = (product, age, asset, income) => {
+  const reasons = []
+  
+  // 연령대별 추천 이유
+  if (age < 30) {
+    reasons.push('청년층 우대 금리 혜택')
+    if (product.maxRate2 > 3.5) reasons.push(`${product.maxRate2}% 고금리 상품`)
+  } else if (age < 40) {
+    reasons.push('30대 맞춤 안정적 상품')
+  }
+  
+  // 자산 규모별 추천 이유
+  if (asset > 100000000) {
+    reasons.push('프리미엄 고객 전용 상품')
+  } else if (asset > 50000000) {
+    reasons.push('우수 고객 우대 혜택')
+  }
+  
+  return reasons.join('\n')
+}
+
+const calculateAgeDistribution = (userAge) => {
+  const ageGroup = Math.floor(userAge / 10) * 10;
+  return [
+    { value: ageGroup === 20 ? 40 : 20, name: '20대', itemStyle: { color: '#64B5F6' } },
+    { value: ageGroup === 30 ? 40 : 25, name: '30대', itemStyle: { color: '#81C784' } },
+    { value: ageGroup === 40 ? 40 : 20, name: '40대', itemStyle: { color: '#FFB74D' } },
+    { value: ageGroup >= 50 ? 40 : 15, name: '50대 이상', itemStyle: { color: '#E57373' } }
+  ];
+};
+
+
+const calculateRecommendationScore = (product, age, asset, income) => {
+  let score = 0
+  
+  // 연령별 점수
+  if (age < 30 && product.maxRate2 > 3.5) score += 3
+  else if (age < 40 && product.maxRate2 > 3.0) score += 2
+  else if (age < 50 && product.maxRate2 > 2.5) score += 2
+  
+  // 자산별 점수
+  if (asset > 100000000 && product.maxRate2 > 4.0) score += 4
+  else if (asset > 50000000 && product.maxRate2 > 3.5) score += 3
+  else if (asset > 10000000 && product.maxRate2 > 3.0) score += 2
+  
+  // 소득별 점수
+  if (income > 50000000 && product.maxRate2 > 3.8) score += 3
+  else if (income > 30000000 && product.maxRate2 > 3.3) score += 2
+  
+  return score
+}
+
+// 매칭률 계산 함수
+const calculateMatchRate = (score) => {
+  return Math.min(Math.round((score / 10) * 100), 100)
+}
+
+// 추천 이유 배열로 변환
+const getProductReasons = (product) => {
+  if (!product.recommendationReason) return []
+  return product.recommendationReason.split('\n').filter(reason => reason)
+}
+
+
 // 차트 옵션 설정
 const ageChartOption = computed(() => ({
-  title: { text: '연령대별 선호도' },
-  tooltip: { trigger: 'item' },
-  legend: { orient: 'vertical', left: 'left' },
+  title: { 
+    text: '연령대별 선호도',
+    textStyle: { fontSize: 16, fontWeight: 'bold' }
+  },
+  tooltip: { 
+    trigger: 'item',
+    formatter: '{b}: {c}%'
+  },
+  legend: { 
+    orient: 'vertical',
+    left: 'left',
+    padding: 20,
+    borderRadius: 10
+  },
   series: [{
     type: 'pie',
-    radius: '70%',
+    radius: ['40%', '70%'],  // 도넛 형태로 변경
+    center: ['60%', '50%'],
+    avoidLabelOverlap: true,
+    itemStyle: {
+      borderRadius: 10,
+      borderColor: '#fff',
+      borderWidth: 2
+    },
+    label: {
+      show: true,
+      formatter: '{b}: {c}%'
+    },
     data: [
-      { value: 35, name: '20대' },
-      { value: 30, name: '30대' },
-      { value: 20, name: '40대' },
-      { value: 15, name: '50대 이상' }
-    ],
-    emphasis: {
-      itemStyle: {
-        shadowBlur: 10,
-        shadowOffsetX: 0,
-        shadowColor: 'rgba(0, 0, 0, 0.5)'
-      }
-    }
+      { value: 35, name: '20대', itemStyle: { color: '#64B5F6' } },
+      { value: 30, name: '30대', itemStyle: { color: '#81C784' } },
+      { value: 20, name: '40대', itemStyle: { color: '#FFB74D' } },
+      { value: 15, name: '50대 이상', itemStyle: { color: '#E57373' } }
+    ]
   }]
 }))
 
@@ -199,4 +320,30 @@ onMounted(async () => {
   font-size: 0.9em;
   color: #555;
 }
+
+.product-card {
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.match-rate {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.recommendation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 </style>
