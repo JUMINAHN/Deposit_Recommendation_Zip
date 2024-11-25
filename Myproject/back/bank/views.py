@@ -152,7 +152,7 @@ def deposit_product_options(request, fin_prdt_cd):
     return JsonResponse(serializers.data, safe=False)
 
 
-openai.api_key=''
+openai.api_key=settings.OPEN_API_KEY
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -161,13 +161,11 @@ def chatbot_response(request):
         user_message = request.data.get('message')
         if not user_message:
             return Response({'error': 'Message is required'}, status=400)
-
         system_prompt = """
         당신은 금융 상품 추천 전문가입니다. 
         예금과 적금 상품에 대한 조언을 제공하고, 
         사용자의 재무 상황에 맞는 최적의 금융 상품을 추천해주세요.
         """
-        
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -175,11 +173,8 @@ def chatbot_response(request):
                 {"role": "user", "content": user_message}
             ]
         )
-        
         chatbot_reply = response.choices[0].message.content
         return Response({'reply': chatbot_reply})
-        
     except Exception as e:
         print("Error occurred:", str(e))
         return Response({'error': str(e)}, status=500)
-
