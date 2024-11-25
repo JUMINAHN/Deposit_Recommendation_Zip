@@ -75,14 +75,34 @@ const predictions = ref([]);
 const formattedResult = ref(null);
 let model = null;
 
+
+onMounted(async () => {
+  try {
+    // 1. TensorFlow.js 로드
+    await loadTensorFlow();
+    
+    // 2. Teachable Machine 라이브러리 로드
+    await loadTeachableMachine();
+    
+    // 3. 모델 초기화
+    await initModel();
+  } catch (error) {
+    console.error('모델 초기화 실패:', error);
+    error.value = '모델을 불러오는데 실패했습니다.';
+  }
+});
+
 const modelPath = ref("/models/my_model/");
 
 async function loadTensorFlow() {
-  if (window.tf) return;
+  if (window.tf) {
+    console.log('TensorFlow.js already loaded');
+    return;
+  }
   
-  await loadScript(
-    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"
-  );
+  console.log('Loading TensorFlow.js...');
+  await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js");
+  console.log('TensorFlow.js loaded successfully');
 }
 
 async function loadTeachableMachine() {
@@ -166,31 +186,26 @@ async function analyzeImage() {
 }
 
 async function initModel() {
-  if (!window.tmImage) {
-    error.value = "Teachable Machine 라이브러리가 아직 로드되지 않았습니다.";
-    return;
-  }
-
   try {
-    // 기존 모델 정리
+    if (!window.tmImage) {
+      throw new Error('Teachable Machine 라이브러리가 로드되지 않았습니다.');
+    }
+
     if (model) {
       await model.dispose();
     }
     
-    // TensorFlow 메모리 정리
-    tf.engine().startScope();  // 스코프 시작
-    window.tf.disposeVariables();
-
-    const modelURL = `${modelPath.value}model.json`;
-    const metadataURL = `${modelPath.value}metadata.json`;
-
-    model = await window.tmImage.load(modelURL, metadataURL);
-    console.log("모델 로드 성공");
+    console.log('모델 경로:', `${modelPath.value}model.json`);
     
-    tf.engine().endScope();  // 스코프 종료
+    model = await window.tmImage.load(
+      `${modelPath.value}model.json`,
+      `${modelPath.value}metadata.json`
+    );
+    
+    console.log('모델 로드 성공');
   } catch (err) {
-    error.value = "모델을 불러오는 중 오류가 발생했습니다.";
-    console.error("모델 로드 오류:", err);
+    error.value = `모델 로드 실패: ${err.message}`;
+    console.error('모델 로드 오류:', err);
   }
 }
 
@@ -231,5 +246,14 @@ defineExpose({
 .teachable-machine {
   color: white;
   padding: 20px;
+}
+
+.teachable-machine {
+  color: #333;  /* 어두운 색상으로 변경 */
+  padding: 20px;
+  margin-top: 64px;  /* 네비게이션 바 고려 */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 </style>
