@@ -10,5 +10,7 @@ urlpatterns = [
         views.add_to_preference, 
         name='add_to_preference'),    
     path('profile/<str:username>/preference/delete/<str:bankname>/<str:preference>/', views.remove_from_preference, name='remove_from_preference'),
+    path('analyze-image/', views.analyze_image, name='analyze_image'),
+    path('verify-ad/', views.verify_ad_view, name='verify_ad'),
 ]
     

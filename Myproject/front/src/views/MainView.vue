@@ -81,7 +81,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { useBankStore } from '@/stores/bank'
 import { Chart } from 'chart.js/auto'
-import RecommendedProducts from '@/components/RecommendedProductsView.vue'
+import '@/views/RecommendedProductsView.vue'
 
 
 // 인터페이스 정의
@@ -185,7 +185,7 @@ const imgData = ref<CardData[]>([
     title: '내가 지폐가 될 상인가',
     number: CARD_NUMBERS.FACE,
     content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요',
-    link: 'moneyface',
+    link: 'teachablemachine',
     requiresLogin: true,
     icon: '💲'
   })

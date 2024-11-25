@@ -2,13 +2,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User, Product
+from .models import User, Product, AdView, MLResult
 from .serializers import ProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from .serializers import PreferenceSerializer  
 from django.utils.http import unquote
-
+import random
+from django.utils import timezone
 
 
 @api_view(['GET', 'PUT']) #기존에는 request.user 정보만 반환해서 다른 유저의 정보를 받아올 수 없었음
@@ -32,6 +33,20 @@ def profile_view(request, username):
             return Response(serializer.errors, status=400)
     except User.DoesNotExist:
         return Response({'message': '사용자를 찾을 수 없습니다.'}, status=404)
+
+async def perform_ml_analysis(image):
+    try:
+        # 머신러닝 분석 결과를 반환하는 함수
+        results = await model.predict(image)
+        
+        # 결과 포맷팅
+        return {
+            'class': results[0].className,  # 가장 높은 확률의 클래스
+            'probability': float(results[0].probability)  # 확률
+        }
+    except Exception as e:
+        print(f"ML 분석 오류: {str(e)}")
+        raise Exception("이미지 분석 중 오류가 발생했습니다.")
 
 
 @api_view(['GET'])
@@ -180,6 +195,85 @@ def current_user_profile(request):
     serializer = ProfileSerializer(request.user)
     return Response(serializer.data)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+# views.py에서 사용할 때
+async def analyze_image(request):  # async 추가
+    try:
+        image = request.FILES['image']
+        user = request.user
+        
+        # 일일 시도 횟수 체크
+        if user.daily_attempts >= 3:
+            return Response({'message': '오늘의 시도 횟수를 모두 사용했습니다.'}, status=400)
+
+        # 이미지 분석
+        result = await perform_ml_analysis(image)  # await 사용 가능
+        
+        # 포인트 지급 로직 (0.1% 확률)
+        points = 0
+        if random.random() < 0.001:  # 0.1% 확률
+            if result.get('class') == '오만원':
+                points = 50000
+                user.points += points
+                user.save()
+
+        # 결과 저장
+        ml_result = MLResult.objects.create(
+            user=user,
+            image=image,
+            result=result.get('class'),
+            probability=result.get('probability'),
+            points_awarded=points
+        )
+
+        user.daily_attempts += 1
+        user.last_attempt = timezone.now()
+        user.save()
+
+        return Response({
+            'result': result,
+            'points_awarded': points,
+            'attempts_left': 3 - user.daily_attempts
+        })
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_ad_view(request):
+    user = request.user
+    
+    # 광고 시청 기록 저장
+    AdView.objects.create(
+        user=user,
+        ad_type=request.data.get('ad_type', 'general')
+    )
+    
+    # 시도 횟수 초기화
+    user.daily_attempts = 0
+    user.save()
+    
+    return Response({'message': '추가 시도가 활성화되었습니다.'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_ad_view(request):
+    user = request.user
+    
+    # 광고 시청 기록 저장
+    AdView.objects.create(
+        user=user,
+        ad_type=request.data.get('ad_type', 'general')
+    )
+    
+    # 시도 횟수 초기화
+    user.daily_attempts = 0
+    user.save()
+    
+    return Response({'message': '추가 시도가 활성화되었습니다.'})
 
 # @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
