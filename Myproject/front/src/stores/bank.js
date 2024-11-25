@@ -428,12 +428,122 @@ export const useBankStore = defineStore('bank', () => {
   } 
 
 
+  // 새로운 상태 추가
+  const recommendedProducts = computed(() => {
+    if (!detailDepositData.value || !userInfo.value) return []
+    
+    const age = userInfo.value.age
+    const asset = userInfo.value.asset
+    const income = userInfo.value.income
+  
+    return detailDepositData.value
+      .map(product => ({
+        ...product,
+        score: calculateRecommendationScore(product, age, asset, income),
+        recommendationReason: getRecommendationReason(product, age, asset, income)
+      }))
+      .filter(product => product.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+  })
+
+  // 추천 상품을 가져오는 함수 추가
+  const getRecommendedProducts = computed(() => {
+    if (!detailDepositData.value || !userInfo.value) return []
+    
+    const age = userInfo.value.age
+    const asset = userInfo.value.asset
+    const gender = userInfo.value.gender
+  
+    return detailDepositData.value
+      .map(product => {
+        let score = 0
+        let reasons = []
+  
+        // 연령대별 점수
+        if (age < 30) {
+          score += product.maxRate2 > 3.5 ? 3 : 1
+          reasons.push('20대 우대 금리 제공')
+        } else if (age < 40) {
+          score += product.maxRate2 > 3.0 ? 2 : 1
+          reasons.push('30대 맞춤 상품')
+        }
+  
+        // 자산별 점수
+        if (asset > 50000000) {
+          score += product.maxRate2 > 4.0 ? 3 : 1
+          reasons.push('고액자산가 우대')
+        }
+  
+        // 성별별 추천 (예시)
+        if (gender === 'F') {
+          score += product.special?.includes('여성') ? 2 : 0
+          if (product.special?.includes('여성')) reasons.push('여성 우대 상품')
+        }
+  
+        return {
+          ...product,
+          score,
+          recommendationReason: reasons.join('\n'),
+          matchRate: Math.min(Math.round((score / 8) * 100), 100) // 매칭률 계산
+        }
+      })
+      .filter(product => product.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5) // 상위 5개 상품만 추천
+  })
+
+  const getRecommendationReason = (product, age, asset, income) => {
+    const reasons = []
+    
+    if (age < 30) {
+      reasons.push('청년층 우대 금리 혜택')
+      if (product.maxRate2 > 3.5) reasons.push(`${product.maxRate2}% 고금리 상품`)
+    } else if (age < 40) {
+      reasons.push('30대 맞춤 안정적 상품')
+    }
+    
+    if (asset > 100000000) {
+      reasons.push('프리미엄 고객 전용 상품')
+    } else if (asset > 50000000) {
+      reasons.push('우수 고객 우대 혜택')
+    }
+    
+    if (income > 50000000) {
+      reasons.push('고소득자 특별 우대')
+    }
+    
+    return reasons.join('\n')
+  }
+  
+const calculateRecommendationScore = (product, age, asset, income) => {
+  let score = 0
+  
+  // 연령별 점수
+  if (age < 30 && product.maxRate2 > 3.5) score += 3
+  else if (age < 40 && product.maxRate2 > 3.0) score += 2
+  else if (age < 50 && product.maxRate2 > 2.5) score += 2
+  
+  // 자산별 점수
+  if (asset > 100000000 && product.maxRate2 > 4.0) score += 4
+  else if (asset > 50000000 && product.maxRate2 > 3.5) score += 3
+  else if (asset > 10000000 && product.maxRate2 > 3.0) score += 2
+  
+  // 소득별 점수
+  if (income > 50000000 && product.maxRate2 > 3.8) score += 3
+  else if (income > 30000000 && product.maxRate2 > 3.3) score += 2
+  
+  return score
+}
+  
+
   return {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
-    , addToPreference, removeFromPreference, updateUserProfile
+    , addToPreference, removeFromPreference, updateUserProfile,
+    recommendedProducts, getRecommendedProducts
 
   }
 }, { persist: true }) 

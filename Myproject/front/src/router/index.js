@@ -14,6 +14,8 @@ import ProfileView from '@/views/ProfileView.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import ExchangeRateView from '@/views/ExchangeRateView.vue'
+// import RecommendedProducts from '@/components/RecommendedProductsView.vue'
+import RecommendedProductsView from '@/views/RecommendedProductsView.vue'
 
 
 
@@ -90,6 +92,11 @@ const router = createRouter({
       name : 'exchangerate',
       component : ExchangeRateView
     },
+    {
+      path: '/main/recommendations',
+      name: 'recommendations',
+      component : RecommendedProductsView
+    }
   ],
 })
 

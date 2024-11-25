@@ -11,6 +11,9 @@ from .serializers import DepositOptionsSerializer, DepositProductsSerializer, De
 from django.core.serializers.json import DjangoJSONEncoder
 import openai 
 import logging
+from recommendations.services import ProductRecommender
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -178,3 +181,14 @@ def chatbot_response(request):
     except Exception as e:
         print("Error occurred:", str(e))
         return Response({'error': str(e)}, status=500)
+    
+from recommendations.services import ProductRecommender
+
+@api_view(['GET'])
+def get_personalized_products(request):
+    user = request.user
+    recommender = ProductRecommender()
+    recommendations = recommender.recommend_products(user)
+    
+    serializer = DepositProductsSerializer(recommendations, many=True)
+    return Response(serializer.data)
