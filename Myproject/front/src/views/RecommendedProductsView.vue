@@ -12,7 +12,7 @@
       <!-- 연령대별 선호 상품 차트 -->
       <v-col cols="12" md="6">
         <v-card class="chart-card">
-          <v-card-title class="blue-grey--text">{{ userInfo.age }}대 연령층의 선호 상품 TOP 5</v-card-title>
+          <v-card-title class="blue-grey--text">{{ userInfo.age }}세 연령층의 선호 상품 TOP 5</v-card-title>
           <v-chart class="chart" :option="ageChartOption" autoresize />
         </v-card>
       </v-col>
@@ -257,6 +257,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.blue-grey--text {
+  background-color: rgba(173, 216, 230, 0.25); /* Light sky blue with 75% transparency */
+  font-weight: 800; 
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
 .recommendation-dashboard {
   padding: 20px;
   margin-top: 64px; /* 네비게이션 바 높이만큼 여백 추가 */

@@ -286,13 +286,6 @@ export const useBankStore = defineStore('bank', () => {
         }
       }
 
-          // 디버깅을 위한 로그 추가
-    console.log('전송 전 데이터:', {
-      bankName,
-      productName,
-      username: userInfo.value.username
-    })
-
       // URL 인코딩 전 공백과 특수문자 처리
       const cleanBankName = bankName.trim().replace(/\//g, '-')
       const cleanProductName = productName.trim().replace(/\//g, '-')

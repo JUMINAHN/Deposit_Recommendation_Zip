@@ -8,11 +8,12 @@
           <img :src="bankchar" alt="프로필 이미지">
         </div>
         <div class="profile-info">
-          <div class="info-row">
+          <div>
             <h2>{{ store.userInfo?.username }}</h2>
-            <button class="edit-btn" @click="editField('username')">수정</button>
           </div>
-          <p class="email">{{ store.userInfo?.email }}</p>
+          <div>
+            <p class="email">{{ store.userInfo?.email }}</p>
+          </div>
         </div>
       </div>
       
@@ -93,7 +94,7 @@
       <button class="cancel-btn" @click="cancelEdit">취소</button>
     </template>
     <template v-else>
-      <span class="value">{{ store.userInfo?.asset }}원</span>
+      <span class="value">{{ formattedAsset }}원</span>
       <button class="edit-btn" @click="startEdit('asset')">수정</button>
     </template>
   </div>
@@ -114,7 +115,7 @@
       <button class="cancel-btn" @click="cancelEdit">취소</button>
     </template>
     <template v-else>
-      <span class="value">{{ store.userInfo?.income }}원</span>
+      <span class="value">{{ formattedIncome }}원</span>
       <button class="edit-btn" @click="startEdit('income')">수정</button>
     </template>
   </div>
@@ -134,7 +135,7 @@
             <p>금리: {{ product.maxRate }}%</p>
             <p>최고 금리: {{ product.maxRate2 }}%</p>
           </div>
-          <button @click="removePreference(product.bankname, product.products)">제거</button>
+          <button class="remove-btn" @click="removePreference(product.bankname, product.products)">제거</button>
         </div>
       </div>
       </div>
@@ -179,6 +180,13 @@ const userIncome = computed(() => store.userInfo?.income || '')
 const isLoading = ref(true)
 const error = ref(null)
 
+// ===================== 숫자 포멧팅
+const formatNumber = (num) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+const formattedAsset = computed(() => formatNumber(store.userInfo?.asset || 0))
+const formattedIncome = computed(() => formatNumber(store.userInfo?.income || 0))
+// ==================================
 
 
 onMounted(async () => {
@@ -248,23 +256,6 @@ const saveEdit = async (field) => {
     alert('프로필 수정에 실패했습니다.')
   }
 }
-
-
-// onMounted(() => {
-  //회원 정보 받아오기
-  // const userInfo = store.getUserInfo() 
-  // userInfo
-  // .then((res) => {
-  //   userName.value = res.username 
-  //   userEmail.value = res.email
-  // })
-  // .catch((err) => {
-  //   console.log('받아오는 과정에서 에러 발생', err)
-  // })
-
-  //회원이 가진 상품 받아오기 => bank.js에 선언했는데 현재 지금 이곳에서 사용
-//})
-
 
 // 팝업 상태 관리
 const isGraphVisible = ref(false)
@@ -348,15 +339,15 @@ const createChart = () => {
       },
       // 클릭 이벤트 활성화
       onClick: function(e, legendItem, legend) {
-        const index = legendItem.datasetIndex;
-        const ci = legend.chart;
-        const meta = ci.getDatasetMeta(index);
+        const index = legendItem.datasetIndex
+        const ci = legend.chart
+        const meta = ci.getDatasetMeta(index)
 
         // 데이터셋 표시/숨김 토글
-        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null
 
         // 차트 업데이트
-        ci.update();
+        ci.update()
       }
     }
   },
@@ -395,6 +386,22 @@ const closeGraph = () => {
 </script>
 
 <style scoped>
+.remove-btn {
+  padding: 0.3rem 0.6rem; /* 버튼 크기 줄이기 */
+  background-color: #ffcccc; /* 옅은 빨강 배경색 */
+  color: #d32f2f; /* 어두운 빨강 텍스트 */
+  border: 1px solid #ff9999; /* 옅은 빨강 테두리 */
+  border-radius: 4px;
+  font-size: 0.8rem; /* 글자 크기 줄이기 */
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.remove-btn:hover {
+  background-color: #ffb3b3; /* 호버 시 약간 더 어두운 옅은 빨강 */
+  transform: scale(1.05); /* 호버 시 작은 확대 효과 */
+}
+
 .profile-container {
   display: flex;
   max-width: 1200px;
@@ -438,13 +445,6 @@ const closeGraph = () => {
 
 .profile-info {
   text-align: center;
-}
-
-.info-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
 }
 
 .financial-info {
@@ -548,10 +548,13 @@ const closeGraph = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(255, 255, 255, 0.9);
   display: flex;
   justify-content: center;
+  text-align: center;
   align-items: center;
+  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-weight: bold;
 }
 
 .popup-content {

@@ -78,7 +78,6 @@ import axios from 'axios'
 
 // 기존 const 선언부 아래에 추가
 const router = useRouter()
-
 // 뒤로가기 함수 추가
 const goBack = () => {
   router.go(-1)
@@ -94,7 +93,6 @@ const maxRate = ref('')
 const maxRate2 = ref('')
 const month = ref('')
 const productResult = ref(false)
-
 
 onMounted(async () => {
   try {
