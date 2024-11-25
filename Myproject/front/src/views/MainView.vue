@@ -22,7 +22,7 @@
           cols="12"
           sm="6"
           md="4"
-          class="pa-4"
+          class="pa-2"
         >
           <v-card
             class="service-card"
@@ -101,27 +101,118 @@ onMounted(() => {
   isLoggedIn.value = !!store.token
 })
 
+interface CardData {
+  id: number
+  src: string
+  title: string
+  number: string
+  content: string
+  link: string
+  requiresLogin: boolean
+  icon?: string
+}
+
+
+// 상수로 분리하여 관리
+const CARD_NUMBERS = {
+  RECOMMEND: 'Number1',
+  COMPARE: 'Number2',
+  COMMUNITY: 'Number3',
+  MAP: 'Number4',
+  EXCHANGE: 'Number5',
+  FACE: 'Number6'
+} as const
+
+
+// 카드 데이터 생성 함수
+const createCardData = (id: number, data: Omit<CardData, 'id'>): CardData => ({
+  id,
+  ...data
+})
+
+
 // 데이터 정보 입력
-let id = 1
 const imgData = ref<CardData[]>([
-  {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend', requiresLogin: false},
-  {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊', link: 'compared', requiresLogin: true},
-  {id: id++, src: community, title: '게시판', number: 'Number3', content: '다른 사용자들은 무슨 생각을 할까 🧐', link: 'community', requiresLogin: true},
-  {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️', link : 'map', requiresLogin: false},
-  {id: id++, src: exchange, title: '환율 검색', number: 'Number5', content: '지금 우리나라 돈으로는 얼마일까? 💱', requiresLogin: false},
-  {id: id++, src: moneyFace, title:'내가 지폐가 될 상인가', number: 'Number6', content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요💲', requiresLogin: true},
+  createCardData(1, {
+    src: recommend,
+    title: '예적금 추천',
+    number: CARD_NUMBERS.RECOMMEND,
+    content: '나에게 맞는 상품을 찾아봐요',
+    link: 'recommend',
+    requiresLogin: false,
+    icon: '🫡'
+  }),
+  createCardData(2, {
+    src: compare,
+    title: '예적금 상품 비교',
+    number: CARD_NUMBERS.COMPARE,
+    content: '다양한 상품을 비교해봐요',
+    link: 'compared',
+    requiresLogin: true,
+    icon: '😊'
+  }),
+  createCardData(3, {
+    src: community,
+    title: '게시판',
+    number: CARD_NUMBERS.COMMUNITY,
+    content: '다른 사용자들은 무슨 생각을 할까',
+    link: 'community',
+    requiresLogin: true,
+    icon: '🧐'
+  }),
+  createCardData(4, {
+    src: findBank,
+    title: '주변 은행 검색',
+    number: CARD_NUMBERS.MAP,
+    content: '근처에 있는 은행을 찾아봐요',
+    link: 'map',
+    requiresLogin: false,
+    icon: '🏛️'
+  }),
+  createCardData(5, {
+    src: exchange,
+    title: '환율 검색',
+    number: CARD_NUMBERS.EXCHANGE,
+    content: '지금 우리나라 돈으로는 얼마일까?',
+    link: 'exchangerate',
+    requiresLogin: false,
+    icon: '💱'
+  }),
+  createCardData(6, {
+    src: moneyFace,
+    title: '내가 지폐가 될 상인가',
+    number: CARD_NUMBERS.FACE,
+    content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요',
+    link: 'moneyface',
+    requiresLogin: true,
+    icon: '💲'
+  })
 ])
+// let id = 1
+// const imgData = ref<CardData[]>([
+//   {id: id++, src: recommend, title: '예적금 추천', number: 'Number1', content: '나에게 맞는 상품을 찾아봐요 🫡', link: 'recommend', requiresLogin: false},
+//   {id: id++, src: compare, title: '예적금 상품 비교', number: 'Number2', content: '다양한 상품을 비교해봐요 😊', link: 'compared', requiresLogin: true},
+//   {id: id++, src: community, title: '게시판', number: 'Number3', content: '다른 사용자들은 무슨 생각을 할까 🧐', link: 'community', requiresLogin: true},
+//   {id: id++, src: findBank, title: '주변 은행 검색', number: 'Number4', content: '근처에 있는 은행을 찾아봐요 🏛️', link : 'map', requiresLogin: false},
+//   {id: id++, src: exchange, title: '환율 검색', number: 'Number5', content: '지금 우리나라 돈으로는 얼마일까? 💱', link : 'exchangerate', requiresLogin: false},
+//   {id: id++, src: moneyFace, title:'내가 지폐가 될 상인가', number: 'Number6', content: '나와 닮은 지폐를 찾아보고, 돈을 획득해요💲', requiresLogin: true},
+// ])
 
 const handleCardClick = (card: CardData) => {
-  if (card.requiresLogin && !isLoggedIn.value) {
-    alert('로그인이 필요한 서비스입니다.')
-    router.push({ name: 'login' })
-  } else {
+  try {
+    // 1. 로그인 체크
+    if (card.requiresLogin && !isLoggedIn.value) {
+      alert('로그인이 필요한 서비스입니다.')
+      router.push({ name: 'login' })
+      return
+    }
+
+    // 2. 단순 라우팅
     if (card.link) {
       router.push({ name: card.link })
-    } else {
-      console.log(`${card.title} 기능은 아직 구현되지 않았습니다.`)
     }
+  } catch (error) {
+    console.error('Navigation error:', error)
   }
 }
 // 팝업 상태 관리
@@ -215,8 +306,29 @@ const closeGraph = () => {
 }
 
 .cards-section {
-  padding: 1rem 0; /* 2rem에서 1rem으로 수정 */
+  padding: 2rem 0;  /* 상하 여백 증가 */
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
 }
+
+/* v-col 스타일 수정 */
+.v-col {
+  padding: 1rem;  /* 컬럼 간격 조정 */
+}
+
+/* 카드 이미지 컨테이너도 둥글게 */
+.v-img {
+  border-radius: 20px 20px 0 0;  /* 상단만 둥글게 */
+}
+
+/* 버튼도 둥글게 */
+.v-btn {
+  border-radius: 12px !important;  /* 버튼 모서리도 둥글게 */
+  margin-top: 0.5rem;  /* 버튼 상단 여백 */
+}
+
+
 
 .titleInfo {
   margin-top: 0; /* 상단 마진 제거 */
@@ -255,17 +367,17 @@ const closeGraph = () => {
 
 .service-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 12px;
+  border-radius: 20px;  /* 더 둥근 모서리 */
+  margin: 1rem;  /* 카드 간 여백 추가 */
+  overflow: hidden;  /* 내부 이미지도 둥글게 */
 }
-
 .service-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
 }
 
 .card-overlay {
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-  padding: 1.5rem;
+  border-radius: 20px 20px 0 0;  /* 오버레이도 둥글게 */
 }
 
 .v-card-subtitle {
@@ -284,6 +396,13 @@ const closeGraph = () => {
   
   .sub-headline {
     font-size: 2rem;
+  }
+}
+
+/* 반응형 조정 */
+@media (min-width: 1904px) {
+  .container {
+    max-width: 1200px !important;  /* 큰 화면에서도 최대 너비 유지 */
   }
 }
 </style>
