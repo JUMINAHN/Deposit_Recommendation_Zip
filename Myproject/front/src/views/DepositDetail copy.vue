@@ -22,12 +22,15 @@
             <v-divider class="divider"></v-divider>
             
             <div class="info-section">
-              <!-- <div class="info-item"> -->
-                <!-- <div class="info-label">상세 정보</div> -->
-                <!-- <div class="info-content"> -->
-                  <!-- {{ detailInfo }} -->
-                <!-- </div> -->
-              <!-- </div> -->
+
+              <div class="info-item">
+                <div class="info-label">상세 정보</div>
+                <div class="info-content">
+                  우대 금리 : {{ maxRate }} <br>
+                  최고 금리 : {{ maxRate2 ? maxRate2 : '해당 값이 없음'}} <br>
+                  개월 수 : {{ month }} 개월
+                </div>
+              </div>
               
               <div class="info-item">
                 <div class="info-label">가입 방법</div>
@@ -44,11 +47,13 @@
               </div>
             </div>
 
+            <!--true이면 바꿔줌 -->
             <v-btn
               class="cart-button"
               elevation="2"
+              @click="toggleProduct"
             >
-              관심상품 등록
+              {{ productResult ? '관심상품 제거' : '관심상품 등록' }}
             </v-btn>
           </div>
         </v-col>
@@ -61,7 +66,7 @@
 import recommend from '@/assets/images/detailbank.jpg'
 import { useBankStore } from '@/stores/bank'
 import { useRoute } from "vue-router"
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const route = useRoute()
 const bankName = ref('')
@@ -70,47 +75,92 @@ const store = useBankStore()
 const detailInfo = ref('')
 const joinWay = ref('')
 const special = ref('')
+const maxRate = ref('')
+const maxRate2 = ref('')
+const month = ref('')
 
-
+// onMounted 수정
 onMounted(async () => {
   try {
     bankName.value = route.params.bankName
     productName.value = route.params.productName
-    console.log('Bank Name:', bankName.value)
-    console.log('Product Name:', productName.value)
     
-    await store.getOptionDeposit()  // 비동기 호출 대기
-
+    // 순차적으로 처리
+    await store.fetchUserInfo()
+    await store.getOptionDeposit()
+    await checkProductStatus()
+    
     const resultData = store.findDepositDetail(bankName.value, productName.value)
-    console.log('Result Data:', resultData) // 디버깅용
-  // console.log(resultData[0].special)    
-    if (resultData[0].special) {
-      special.value = resultData[0].special
-    } else {
-      special.value = '관련 데이터가 없습니다.'
+    if (resultData && resultData[0]) {
+      special.value = resultData[0].special || '관련 데이터가 없습니다.'
+      joinWay.value = resultData[0].joinWay || '관련 데이터가 없습니다.'
+      maxRate.value = resultData[0].maxRate
+      maxRate2.value = resultData[0].maxRate2 
+      month.value = resultData[0].month
     }
-    
-    if (resultData[0].joinWay) {
-      joinWay.value = resultData[0].joinWay
-    } else {
-      joinWay.value ='관련 데이터가 없습니다.'
-    }
-    
-    // if (resultData[0].detailInfo) {
-    //   detailInfo.value = resultData[0].detailInfo
-    // } else {
-    //   detailInfo.value = '관련 데이터가 없습니다.'
-    // }
-  
   } catch (error) {
     console.error('데이터 로딩 중 오류 발생:', error)
   }
 })
+
+// 상품 상태 확인 함수
+const checkProductStatus = async () => {
+  try {
+    if (!store.userInfo?.username) {
+      await store.fetchUserInfo()
+    }
+    const preferences = await store.getPreferences()
+    if (preferences && Array.isArray(preferences)) {
+      const isProductInPreferences = preferences.some(
+        pref => 
+          pref.bankname?.trim() === bankName.value?.trim() && 
+          pref.products?.trim() === productName.value?.trim()
+      )
+      if (productResult.value !== isProductInPreferences) {
+        productResult.value = isProductInPreferences
+      }
+    }
+  } catch (error) {
+    console.error('상품 상태 확인 중 오류 발생:', error)
+    productResult.value = false
+  }
+}
+
+const productResult = ref(false)
+// toggleProduct 함수 개선
+const toggleProduct = async () => {
+  try {
+    if (productResult.value) {
+      await store.removeFromPreference(bankName.value, productName.value)
+      productResult.value = false  // 즉시 UI 업데이트
+    } else {
+      await store.addToPreference(bankName.value, productName.value)
+      productResult.value = true   // 즉시 UI 업데이트
+    }
+    
+    // 서버와 상태 동기화
+    setTimeout(async () => {
+      await checkProductStatus()
+    }, 500)
+    
+  } catch (error) {
+    console.error('상품 토글 중 오류 발생:', error)
+    // 에러 발생 시 상태 복원
+    await checkProductStatus()
+  }
+}
 </script>
 
 <style scoped>
+/* 문제 원인:고정된(fixed) 네비게이션 바가 페이지 컨텐츠와 겹침
+해결 방법: */
+
 .detailPage {
-  margin: 40px auto;
+  /* margin: 40px auto; 기존 코드 수정 */
+  margin-top: 100px;
+  margin-bottom: 40px;
+  margin-left: auto;
+  margin-right: auto;
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 15px;

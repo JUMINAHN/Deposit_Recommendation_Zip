@@ -7,4 +7,5 @@ urlpatterns = [
     path('save-deposit-products2/<str:topFinGrpNo>/<int:pageNo>/', views.save_deposit_products2, name='save_deposit_products2'),
     path('deposit-products/', views.deposit_products, name='deposit_products'),
     path('deposit-products-options/<str:fin_prdt_cd>/', views.deposit_product_options, name='deposit_product_options'),
+    path('chatbot/', views.chatbot_response, name='chatbot'),  # 'api/'를 제거
 ]

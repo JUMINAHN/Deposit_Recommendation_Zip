@@ -148,12 +148,8 @@ const toggleLike = async () => {
       isLiked.value = response.data.is_liked
       likeCount.value = response.data.likes_count
       
-      // 좋아요 상태가 변경된 후 UI 업데이트
-      article.value = {
-        ...article.value,
-        is_liked: response.data.is_liked,
-        likes_count: response.data.likes_count
-      }
+      // 좋아요 후 게시글 정보 갱신하지 않음
+      // await fetchArticle() 제거
     }
   } catch (error) {
     console.error('좋아요 처리 실패:', error)
