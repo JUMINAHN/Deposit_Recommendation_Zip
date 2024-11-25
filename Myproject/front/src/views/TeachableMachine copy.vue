@@ -46,18 +46,17 @@
           ></div>
         </div>
       </div>
-
+      
       <div v-if="formattedResult" class="formatted-result">
         <h4 class="formatted-title">상세 분석 결과</h4>
         <pre class="result-code">{{ formattedResult }}</pre>
       </div>
     </div>
     
-    <!-- 광고 표시 섹션 -->
     <div v-if="!canUploadImage" class="ad-section">
-      <p>새로운 시도를 위해 광고를 시청해주세요</p>
-      <AdComponent @ad-completed="watchAd" />
-    </div>
+    <p>새로운 시도를 위해 광고를 시청해주세요</p>
+    <AdComponent @ad-completed="watchAd" />
+  </div>
   </div>
 </template>
 
@@ -74,13 +73,6 @@ const canUploadImage = ref(true)
 let model = null
 
 const modelPath = ref("/models/my_model/")
-
-
-const showAdComponent = ref(false)
-
-function showAd() {
-  showAdComponent.value = true
-}
 
 async function loadTensorFlow() {
   if (window.tf) {
@@ -100,6 +92,12 @@ async function loadTeachableMachine() {
 }
 
 async function handleImageUpload(event) {
+  // 광고 시청 확인
+  if (!canUploadImage.value) {
+    error.value = "새로운 시도를 위해 광고를 시청해주세요."
+    return
+  }
+
   const file = event.target.files[0]
   if (!file) return
 
@@ -116,6 +114,7 @@ async function handleImageUpload(event) {
   error.value = null
   imageUrl.value = URL.createObjectURL(file)
   formattedResult.value = null
+  canUploadImage.value = false  // 업로드 후 광고 시청 필요
 }
 
 async function analyzeImage() {
@@ -128,7 +127,6 @@ async function analyzeImage() {
     const results = await model.predict(imagePreview.value)
     predictions.value = results.sort((a, b) => b.probability - a.probability)
     formattedResult.value = null
-    canUploadImage.value = false  // 분석 완료 후 광고 시청 필요
   } catch (err) {
     error.value = "이미지 분석 중 오류가 발생했습니다."
     console.error("분석 오류:", err)
@@ -280,7 +278,6 @@ onUnmounted(async () => {
   margin-bottom: 1.5rem;
 }
 
-
 .prediction-header {
   display: flex;
   justify-content: space-between;
@@ -319,34 +316,4 @@ onUnmounted(async () => {
   border-radius: 8px;
   margin-bottom: 1rem;
 }
-.next-attempt-section {
-  margin-top: 2rem;
-  text-align: center;
-  padding: 1rem;
-  background: #f5f5f5;
-  border-radius: 8px;
-}
-
-.next-attempt-text {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.watch-ad-button {
-  background: #1976D2;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.watch-ad-button:hover {
-  background: #1565C0;
-  transform: translateY(-2px);
-}
-
 </style>
