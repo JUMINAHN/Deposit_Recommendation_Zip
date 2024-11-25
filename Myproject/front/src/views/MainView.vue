@@ -81,6 +81,8 @@ import { RouterLink, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { useBankStore } from '@/stores/bank'
 import { Chart } from 'chart.js/auto'
+import RecommendedProducts from '@/components/RecommendedProductsView.vue'
+
 
 // 인터페이스 정의
 interface CardData {
@@ -138,8 +140,8 @@ const imgData = ref<CardData[]>([
     title: '예적금 추천',
     number: CARD_NUMBERS.RECOMMEND,
     content: '나에게 맞는 상품을 찾아봐요',
-    link: 'recommend',
-    requiresLogin: false,
+    link: 'recommendations',
+    requiresLogin: true,
     icon: '🫡'
   }),
   createCardData(2, {
@@ -147,8 +149,8 @@ const imgData = ref<CardData[]>([
     title: '예적금 상품 비교',
     number: CARD_NUMBERS.COMPARE,
     content: '다양한 상품을 비교해봐요',
-    link: 'compared',
-    requiresLogin: true,
+    link: 'recommend',
+    requiresLogin: false,
     icon: '😊'
   }),
   createCardData(3, {

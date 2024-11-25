@@ -428,12 +428,81 @@ export const useBankStore = defineStore('bank', () => {
   } 
 
 
+  // 새로운 상태 추가
+  const recommendedProducts = ref([])
+  
+  // 추천 상품을 가져오는 함수 추가
+  const getRecommendedProducts = computed(() => {
+    if (!detailDepositData.value || !userInfo.value) return []
+    
+    const age = userInfo.value.age
+    const asset = userInfo.value.asset
+    
+    return detailDepositData.value
+      .map(product => ({
+        ...product,
+        score: calculateRecommendationScore(product, age, asset),
+        recommendationReason: getRecommendationReason(product, age, asset)
+      }))
+      .filter(product => product.score > 0)
+      .sort((a, b) => b.score - a.score)
+  })
+  
+  const getRecommendationReason = (product, age, asset) => {
+    const reasons = []
+    
+    // 연령대별 추천 이유
+    if (age < 30) {
+      reasons.push('20대를 위한 높은 금리 혜택')
+      if (product.maxRate2 > 3.5) {
+        reasons.push(`우대금리 ${product.maxRate2}%로 높은 수익률`)
+      }
+    }
+    
+    if (age >= 30 && age < 50) {
+      reasons.push('30~40대 맞춤 안정적인 금리')
+      if (product.maxRate2 > 3.0) {
+        reasons.push('우대조건 충족 시 추가 금리 혜택')
+      }
+    }
+    
+    // 자산 규모별 추천 이유
+    if (asset > 50000000) {
+      reasons.push('고액 자산가 맞춤 상품')
+      if (product.maxRate2 > 4.0) {
+        reasons.push('프리미엄 고객 우대금리 제공')
+      }
+    }
+    
+    if (asset > 100000000) {
+      reasons.push('프리미엄 고객 전용 혜택')
+    }
+    
+    return reasons.join('\n')
+  }
+
+  const calculateRecommendationScore = (product, age, asset) => {
+    let score = 0
+    
+    // 연령별 점수
+    if (age < 30 && product.maxRate2 > 3.5) score += 3
+    if (age >= 30 && age < 50 && product.maxRate2 > 3.0) score += 2
+    
+    // 자산별 점수
+    if (asset > 50000000 && product.maxRate2 > 4.0) score += 3
+    if (asset > 100000000 && product.maxRate2 > 4.5) score += 4
+    
+    return score
+  }
+  
+
   return {
     getDepositData, findCondition, getUserInput,
     findUser, signUpComplete, token, logoutUser,
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
-    , addToPreference, removeFromPreference, updateUserProfile
+    , addToPreference, removeFromPreference, updateUserProfile,
+    recommendedProducts, getRecommendedProducts
 
   }
 }, { persist: true }) 
