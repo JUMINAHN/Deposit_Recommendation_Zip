@@ -84,61 +84,53 @@ export const useBankStore = defineStore('bank', () => {
         url: 'http://127.0.0.1:8000/api/v1/deposit-products/'
       })
       const arrayData = response.data
-      //상세 데이터 저장
-      detailDepositData.value = arrayData.map((item, index) => {
+  
+      detailDepositData.value = arrayData.map((item) => {
         const bankname = item.kor_co_nm
         const products = item.fin_prdt_nm
         const joinWay = item.join_way
         const special = item.spcl_cnd
-        const options = item.options
-        let six = 0
-        let twelve = 0
-        let twenty_four = 0
-        let thirty_six = 0
-        options.forEach(option => { //뽑은 options에서 우대 금리
-          const rate = option.intr_rate 
-          switch (option.save_trm) {
-            case 6:
-              six = rate
-              break
-            case 12:
-              twelve = rate
-              break
-            case 24:
-              twenty_four = rate
-              break
-            case 36:
-              thirty_six = rate
-              break
-          }
-        })        
-        let month = '' 
-        let maxRate2 = ''
+        const options = item.options || [] // options가 없을 경우 빈 배열 할당
+  
+        let six = 0, twelve = 0, twenty_four = 0, thirty_six = 0
+  
+        // options가 존재하고 배열인 경우에만 처리
+        if (Array.isArray(options) && options.length > 0) {
+          options.forEach(option => {
+            if (option && option.save_trm) {  // option과 save_trm이 존재하는지 확인
+              const rate = option.intr_rate || 0
+              switch (option.save_trm) {
+                case 6: six = rate; break
+                case 12: twelve = rate; break
+                case 24: twenty_four = rate; break
+                case 36: thirty_six = rate; break
+              }
+            }
+          })
+        }
+  
+        // 최대 금리 계산
         const maxRate = Math.max(six, twelve, twenty_four, thirty_six)
-        const resultOption = options.filter((option)=> {
-          return (option.intr_rate === maxRate) 
-        })
-        month = resultOption[0].save_trm
-        maxRate2 = resultOption[0].intr_rate2
-
+        const resultOption = options.find(option => option?.intr_rate === maxRate) || {}
+  
         return {
           'bankname': bankname,
           'products': products,
-          'joinWay': joinWay,
-          'special': special,
-          //추가
-          'month' : month, //개월 수
-          'maxRate' : maxRate,  //가장 높은 금리1
-          'maxRate2' : maxRate2 //금리 1 기준 우대 금리1
+          'joinWay': joinWay || '정보 없음',
+          'special': special || '정보 없음',
+          'month': resultOption.save_trm || 0,
+          'maxRate': maxRate || 0,
+          'maxRate2': resultOption.intr_rate2 || 0
         }
       })
-      return detailDepositData //저장 값 반환
+  
+      return detailDepositData
     } catch (error) {
       console.error('데이터 변환 중 오류 발생:', error)
       throw error
     }
   }
-
+  
   //예적금 상세 정보 보유 여부 검색
   const findDepositDetail = function (paramsBank, paramsProudct) {
     const resultData = detailDepositData.value.filter((item) => {
