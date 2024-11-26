@@ -8,11 +8,12 @@
 
       <div class="navbar-menu">
         <RouterLink :to="{name: 'main'}" class="nav-link">메인 페이지</RouterLink>
-        <RouterLink :to="{name: 'recommend'}" class="nav-link">예적금 추천</RouterLink>
+        <RouterLink v-if="isLoggedIn" :to="{name: 'recommendations'}" class="nav-link">예적금 추천</RouterLink>
+        <RouterLink :to="{name: 'recommend'}" class="nav-link">예적금 비교</RouterLink>
         <RouterLink :to="{name: 'map'}" class="nav-link">주변 은행 검색</RouterLink>
         <RouterLink v-if="isLoggedIn" :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
         <RouterLink :to="{name: 'exchangerate'}" class="nav-link">환율 검색</RouterLink> 
-        <a href="#" class="nav-link">EVENT </a> <br>
+        <RouterLink v-if="isLoggedIn" :to="{name: 'teachablemachine'}" class="nav-link">내가 지폐가 될 상인가?</RouterLink> <br>
 
       </div>
       
