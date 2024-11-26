@@ -180,6 +180,14 @@ def current_user_profile(request):
     serializer = ProfileSerializer(request.user)
     return Response(serializer.data)
 
+@api_view(['DELETE'])
+def delete_user(request):
+    try:
+        user = request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 # @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
