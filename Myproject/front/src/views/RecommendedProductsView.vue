@@ -12,7 +12,7 @@
       <!-- 연령대별 선호 상품 차트 -->
       <v-col cols="12" md="6">
         <v-card class="chart-card">
-          <v-card-title class="blue-grey--text">{{ userInfo.age }}세 연령층의 선호 상품 TOP 5</v-card-title>
+          <v-card-title class="blue-grey--text">추천된 상품의 연령대별 선호도</v-card-title>
           <v-chart class="chart" :option="ageChartOption" autoresize />
         </v-card>
       </v-col>
@@ -20,7 +20,7 @@
       <!-- 자산 규모별 선호 상품 차트 -->
       <v-col cols="12" md="6">
         <v-card class="chart-card">
-          <v-card-title class="blue-grey--text">비슷한 자산 규모 선호 상품</v-card-title>
+          <v-card-title class="blue-grey--text">비슷한 자산 규모 금리</v-card-title>
           <v-chart class="chart" :option="assetChartOption" autoresize />
         </v-card>
       </v-col>
