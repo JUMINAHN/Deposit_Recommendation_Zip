@@ -1,5 +1,9 @@
 <template>
-  <div class="topClass">
+  <!-- 
+    네비게이션 바가 fixed position으로 설정되어 있어 컨텐츠와 겹치는 문제 해결을 위해
+    전체 컨테이너에 최소 높이를 설정하고 flex로 중앙 정렬
+  -->
+  <div class="signup-container">
     <v-card
       class="mx-auto pa-12 pb-8"
       elevation="8"
@@ -123,14 +127,56 @@ const userData = {
 }
 
 // 기존 checkLogin 함수 유지
-const checkLogin = function (userData) {
+const checkLogin = async function (userData) {
+  if (!userData.name.value || !userData.email.value || !userData.password1.value || !userData.password2.value) {
+    alert('모든 필드를 입력해주세요.')
+    return
+  }
 
+  // 비밀번호 일치 확인
+  if (userData.password1.value !== userData.password2.value) {
+    alert('비밀번호가 일치하지 않습니다.')
+    return
+  }
+
+
+  // 약관 동의 확인
+  if (!terms.value) {
+    alert('이용약관에 동의해주세요.')
+    return
+  }
+
+  try {
+    const result = await store.signUpComplete(userData)
+    if (result) {
+      alert('회원가입이 완료되었습니다.')
+      router.push({ name: 'login' })
+    }
+  } catch (error) {
+    console.error('회원가입 오류:', error)
+    alert('회원가입 처리 중 오류가 발생했습니다.')
+  }
 }
 </script>
 
 <style scoped>
-.topClass {
-  margin-top: 40px;
+/* 
+  문제 원인:
+  1. margin-top만으로는 네비게이션 바의 높이를 고려하지 못함
+  2. 컨텐츠가 화면 상단에 고정되어 있어 반응형 레이아웃에 적합하지 않음
+  
+  해결 방법:
+  1. 컨테이너에 min-height: 100vh 설정으로 전체 화면 높이 확보
+  2. padding-top으로 네비게이션 바 높이만큼 여백 확보
+  3. flex 레이아웃으로 수직/수평 중앙 정렬
+*/
+.signup-container {
+  min-height: 100vh;
+  padding-top: 80px; /* 네비게이션 바 높이만큼 상단 패딩 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
 }
 
 .terms-content {
@@ -147,5 +193,12 @@ const checkLogin = function (userData) {
 .terms-content p {
   margin-bottom: 12px;
   line-height: 1.6;
+}
+
+/* 반응형 디자인을 위한 미디어 쿼리 추가 */
+@media (max-width: 600px) {
+  .signup-container {
+    padding: 60px 16px; 
+  }
 }
 </style>

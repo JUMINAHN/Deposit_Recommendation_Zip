@@ -1,104 +1,175 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary justify-content-center">
-    <div class="container-fluid">
-      <img src="@/assets/images/logo.png" alt="Logo" width="40" height="34" class="d-inline-block align-text-top">
-      <a class="navbar-brand" href="#">예적금 맛ZIP</a> 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <RouterLink :to="{name : 'main'}" class="nav-link" >메인 페이지</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink :to="{name : 'recommend'}" class="nav-link" >예적금 추천</RouterLink>
-          </li>
-          <!-- <li class="nav-item">
-            <RouterLink :to="{name : 'compared'}" class="nav-link" @click.prevent="handleProductCompare">예적금 상품비교</RouterLink>
-          </li> -->
-  
-          <li class="nav-item">
-            <a class="nav-link" href="#">환율 검색</a>
-          </li>
-          <li class="nav-item">
-            <RouterLink :to="{name: 'map'}" class="nav-link" >주변 은행 검색</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">내가 지폐가 될 상인가?</a>
-          </li>
-          <li class="nav-item">
-          <RouterLink 
-            v-if="!isLoggedIn" 
-            :to="{name : 'login'}" 
-            class="nav-link">
-            로그인
-          </RouterLink>
-          <a 
-            v-else 
-            href="#" 
-            class="nav-link"
-            @click.prevent="handleLogout">
-            로그아웃  
-          </a>
-          </li>
-        </ul>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-brand">
+        <img src="@/assets/images/logo.png" alt="Logo" class="logo">
+        <RouterLink to="/" class="brand-name">예적금 맛ZIP</RouterLink>
+      </div>
+
+      <div class="navbar-menu">
+        <RouterLink :to="{name: 'main'}" class="nav-link">메인 페이지</RouterLink>
+        <RouterLink v-if="isLoggedIn" :to="{name: 'recommendations'}" class="nav-link">예적금 추천</RouterLink>
+        <RouterLink :to="{name: 'recommend'}" class="nav-link">예적금 비교</RouterLink>
+        <RouterLink :to="{name: 'map'}" class="nav-link">주변 은행 검색</RouterLink>
+        <RouterLink v-if="isLoggedIn" :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
+        <RouterLink :to="{name: 'exchangerate'}" class="nav-link">환율 검색</RouterLink> 
+        <RouterLink v-if="isLoggedIn" :to="{name: 'teachablemachine'}" class="nav-link">내가 지폐가 될 상인가?</RouterLink> <br>
+
+      </div>
+      
+      <div class="navbar-auth">
+        <RouterLink v-if="isLoggedIn" :to="{name: 'profile'}" class="auth-link">
+          <i class="fas fa-user"></i> 마이페이지
+        </RouterLink>
+        <RouterLink v-if="!isLoggedIn" :to="{name: 'login'}" class="auth-link login-btn">
+          로그인
+        </RouterLink>
+        <a v-else @click.prevent="handleLogout" href="#" class="auth-link logout-btn">
+          로그아웃
+        </a>
+
       </div>
     </div>
   </nav>
-  
-  </template>
-  
-  <script setup>
-  import { RouterLink, useRouter } from 'vue-router'
-  import { ref, computed, onMounted } from 'vue'
-  import { useBankStore } from '@/stores/bank'
-  
-  const store = useBankStore()
-  const router = useRouter()
-  
-  const isLoggedIn = computed(() => !!store.token)
-  
-  onMounted(() => {
-    // 페이지 로드 시 로컬 스토리지에서 토큰을 확인하고 store에 설정
-    const storedToken = localStorage.getItem('token')
-    if (storedToken) {
-      store.token = storedToken
-    }
-  })
-  
-  const handleLogout = async () => {
-    const success = await store.logoutUser()
-    if (success) {
-      router.push({ name: 'login' })
-    } else {
-      alert('로그아웃 실패')
-    }
+</template>
+
+
+<script setup>
+import { RouterLink, useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useBankStore } from '@/stores/bank'
+
+const store = useBankStore()
+const router = useRouter()
+
+const isLoggedIn = computed(() => !!store.token)
+
+onMounted(() => {
+  const storedToken = localStorage.getItem('token')
+  if (storedToken) {
+    store.token = storedToken
+  }
+})
+
+const handleLogout = async () => {
+  const success = await store.logoutUser()
+  if (success) {
+    router.push({ name: 'login' })
+  } else {
+    alert('로그아웃 실패')
+  }
+}
+
+const handleProductCompare = () => {
+  if (!isLoggedIn.value) {
+    alert('로그인이 필요한 서비스입니다.')
+    router.push({ name: 'login' })
+    return
+  }
+}
+</script>
+
+
+<style scoped>
+.navbar {
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 0.8rem 0;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3rem; /* 2rem에서 3rem으로 증가 */
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.logo {
+  width: 40px;
+  height: 34px;
+}
+
+.brand-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #4a90e2;
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* auth-link 버튼들의 패딩도 약간 조정 */
+.auth-link {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a5568;
+  transition: all 0.2s;
+  padding: 0.5rem 0.8rem; /* 패딩 추가 */
+}
+
+.nav-link:hover {
+  color: #4a90e2;
+}
+
+.navbar-auth {
+  display: flex;
+  gap: 2rem; /* 1.5rem에서 2rem으로 증가 */
+  align-items: center;
+  margin-left: auto; /* 오른쪽 정렬을 위해 추가 */
+  padding-right: 1rem; /* 오른쪽 여백 추가 */
+}
+
+.auth-link {
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a5568;
+  transition: all 0.2s;
+}
+
+.login-btn {
+  background-color: #4a90e2;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+}
+
+.login-btn:hover {
+  background-color: #357abd;
+}
+
+.logout-btn {
+  color: #e53e3e;
+}
+
+.logout-btn:hover {
+  color: #c53030;
+}
+
+@media (max-width: 1024px) {
+  .navbar-menu {
+    gap: 1rem;
   }
   
-  const handleProductCompare = () => {
-    if (!isLoggedIn.value) {
-      alert('로그인이 필요한 서비스입니다.')
-      router.push({ name: 'login' })
-      return
-    }
-    // // 로그인 되어있으면 해당 페이지로 이동
-    // router.push({ name: 'product-compare' })
+  .nav-link {
+    font-size: 0.9rem;
   }
-  
-  </script>
-  
-  <style scoped>
-    /*  */
-    .navbar-nav {
-    margin: 0 auto;
-    }
-  
-  .navbar-collapse {
-    justify-content: center !important; 
-    /* center로 넣는데 먼저 => important로 우선적으로 걸기 */
-  }
-  </style>
+}
+</style>

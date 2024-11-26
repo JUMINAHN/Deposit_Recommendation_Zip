@@ -6,10 +6,18 @@ import LoginRetryView from '@/views/LoginRetryView.vue'
 import LoginView from '@/views/LoginView.vue'
 import MainView from '@/views/MainView.vue'
 import RecommendView from '@/views/RecommendView.vue'
-import SignUpView from '@/views/SignUpView.vue'
-import DepositCompareView from '@/views/DepositCompareView.vue'
+
+import DepositCompareView from '@/views/DepositDetail.vue'
 import BankMapView from '@/views/BankMapView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import ProfileView from '@/views/ProfileView.vue'
+import UserProfile from '@/components/UserProfile.vue'
+import SignUpView from '@/views/SignUpView.vue'
+import ExchangeRateView from '@/views/ExchangeRateView.vue'
+// import RecommendedProducts from '@/components/RecommendedProductsView.vue'
+import RecommendedProductsView from '@/views/RecommendedProductsView.vue'
+import TeachableMachine from '@/views/TeachableMachine.vue'
+
 
 
 const router = createRouter({
@@ -34,6 +42,16 @@ const router = createRouter({
       path : '/main/recommend/:bankName/:productName',
       name : 'compared',
       component : DepositCompareView
+    },
+    {
+      path : '/main/profile',
+      name : 'profile',
+      component : ProfileView
+    },
+    {
+      path: '/profile/:username', 
+      name: 'userProfile',
+      component: UserProfile // 직접 import한 컴포넌트 사용
     },
     {
       path : '/main/login',
@@ -70,6 +88,21 @@ const router = createRouter({
       name : 'map',
       component : BankMapView
     },
+    {
+      path : '/main/exchangerate',
+      name : 'exchangerate',
+      component : ExchangeRateView
+    },
+    {
+      path: '/main/recommendations',
+      name: 'recommendations',
+      component : RecommendedProductsView
+    },
+    {
+      path: '/main/teachablemachine',
+      name: 'teachablemachine',
+      component : TeachableMachine
+    }
   ],
 })
 
