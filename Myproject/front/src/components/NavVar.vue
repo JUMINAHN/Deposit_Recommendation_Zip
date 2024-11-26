@@ -12,10 +12,10 @@
         <RouterLink :to="{name: 'map'}" class="nav-link">주변 은행 검색</RouterLink>
         <RouterLink v-if="isLoggedIn" :to="{name: 'community'}" class="nav-link">게시판</RouterLink>
         <RouterLink :to="{name: 'exchangerate'}" class="nav-link">환율 검색</RouterLink> 
-        <a href="#" class="nav-link">EVENT </a>
+        <a href="#" class="nav-link">EVENT </a> <br>
 
       </div>
-
+      
       <div class="navbar-auth">
         <RouterLink v-if="isLoggedIn" :to="{name: 'profile'}" class="auth-link">
           <i class="fas fa-user"></i> 마이페이지

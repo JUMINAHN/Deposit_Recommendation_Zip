@@ -53,71 +53,98 @@
     <div class="map-container">
       <div id="map"></div>
     </div>
+
+    <!-- 모달 열림 상태를 관리하는 변수 -->
+    <v-dialog v-model="showModal" persistent max-width="400px">
+      <!-- 모달 내부 카드 -->
+      <v-card>
+        <!-- 모달 헤더 -->
+        <v-card-title>
+          <span class="text-h6">알림</span>
+        </v-card-title>
+        <!-- 모달 본문 -->
+        <v-card-text>
+          지도에 대한 정보를 불러오는데 실패했습니다.<br />
+          잠시 후 다시 시도해주세요.
+        </v-card-text>
+        <!-- 모달 푸터 -->
+        <v-card-actions>
+          <v-btn color="primary" text @click="showModal = false, router.push({ name: 'main' })">
+            닫기
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
 
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const apiKey = import.meta.env.VITE_KAKAO_API_KEY
 // 변수 선언 부분 수정
-const selectedRegion = ref('');
-const selectedDistrict = ref(''); // selectedCity 대신 selectedDistrict로 통일
-const selectedBank = ref('');
-const districts = ref([]); // cities 대신 districts로 통일
+const selectedRegion = ref('')
+const selectedDistrict = ref('') // selectedCity 대신 selectedDistrict로 통일
+const selectedBank = ref('')
+const districts = ref([]) // cities 대신 districts로 통일
+const router = useRouter()
+const showModal = ref(false) // 모달 표시 여부
+
 
 // 11/24-오전 11시 : ps오류
-let map, ps, infowindow, markers = []; 
+let map, ps, infowindow, markers = []
 
 // 지도 초기화 함수
 const initMap = () => {
-  const mapContainer = document.getElementById('map');
+  const mapContainer = document.getElementById('map')
   const mapOption = {
     center: new kakao.maps.LatLng(37.566826, 126.9786567),
     level: 3
-  };
+  }
 
-  map = new kakao.maps.Map(mapContainer, mapOption);
-  ps = new kakao.maps.services.Places();
-  infowindow = new kakao.maps.InfoWindow({zIndex:1});
+  map = new kakao.maps.Map(mapContainer, mapOption)
+  ps = new kakao.maps.services.Places()
+  infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
 }
 
 
 // 시/군/구 목록 업데이트 함수
 
 const updateDistricts = () => {
-  console.log('Selected Region:', selectedRegion.value); // 디버깅용
+  console.log('Selected Region:', selectedRegion.value) // 디버깅용
   if (selectedRegion.value) {
-    const regionData = districtData[selectedRegion.value];
+    const regionData = districtData[selectedRegion.value]
     if (regionData) {
-      districts.value = regionData.districts;
-      console.log('Updated Districts:', districts.value); // 디버깅용
+      districts.value = regionData.districts
+      console.log('Updated Districts:', districts.value) // 디버깅용
     } else {
-      districts.value = [];
+      districts.value = []
     }
   } else {
-    districts.value = [];
+    districts.value = []
   }
   // 시/군/구 선택값 초기화
-  selectedDistrict.value = '';
+  selectedDistrict.value = ''
 }
 
 // 근처 은행 검색 함수
 // searchNearbyBanks 함수도 수정
 const searchNearbyBanks = () => {
   if (!selectedRegion.value || !selectedDistrict.value) {
-    alert('지역을 선택해주세요!');
-    return;
+    alert('지역을 선택해주세요!')
+    return
   }
   if (!selectedBank.value) {
-    alert('은행을 선택해주세요!');
-    return;
+    alert('은행을 선택해주세요!')
+    return
   }
-  
-  const regionName = districtData[selectedRegion.value].name;
-  const keyword = `${regionName} ${selectedDistrict.value} ${selectedBank.value}`;
-  ps.keywordSearch(keyword, placesSearchCB);
+
+  const regionName = districtData[selectedRegion.value].name
+  const keyword = `${regionName} ${selectedDistrict.value} ${selectedBank.value}`
+  ps.keywordSearch(keyword, placesSearchCB)
 }
 
 // 검색 결과 콜백 함수
@@ -134,51 +161,51 @@ const placesSearchCB = (data, status, pagination) => {
 
 // 검색 결과 표시 함수
 const displayPlaces = (places) => {
-  const listEl = document.getElementById('placesList');
-  const menuEl = document.getElementById('menu_wrap');
-  const fragment = document.createDocumentFragment();
-  const bounds = new kakao.maps.LatLngBounds();
+  const listEl = document.getElementById('placesList')
+  const menuEl = document.getElementById('menu_wrap')
+  const fragment = document.createDocumentFragment()
+  const bounds = new kakao.maps.LatLngBounds()
 
-  removeAllChildNods(listEl);
-  removeMarker();
+  removeAllChildNods(listEl)
+  removeMarker()
 
   for (let i = 0; i < places.length; i++) {
-    const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
-    const marker = addMarker(placePosition, i);
-    const itemEl = getListItem(i, places[i]);
+    const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x)
+    const marker = addMarker(placePosition, i)
+    const itemEl = getListItem(i, places[i])
 
     bounds.extend(placePosition);
 
-    (function(marker, title) {
-      kakao.maps.event.addListener(marker, 'mouseover', function() {
-        displayInfowindow(marker, title);
+    (function (marker, title) {
+      kakao.maps.event.addListener(marker, 'mouseover', function () {
+        displayInfowindow(marker, title)
       });
 
-      kakao.maps.event.addListener(marker, 'mouseout', function() {
-        infowindow.close();
+      kakao.maps.event.addListener(marker, 'mouseout', function () {
+        infowindow.close()
       });
 
-      itemEl.onmouseover = function() {
-        displayInfowindow(marker, title);
+      itemEl.onmouseover = function () {
+        displayInfowindow(marker, title)
       };
 
-      itemEl.onmouseout = function() {
-        infowindow.close();
+      itemEl.onmouseout = function () {
+        infowindow.close()
       };
-    })(marker, places[i].place_name);
+    })(marker, places[i].place_name)
 
-    fragment.appendChild(itemEl);
+    fragment.appendChild(itemEl)
   }
 
-  listEl.appendChild(fragment);
-  
-  map.setBounds(bounds);
+  listEl.appendChild(fragment)
+
+  map.setBounds(bounds)
 }
 
 // 검색 결과 항목 생성 함수
 // getListItem 함수 수정
 const getListItem = (index, place) => {
-  const el = document.createElement('li');
+  const el = document.createElement('li')
   let itemStr = `
     <div class="item-container">
       <div class="item-header">
@@ -203,39 +230,39 @@ const getListItem = (index, place) => {
       </div>
     </div>
   `.trim(); // 불필요한 공백 제거
-  
-  el.innerHTML = itemStr;
-  el.className = 'item';
-  
+
+  el.innerHTML = itemStr
+  el.className = 'item'
+
   // 클릭 이벤트 추가 및 활성화 스타일 처리
   el.addEventListener('click', () => {
     // 기존 활성화된 항목의 스타일 제거
-    const items = document.querySelectorAll('.item');
-    items.forEach(item => item.classList.remove('active'));
-    
+    const items = document.querySelectorAll('.item')
+    items.forEach(item => item.classList.remove('active'))
+
     // 현재 항목 활성화
-    el.classList.add('active');
-    
+    el.classList.add('active')
+
     // 기존 마커 모두 제거
-    removeMarker();
-    
+    removeMarker()
+
     // 클릭한 장소에 대한 마커 생성
-    const marker = addMarker(new kakao.maps.LatLng(place.y, place.x), index);
-    
+    const marker = addMarker(new kakao.maps.LatLng(place.y, place.x), index)
+
     // 지도 중심 이동 (부드러운 이동 효과 추가)
-    map.panTo(new kakao.maps.LatLng(place.y, place.x));
-    
+    map.panTo(new kakao.maps.LatLng(place.y, place.x))
+
     // 인포윈도우 표시
-    displayInfowindow(marker, place.place_name);
-  });
-  
-  return el;
+    displayInfowindow(marker, place.place_name)
+  })
+
+  return el
 }
 
 // 마커 생성 함수
 const addMarker = (position, idx) => {
-  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png';
-  const imageSize = new kakao.maps.Size(36, 37);
+  const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png'
+  const imageSize = new kakao.maps.Size(36, 37)
   const imgOptions = {
     spriteSize: new kakao.maps.Size(36, 691),
     spriteOrigin: new kakao.maps.Point(0, (idx * 46) + 10),
@@ -245,76 +272,79 @@ const addMarker = (position, idx) => {
   const marker = new kakao.maps.Marker({
     position: position,
     image: markerImage
-  });
+  })
 
-  marker.setMap(map);
-  markers.push(marker);
+  marker.setMap(map)
+  markers.push(marker)
 
-  return marker;
+  return marker
 }
 
 // 마커 제거 함수
 const removeMarker = () => {
   for (let i = 0; i < markers.length; i++) {
-    markers[i].setMap(null);
+    markers[i].setMap(null)
   }
-  markers = [];
+  markers = []
 }
 
 // 페이지네이션 표시 함수
 const displayPagination = (pagination) => {
-  const paginationEl = document.getElementById('pagination');
-  const fragment = document.createDocumentFragment();
-  
+  const paginationEl = document.getElementById('pagination')
+  const fragment = document.createDocumentFragment()
+
   while (paginationEl.hasChildNodes()) {
-    paginationEl.removeChild(paginationEl.lastChild);
+    paginationEl.removeChild(paginationEl.lastChild)
   }
 
   for (let i = 1; i <= pagination.last; i++) {
-    const el = document.createElement('a');
-    el.href = "#";
-    el.innerHTML = i;
+    const el = document.createElement('a')
+    el.href = "#"
+    el.innerHTML = i
 
     if (i === pagination.current) {
-      el.className = 'on';
+      el.className = 'on'
     } else {
-      el.onclick = (function(i) {
-        return function() {
-          pagination.gotoPage(i);
+      el.onclick = (function (i) {
+        return function () {
+          pagination.gotoPage(i)
         }
-      })(i);
+      })(i)
     }
 
-    fragment.appendChild(el);
+    fragment.appendChild(el)
   }
-  paginationEl.appendChild(fragment);
+  paginationEl.appendChild(fragment)
 }
 
 // 인포윈도우 표시 함수
 const displayInfowindow = (marker, title) => {
-  const content = `<div style="padding:5px;z-index:1;">${title}</div>`;
-  infowindow.setContent(content);
-  infowindow.open(map, marker);
+  const content = `<div style="padding:5px;z-index:1;">${title}</div>`
+  infowindow.setContent(content)
+  infowindow.open(map, marker)
 }
 
 // 요소의 모든 자식 노드 제거 함수
 const removeAllChildNods = (el) => {
   while (el.hasChildNodes()) {
-    el.removeChild(el.lastChild);
+    el.removeChild(el.lastChild)
   }
 }
 
 // 컴포넌트 마운트 시 실행되는 함수
 onMounted(() => {
   const script = document.createElement('script')
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`
-  script.async = true
-  
-  script.onload = () => {
-    window.kakao.maps.load(initMap)
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`
+    script.async = true
+    script.onload = () => {
+      window.kakao.maps.load(initMap)
+    }
+    script.onerror = () => {
+    console.error('카카오 맵 API 로드 실패')
+    showModal.value = true
   }
-  
-  document.head.appendChild(script)
+    document.head.appendChild(script)
+
 })
 
 const administrativeDistricts = {
@@ -355,7 +385,7 @@ const banks = ref([
   '케이뱅크',
   '카카오뱅크',
   '토스뱅크'
-]);
+])
 
 
 const districtData = {
@@ -427,13 +457,14 @@ const districtData = {
     name: '제주특별자치도',
     districts: ['제주시', '서귀포시']
   }
-};
+}
 </script>
 
 
 <style scoped>
 .main-container {
-  padding-top: 80px; /* 네비게이션 바 높이 + 여유 공간 */
+  padding-top: 80px;
+  /* 네비게이션 바 높이 + 여유 공간 */
   display: flex;
   height: 100vh;
   background-color: #f5f7fa;
@@ -443,7 +474,7 @@ const districtData = {
   width: 400px;
   padding: 20px;
   background-color: white;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .search-panel h2 {
@@ -503,7 +534,7 @@ const districtData = {
   width: 100%;
   height: 100%;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* 검색 결과 스타일 수정 */
@@ -547,7 +578,7 @@ const districtData = {
   border-radius: 8px;
   background-color: white;
   margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .item-header {
