@@ -64,8 +64,7 @@
         <div v-else class="content-section">
           <div v-for="comment in userComments" 
                :key="comment.id" 
-               class="comment-item"
-               @click="goToArticle(comment.article)">
+               class="comment-item">
             <p class="comment-content">{{ comment.content }}</p>
             <span class="article-date">{{ formatDate(comment.created_at) }}</span>
           </div>
@@ -337,10 +336,10 @@ const fetchUserComments = async () => {
   transition: all 0.2s ease;
 }
 
-.comment-item:hover {
+/* .comment-item:hover {
   background: #f0f7ff;
   transform: translateX(5px);
-}
+} */
 
 .comment-content {
   color: #2c3e50;

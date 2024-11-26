@@ -120,6 +120,10 @@
     </template>
   </div>
 </div>
+<!-- 회원탈퇴 버튼 -->
+<div class="info-item">
+  <button class="delete-btn" @click="userDelete">회원탈퇴</button>
+</div>
 </div>
 
     <!-- 오른쪽 섹션 -->
@@ -163,11 +167,14 @@ import bankchar from '@/assets/images/bankchar.jpg'
 import { computed, onMounted, ref } from 'vue'
 import { Chart } from 'chart.js/auto'
 import { useBankStore } from '@/stores/bank'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+
+import axios from 'axios'
 
 const store = useBankStore()
 const userInfo = ref(null)
-const route = useRoute();
+const route = useRoute()
+const router = useRouter()
 const bankname = route.params.bankname
 const productname = route.params.productname
 const preferences = ref([])
@@ -188,6 +195,24 @@ const formattedAsset = computed(() => formatNumber(store.userInfo?.asset || 0))
 const formattedIncome = computed(() => formatNumber(store.userInfo?.income || 0))
 // ==================================
 
+// ====================== 회원탈퇴 기능 ===============
+const userDelete = async () => {
+  if (confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+    try {
+      await axios.delete('http://127.0.0.1:8000/app/accounts/delete/', {
+        headers: {
+          Authorization: `Token ${store.token}`
+        },
+      })
+      alert('회원 탈퇴가 완료되었습니다.')
+      store.clearUserInfo() // 사용자 정보 및 토큰 삭제
+      router.push({ name: 'main'} ) 
+    } catch (error) {
+      console.error('회원 탈퇴 중 오류 발생:', error)
+      alert('회원 탈퇴 중 오류가 발생했습니다. 다시 시도해 주세요.')
+    }
+  }
+}
 
 onMounted(async () => {
   try {
@@ -386,6 +411,22 @@ const closeGraph = () => {
 </script>
 
 <style scoped>
+.delete-btn {
+  padding: 0.5rem 1rem;
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.delete-btn:hover {
+  background-color: #c53030;
+}
+
 .remove-btn {
   padding: 0.3rem 0.6rem; /* 버튼 크기 줄이기 */
   background-color: #ffcccc; /* 옅은 빨강 배경색 */

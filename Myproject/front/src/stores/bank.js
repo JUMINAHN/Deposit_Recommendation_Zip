@@ -15,6 +15,12 @@ export const useBankStore = defineStore('bank', () => {
   const nowUserProduct = ref([]) //지금 유저가 선택한 배열 리스트
   //사실 userProduct랑 동일함
 
+  // ============== 회원탈퇴 기능
+  const clearUserInfo = async function () {
+    userInfo.value = null
+    token.value = null
+    localStorage.removeItem('token')
+  }
 
   //서버에 예적금 API 데이터 요청
   const getDepositData = async function () {
@@ -536,7 +542,7 @@ const calculateRecommendationScore = (product, age, asset, income) => {
     depositData, detailDepositData, findDepositDetail, getOptionDeposit,
     userProduct, nowUserProduct,userGetProduct, userInfo, getPreferences // loadUserProduct, getUserInfo, userSaveProducts, userDeleteProducts, 
     , addToPreference, removeFromPreference, updateUserProfile,
-    recommendedProducts, getRecommendedProducts
+    recommendedProducts, getRecommendedProducts, clearUserInfo
 
   }
 }, { persist: true }) 
