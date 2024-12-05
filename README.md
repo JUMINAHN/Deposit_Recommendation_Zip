@@ -109,6 +109,7 @@ src/
 - 사용자 개인정보 기반 맞춤형 예적금 상품 추천 
 :https://github.com/user-attachments/assets/c08f69cc-edfe-49a3-89fe-63cba4de9779
 
+
 - 연령대별/자산 규모별 선호도 분석:
 https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
 
@@ -125,12 +126,11 @@ https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
 :https://github.com/user-attachments/assets/2fb13b81-0d16-4a10-97f3-44ecf6ad0d78
 
 - 팔로우/팔로잉 시스템
-:https://github.com/user-attachments/assets/1e8f505c-6ac9-4a92-b157-c4318861eedc
+<video controls src="assets/팔로우 및 게시글 이동.mp4" title=":https://github.com/user-attachments/assets/1e8f505c-6ac9-4a92-b157-c4318861eedc"></video>
 
 - 사용자 프로필 연동
 - 로그인 / 회원가입 기능 
-: https://github.com/user-attachments/assets/e9ddad1b-9e19-4f29-a863-10ab2604097a
-
+<video controls src="assets/회원가입 로그인.mp4" title="Title"></video>
 
 
 
@@ -139,18 +139,17 @@ https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
 ![alt text](assets/image-31.png)
 ![alt text](assets/image-32.png)
 - 실시간 환율 정보 제공
-:https://github.com/user-attachments/assets/50af16f7-dc5c-459c-aad4-d73e8dbee315
+<video controls src="assets/환율.mp4" title="Title"></video>
 
 
 - 카카오맵 API 활용 주변 은행 찾기
-:https://github.com/user-attachments/assets/f1053c2b-c42a-4dfd-964e-d505bbde6ea4
+<video controls src="assets/지도.mp4" title=":https://github.com/user-attachments/assets/f1053c2b-c42a-4dfd-964e-d505bbde6ea4"></video>
 
 - AI 기반 "나와 닮은 지폐 찾기" 
-:https://user-images.githubusercontent.com/JUMINAHN/Deposit_Recommendation_Zip/assets/faceGame.mp4
+<video controls src="assets/관상.mp4" title="Title"></video>
 
 - GPT 기반 금융 상품 추천 챗봇
-:https://github.com/user-attachments/assets/a26b38c0-7107-453e-ac5a-3686a03c62f4
-
+<video controls src="assets/챗봇 금융 상품 추천.mp4" title="Title"></video>
 
 ## 💡 프로젝트 개선 사항
 - 모바일 앱 확장
