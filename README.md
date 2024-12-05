@@ -100,35 +100,57 @@ src/
 
 ## 📌 프로젝트 기능 상세
 ![alt text](assets/image-22.png)
-![alt text]assets/(image-23.png)
 
 
 ### 1. 금융 상품 추천 시스템
 ![alt text](assets/image-25.png)
 ![alt text](assets/image-26.png)
 ![alt text](assets/image-30.png)
-- 사용자 개인정보 기반 맞춤형 예적금 상품 추천 :
-https://github.com/JUMINAHN/DEPOSIT_RECOMMENDATION_ZIP/assets/JUMINAHN/상품저장및비교.mp4
-- 연령대별/자산 규모별 선호도 분석
+- 사용자 개인정보 기반 맞춤형 예적금 상품 추천 
+:https://github.com/user-attachments/assets/c08f69cc-edfe-49a3-89fe-63cba4de9779
+
+- 연령대별/자산 규모별 선호도 분석:
+https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
+
+
 - 실시간 금리 정보 반영
+:https://github.com/user-attachments/assets/0867f83a-1164-414f-a2eb-bbf3d9c9fdcb
+
 
 ### 2. 커뮤니티 기능
 ![alt text](assets/image-27.png)
 ![alt text](assets/image-28.png)
-- 제목/작성자/내용별 필터링
-- 팔로우/팔로잉 시스템
-- 사용자 프로필 연동
 - 게시글 CRUD 기능
+- 제목/작성자/내용별 필터링
+:https://github.com/user-attachments/assets/2fb13b81-0d16-4a10-97f3-44ecf6ad0d78
+
+- 팔로우/팔로잉 시스템
+:https://github.com/user-attachments/assets/1e8f505c-6ac9-4a92-b157-c4318861eedc
+
+- 사용자 프로필 연동
+- 로그인 / 회원가입 기능 
+: https://github.com/user-attachments/assets/e9ddad1b-9e19-4f29-a863-10ab2604097a
+
+
+
 
 ### 3. 부가 기능
 ![alt text](assets/image-29.png)
 ![alt text](assets/image-31.png)
 ![alt text](assets/image-32.png)
 - 실시간 환율 정보 제공
+:https://github.com/user-attachments/assets/50af16f7-dc5c-459c-aad4-d73e8dbee315
+
+
 - 카카오맵 API 활용 주변 은행 찾기
-- AI 기반 "나와 닮은 지폐 찾기" :
-https://github.com/[사용자명]/DEPOSIT_RECOMMENDATION_ZIP/assets/[사용자ID]/관상.mp4
+:https://github.com/user-attachments/assets/f1053c2b-c42a-4dfd-964e-d505bbde6ea4
+
+- AI 기반 "나와 닮은 지폐 찾기" 
+: https://github.com/user-attachments/assets/e29af58f-17fc-4ea6-a802-1d54d78231c4
+
 - GPT 기반 금융 상품 추천 챗봇
+:https://github.com/user-attachments/assets/a26b38c0-7107-453e-ac5a-3686a03c62f4
+
 
 ## 💡 프로젝트 개선 사항
 - 모바일 앱 확장
@@ -148,6 +170,7 @@ https://github.com/[사용자명]/DEPOSIT_RECOMMENDATION_ZIP/assets/[사용자ID
 - **해결**: Django REST Framework 설정 수정 및 토큰 헤더 추가
 
 ## 🌟 프로젝트 성과
+- 🌟SSAFY(삼성 청년 소프트웨어 아카데미) 관통 PJT 우수상🌟 
 - 실시간 금융 데이터 연동
 - 사용자 맞춤형 추천 시스템 구현
 - 직관적인 UI/UX 구현
