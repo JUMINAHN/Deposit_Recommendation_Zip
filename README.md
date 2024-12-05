@@ -146,7 +146,7 @@ https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
 :https://github.com/user-attachments/assets/f1053c2b-c42a-4dfd-964e-d505bbde6ea4
 
 - AI 기반 "나와 닮은 지폐 찾기" 
-: https://github.com/user-attachments/assets/e29af58f-17fc-4ea6-a802-1d54d78231c4
+:https://user-images.githubusercontent.com/JUMINAHN/Deposit_Recommendation_Zip/assets/faceGame.mp4
 
 - GPT 기반 금융 상품 추천 챗봇
 :https://github.com/user-attachments/assets/a26b38c0-7107-453e-ac5a-3686a03c62f4
