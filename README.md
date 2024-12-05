@@ -5,16 +5,42 @@
 - **개발 기간**: 2024.11.18 ~ 2024.11.26
 - **팀원**: 김정우, 안주민
 
+## 🔍 프로젝트 구조
+![alt text](assets/image-24.png)
+
+### Backend (Django)
+```jsx
+MyProject/
+├── accounts/          # 사용자 인증
+├── articles/          # 커뮤니티 게시판
+├── bank/              # 금융 상품
+├── exchangerate/      # 환율 계산
+└── recommendations/   # 상품 추천
+```
+### Frontend(Vue)
+```jsx
+src/
+├── assets/           # 정적 파일
+├── components/       # 컴포넌트
+├── views/            # 페이지
+├── stores/           # Pinia 상태관리
+└── router/           # 라우팅
+
+```
+
+## 🗓 개발 일정
+![alt text](assets/image.png)
+
 ## 🎯 기획 배경
 ### 현재 금융 환경의 문제점
-![alt text](image-19.png)
+![alt text](assets/image-19.png)
 - 분산된 금융 정보로 인한 정보 접근성 문제
 - 복잡한 금융 상품 비교의 어려움
 - MZ세대의 재테크 관심 증가와 정보 부족
 
 
 ### 사용자 요구사항
-![alt text](image-20.png)
+![alt text](assets/image-20.png)
 - 재테크 계획 수립 필요성
 - 통합된 금융 상품 비교 플랫폼 필요
 - 맞춤형 금융 정보 제공 요구
@@ -24,30 +50,6 @@
 - 유사 서비스 분석 및 차별점
 - 사용자 페르소나 정의 (재테크 관심 초보 투자자)
 
-## 🛠 기술 스택 및 개발 환경
-### Frontend
-- Vue.js 3
-- Vuetify
-- Pinia
-- Chart.js, ECharts
-- TensorFlow.js
-- Bootstrap
-- Axios
-- SweetAlert2
-
-### Backend
-- Django 4.2.16
-- Django REST Framework
-- Python 3.9
-- Django Allauth
-- Django CORS Headers
-
-### 개발 도구
-- IDE: Visual Studio Code
-- API 테스트: Postman
-- 프로젝트 관리: Jira
-- 형상 관리: Git, GitHub
-- 소통 도구: Discord
 
 ## 📚 주요 기능
 ### 1. 예적금 추천 시스템
@@ -73,7 +75,7 @@
 - GPT 기반 금융 상품 추천 챗봇
 
 ## 👥 역할 분담
-![alt text](image-21.png)
+![alt text](assets/image-21.png)
 ## 👥 참여 인원
 
 |                                                                                                  |                                                                                                  |
@@ -96,40 +98,37 @@
 - 사용자 인터페이스 최적화
 
 
-## 🗓 개발 일정
-![alt text](image.png)
-
-
 ## 📌 프로젝트 기능 상세
-![alt text](image-22.png)
-![alt text](image-23.png)
+![alt text](assets/image-22.png)
+![alt text]assets/(image-23.png)
 
 
 ### 1. 금융 상품 추천 시스템
-![alt text](image-25.png)
-![alt text](image-26.png)
-![alt text](image-30.png)
-- 사용자 개인정보 기반 맞춤형 예적금 상품 추천
+![alt text](assets/image-25.png)
+![alt text](assets/image-26.png)
+![alt text](assets/image-30.png)
+- 사용자 개인정보 기반 맞춤형 예적금 상품 추천 :
+https://github.com/JUMINAHN/DEPOSIT_RECOMMENDATION_ZIP/assets/JUMINAHN/상품저장및비교.mp4
 - 연령대별/자산 규모별 선호도 분석
 - 실시간 금리 정보 반영
 
 ### 2. 커뮤니티 기능
-![alt text](image-27.png)
-![alt text](image-28.png)
+![alt text](assets/image-27.png)
+![alt text](assets/image-28.png)
 - 제목/작성자/내용별 필터링
 - 팔로우/팔로잉 시스템
 - 사용자 프로필 연동
 - 게시글 CRUD 기능
 
 ### 3. 부가 기능
-![alt text](image-29.png)
-![alt text](image-31.png)
-![alt text](image-32.png)
+![alt text](assets/image-29.png)
+![alt text](assets/image-31.png)
+![alt text](assets/image-32.png)
 - 실시간 환율 정보 제공
 - 카카오맵 API 활용 주변 은행 찾기
-- AI 기반 "나와 닮은 지폐 찾기"
+- AI 기반 "나와 닮은 지폐 찾기" :
+https://github.com/[사용자명]/DEPOSIT_RECOMMENDATION_ZIP/assets/[사용자ID]/관상.mp4
 - GPT 기반 금융 상품 추천 챗봇
-
 
 ## 💡 프로젝트 개선 사항
 - 모바일 앱 확장
@@ -138,45 +137,7 @@
 - 계정 접속 방법 다양화
 - 추천 알고리즘 고도화
 
-## ⚙️ 개발 환경
-### Frontend
-- Vue.js 3
-- Vuetify
-- Pinia
-- Chart.js, ECharts
-- TensorFlow.js
-- Bootstrap
-- Axios
-- SweetAlert2
 
-### Backend
-- Django 4.2.16
-- Django REST Framework
-- Python 3.9
-- Django Allauth
-- Django CORS Headers
-
-## 🔍 프로젝트 구조
-![alt text](image-24.png)
-### Backend (Django)
-```jsx
-MyProject/
-├── accounts/          # 사용자 인증
-├── articles/          # 커뮤니티 게시판
-├── bank/              # 금융 상품
-├── exchangerate/      # 환율 계산
-└── recommendations/   # 상품 추천
-```
-### Frontend(Vue)
-```jsx
-src/
-├── assets/           # 정적 파일
-├── components/       # 컴포넌트
-├── views/            # 페이지
-├── stores/           # Pinia 상태관리
-└── router/           # 라우팅
-
-```
 ## 📌 트러블 슈팅
 ### 1. Axios 순환 참조 오류
 - **문제**: Vue의 반응형 객체 직접 전송 시 발생하는 오류
@@ -199,7 +160,7 @@ src/
 - 추천 알고리즘 고도화
 
 ## 👥 팀원 소감
-![alt text](image-33.png)
+![alt text](assets/image-33.png)
 ### 안주민
 1. 백엔드 DB 로직의 명확한 설계 필요성 인식
 2. 엔드포인트 및 뷰 설정의 구체화 필요
@@ -216,18 +177,24 @@ src/
 5. 팀 협업에서의 피드백 중요성 인식
 6. 실무 대비 문제 해결 능력 향상 의지
 
-## 🛠 개발 환경
-### 언어
-- Python 3.9
-- Django 4.2.16
-- Vue.js @vue/cli 4.5.8
 
-### 도구
-- IDE: Visual Studio Code
-- 브라우저: Chrome
-- 프로젝트 관리: Jira
-- API 테스트: Postman
-- 참고 도구: ChatGPT
+## ⚙️ 개발 환경
+### Frontend
+- Vue.js 3
+- Vuetify
+- Pinia
+- Chart.js, ECharts
+- TensorFlow.js
+- Bootstrap
+- Axios
+- SweetAlert2
+
+### Backend
+- Django 4.2.16
+- Django REST Framework
+- Python 3.9
+- Django Allauth
+- Django CORS Headers
 
 ### 주요 라이브러리 및 프레임워크
 #### Frontend
@@ -243,6 +210,7 @@ src/
 - Django CORS Headers
 - python-dotenv
 - TensorFlow
+
 
 ## 📚 참고 자료
 - [Vue.js 공식 문서](https://vuejs.org/)
