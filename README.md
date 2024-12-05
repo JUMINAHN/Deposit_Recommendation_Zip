@@ -107,15 +107,15 @@ src/
 ![alt text](assets/image-26.png)
 ![alt text](assets/image-30.png)
 - 사용자 개인정보 기반 맞춤형 예적금 상품 추천 
-:https://github.com/user-attachments/assets/c08f69cc-edfe-49a3-89fe-63cba4de9779
+<video controls src="assets/예금 상품 비교.mp4" title=":https://github.com/user-attachments/assets/c08f69cc-edfe-49a3-89fe-63cba4de9779"></video>
 
 
 - 연령대별/자산 규모별 선호도 분석:
-https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
+<video controls src="assets/프로필과 장바구니 상품 추천.mp4" title="Title"></video>
 
 
 - 실시간 금리 정보 반영
-:https://github.com/user-attachments/assets/0867f83a-1164-414f-a2eb-bbf3d9c9fdcb
+<video controls src="assets/상품 저장 및 비교.mp4" title="Title"></video>
 
 
 ### 2. 커뮤니티 기능
@@ -123,7 +123,7 @@ https://github.com/user-attachments/assets/9c0883a0-6ba5-48d8-a287-cc4b9d891bdf
 ![alt text](assets/image-28.png)
 - 게시글 CRUD 기능
 - 제목/작성자/내용별 필터링
-:https://github.com/user-attachments/assets/2fb13b81-0d16-4a10-97f3-44ecf6ad0d78
+<video controls src="assets/커뮤니티 기능.mp4" title=":https://github.com/user-attachments/assets/2fb13b81-0d16-4a10-97f3-44ecf6ad0d78"></video>
 
 - 팔로우/팔로잉 시스템
 <video controls src="assets/팔로우 및 게시글 이동.mp4" title=":https://github.com/user-attachments/assets/1e8f505c-6ac9-4a92-b157-c4318861eedc"></video>
